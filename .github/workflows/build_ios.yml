@@ -20,18 +20,14 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
-      - name: Configure CocoaPods & Pre-cache
-        run: |
-          cd ios
-          rm -rf Pods Podfile.lock
-          cd ..
-          flutter build ios --config-only
-
       - name: Build iOS Application (Unsigned)
         run: |
+          # Build without codesigning
           flutter build ios --release --no-codesign
+          
+          # Package into IPA structure for AltServer
           cd build/ios/iphoneos
-          mkdir Payload
+          mkdir -p Payload
           cp -r Runner.app Payload/
           zip -r carepulse.ipa Payload
 
