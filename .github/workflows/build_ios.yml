@@ -20,13 +20,12 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
-      - name: Install and clean CocoaPods
+      - name: Configure CocoaPods & Pre-cache
         run: |
           cd ios
           rm -rf Pods Podfile.lock
-          pod repo update
-          pod install
           cd ..
+          flutter build ios --config-only
 
       - name: Build iOS Application (Unsigned)
         run: |
