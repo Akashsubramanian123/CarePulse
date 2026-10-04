@@ -40,12 +40,6 @@ class TriageEngineService {
     final contextParams = ContextParams();
     contextParams.nCtx = AppConstants.defaultNCtx;
 
-    if (Platform.isIOS && Llama.libraryPath == null) {
-      try {
-        Llama.libraryPath = 'llama_cpp_dart.framework/llama_cpp_dart';
-      } catch (_) {}
-    }
-
     _llama = Llama(
       modelPath,
       modelParams: modelParams,
