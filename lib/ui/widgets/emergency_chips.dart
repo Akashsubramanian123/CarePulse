@@ -36,7 +36,7 @@ class EmergencyChips extends StatelessWidget {
       children: [
         Row(
           children: const [
-            Icon(Icons.bolt_rounded, size: 16, color: AppColors.crimsonLight),
+            Icon(Icons.bolt_rounded, size: 16, color: AppColors.tealAccent),
             SizedBox(width: 4),
             Text(
               'QUICK EMERGENCY TRIGGERS',
@@ -57,33 +57,37 @@ class EmergencyChips extends StatelessWidget {
             children: emergencyPresets.map((preset) {
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
-                child: ActionChip(
-                  elevation: 2,
-                  pressElevation: 4,
-                  avatar: Icon(
-                    _getPresetIcon(preset.iconName),
-                    size: 16,
-                    color: isDisabled ? AppColors.textMuted : AppColors.crimsonLight,
-                  ),
-                  label: Text(
-                    preset.title,
-                    style: TextStyle(
-                      color: isDisabled ? AppColors.textMuted : AppColors.textPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                child: SizedBox(
+                  height: 50,
+                  child: ActionChip(
+                    elevation: 0,
+                    pressElevation: 2,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    avatar: Icon(
+                      _getPresetIcon(preset.iconName),
+                      size: 18,
+                      color: isDisabled ? AppColors.textMuted : AppColors.tealPrimary,
                     ),
+                    label: Text(
+                      preset.title,
+                      style: TextStyle(
+                        color: isDisabled ? AppColors.textMuted : AppColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    backgroundColor: AppColors.darkSurfaceCard,
+                    side: BorderSide(
+                      color: isDisabled
+                          ? AppColors.darkSurfaceBorder
+                          : AppColors.tealPrimary.withValues(alpha: 0.5),
+                      width: 1,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    onPressed: isDisabled ? null : () => onPresetSelected(preset),
                   ),
-                  backgroundColor: AppColors.darkSurfaceCard,
-                  side: BorderSide(
-                    color: isDisabled
-                        ? AppColors.darkSurfaceBorder
-                        : AppColors.crimsonPrimary.withValues(alpha: 0.5),
-                    width: 1,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  onPressed: isDisabled ? null : () => onPresetSelected(preset),
                 ),
               );
             }).toList(),
@@ -93,3 +97,4 @@ class EmergencyChips extends StatelessWidget {
     );
   }
 }
+

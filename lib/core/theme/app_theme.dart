@@ -1,37 +1,34 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary Emergency Crimson
-  static const Color crimsonPrimary = Color(0xFFDC2626);
-  static const Color crimsonLight = Color(0xFFEF4444);
-  static const Color crimsonDark = Color(0xFF991B1B);
-  static const Color crimsonGlow = Color(0x33DC2626);
+  // Calm Backgrounds (Eliminate pure black #000000 and harsh blue-black #0B0F19)
+  static const Color darkBackground = Color(0xFF121A22); // Deep calm blue-gray
+  static const Color darkSurface = Color(0xFF1B242D);    // Soft elevated surface
+  static const Color darkSurfaceCard = Color(0xFF242F3A);// Card surface
+  static const Color darkSurfaceBorder = Color(0xFF334250);// Low-contrast borders
 
-  // Medical Teal / Cyan
-  static const Color tealPrimary = Color(0xFF0D9488);
-  static const Color tealAccent = Color(0xFF14B8A6);
-  static const Color tealLight = Color(0xFF5EEAD4);
-  static const Color tealDark = Color(0xFF0F766E);
+  static const Color lightBackground = Color(0xFFF7F5F2);// Warm off-white
+  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightSurfaceBorder = Color(0xFFE2DDD5);
 
-  // Status & Utility
-  static const Color successGreen = Color(0xFF10B981);
-  static const Color warningAmber = Color(0xFFF59E0B);
-  static const Color infoBlue = Color(0xFF06B6D4);
+  // Calming Medical Primaries
+  static const Color tealPrimary = Color(0xFF2F8F9D);     // Soft healthcare teal
+  static const Color tealAccent = Color(0xFF3EA3B3);      // Calming interaction accent
+  static const Color tealLight = Color(0xFF72C2CE);       // Gentle highlight
+  static const Color tealGlow = Color(0x262F8F9D);        // Soft teal ambient aura
 
-  // Dark Theme Backgrounds
-  static const Color darkBackground = Color(0xFF0B0F19);
-  static const Color darkSurface = Color(0xFF151C2C);
-  static const Color darkSurfaceCard = Color(0xFF1E293B);
-  static const Color darkSurfaceBorder = Color(0xFF334155);
+  // Emergency & Alert Colors (Reserved STRICTLY for SOS and immediate harm actions)
+  static const Color coralEmergency = Color(0xFFE05A4F);  // Muted coral-red (less alarming than neon crimson)
+  static const Color coralGlow = Color(0x26E05A4F);
+  
+  // Status Colors
+  static const Color safeGreen = Color(0xFF6BAA8E);       // Sage green for Offline / Safe
+  static const Color warningAmber = Color(0xFFE8B04B);    // Soft warm amber
 
-  // Text colors
-  static const Color textPrimary = Color(0xFFF8FAFC);
-  static const Color textSecondary = Color(0xFF94A3B8);
-  static const Color textMuted = Color(0xFF64748B);
-
-  // Glassmorphic Overlay
-  static const Color glassOverlay = Color(0x1AFFFFFF);
-  static const Color glassBorder = Color(0x2BFFFFFF);
+  // High-Legibility Typography Colors
+  static const Color textPrimary = Color(0xFFE6EDF3);     // Soft white on dark
+  static const Color textSecondary = Color(0xFF9AA7B4);   // Subdued secondary text
+  static const Color textMuted = Color(0xFF637381);       // Hints and labels
 }
 
 class AppTheme {
@@ -41,13 +38,13 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.darkBackground,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.crimsonPrimary,
+        primary: AppColors.tealPrimary,
         secondary: AppColors.tealAccent,
         surface: AppColors.darkSurface,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
-        error: AppColors.crimsonLight,
+        error: AppColors.coralEmergency,
       ),
       fontFamily: 'Roboto',
       appBarTheme: const AppBarTheme(
@@ -63,10 +60,10 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.darkSurfaceCard,
-        elevation: 4,
-        shadowColor: Colors.black45,
+        elevation: 0,
+        shadowColor: const Color(0x1A000000),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
           side: const BorderSide(color: AppColors.darkSurfaceBorder, width: 1),
         ),
       ),
@@ -76,26 +73,28 @@ class AppTheme {
         hintStyle: const TextStyle(color: AppColors.textMuted),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: AppColors.tealAccent, width: 2),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.crimsonPrimary,
+          minimumSize: const Size.fromHeight(56),
+          backgroundColor: AppColors.tealPrimary,
           foregroundColor: Colors.white,
-          elevation: 3,
+          elevation: 0,
+          shadowColor: const Color(0x1A000000),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(20),
           ),
           textStyle: const TextStyle(
             fontSize: 16,
@@ -107,3 +106,4 @@ class AppTheme {
     );
   }
 }
+

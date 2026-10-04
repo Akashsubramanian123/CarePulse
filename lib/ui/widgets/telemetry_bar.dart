@@ -22,13 +22,13 @@ class TelemetryBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.darkSurface.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.darkSurfaceBorder),
         boxShadow: const [
           BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
+            color: Color(0x1A000000),
+            blurRadius: 16,
             offset: Offset(0, 4),
           )
         ],
@@ -43,11 +43,13 @@ class TelemetryBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: isOffline
-                    ? AppColors.tealPrimary.withValues(alpha: 0.2)
-                    : AppColors.crimsonPrimary.withValues(alpha: 0.2),
+                    ? AppColors.safeGreen.withValues(alpha: 0.15)
+                    : AppColors.coralEmergency.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isOffline ? AppColors.tealAccent : AppColors.crimsonLight,
+                  color: isOffline
+                      ? AppColors.safeGreen.withValues(alpha: 0.4)
+                      : AppColors.coralEmergency.withValues(alpha: 0.4),
                   width: 1,
                 ),
               ),
@@ -57,7 +59,7 @@ class TelemetryBar extends StatelessWidget {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: isOffline ? AppColors.tealAccent : AppColors.crimsonLight,
+                      color: isOffline ? AppColors.safeGreen : AppColors.coralEmergency,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -65,7 +67,7 @@ class TelemetryBar extends StatelessWidget {
                   Text(
                     isOffline ? 'OFFLINE ACTIVE' : 'ONLINE',
                     style: TextStyle(
-                      color: isOffline ? AppColors.tealLight : AppColors.crimsonLight,
+                      color: isOffline ? AppColors.safeGreen : AppColors.coralEmergency,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
@@ -81,7 +83,7 @@ class TelemetryBar extends StatelessWidget {
               icon: Icons.timer_outlined,
               label: 'TTFT',
               value: ttftMs > 0 ? '$ttftMs ms' : '-- ms',
-              color: isGenerating ? AppColors.warningAmber : AppColors.textSecondary,
+              color: isGenerating ? AppColors.warningAmber : AppColors.tealLight,
             ),
             const SizedBox(width: 8),
 
@@ -92,7 +94,7 @@ class TelemetryBar extends StatelessWidget {
               value: tokensPerSec > 0
                   ? '${tokensPerSec.toStringAsFixed(1)} tok/s'
                   : '-- tok/s',
-              color: tokensPerSec > 0 ? AppColors.tealAccent : AppColors.textSecondary,
+              color: tokensPerSec > 0 ? AppColors.tealLight : AppColors.textSecondary,
             ),
             const SizedBox(width: 8),
 
@@ -131,7 +133,7 @@ class _TelemetryPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.darkSurfaceCard,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.darkSurfaceBorder.withValues(alpha: 0.6)),
       ),
       child: Row(
@@ -160,3 +162,4 @@ class _TelemetryPill extends StatelessWidget {
     );
   }
 }
+

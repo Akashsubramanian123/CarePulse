@@ -47,7 +47,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: const [
-            Icon(Icons.medical_services_rounded, color: AppColors.crimsonLight, size: 24),
+            Icon(Icons.medical_services_rounded, color: AppColors.tealPrimary, size: 24),
             SizedBox(width: 8),
             Text(
               AppConstants.appName,
@@ -62,22 +62,21 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.tealPrimary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.tealAccent.withValues(alpha: 0.4)),
+              color: AppColors.safeGreen.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.safeGreen.withValues(alpha: 0.4)),
             ),
             child: Row(
               children: const [
-                Icon(Icons.airplanemode_active_rounded,
-                    size: 14, color: AppColors.tealAccent),
-                SizedBox(width: 4),
+                Icon(Icons.circle, size: 8, color: AppColors.safeGreen),
+                SizedBox(width: 6),
                 Text(
-                  'AIRPLANE READY',
+                  'Offline • AI Ready',
                   style: TextStyle(
-                    color: AppColors.tealLight,
-                    fontSize: 10,
+                    color: AppColors.safeGreen,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -105,7 +104,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                physics: const BouncingScrollPhysics(),
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -146,9 +145,9 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                 ),
                 boxShadow: const [
                   BoxShadow(
-                    color: Colors.black38,
-                    blurRadius: 10,
-                    offset: Offset(0, -2),
+                    color: Color(0x1A000000),
+                    blurRadius: 16,
+                    offset: Offset(0, -4),
                   ),
                 ],
               ),
@@ -156,60 +155,71 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                 children: [
                   // Text Field Input
                   Expanded(
-                    child: TextField(
-                      controller: _textController,
-                      focusNode: _focusNode,
-                      enabled: !controller.isGenerating,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: 'Describe emergency situation...',
-                        hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                        filled: true,
-                        fillColor: AppColors.darkSurfaceCard,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        prefixIcon: const Icon(
-                          Icons.emergency_rounded,
-                          color: AppColors.crimsonLight,
-                          size: 20,
+                    child: SizedBox(
+                      height: 56,
+                      child: TextField(
+                        controller: _textController,
+                        focusNode: _focusNode,
+                        enabled: !controller.isGenerating,
+                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: 'Describe emergency situation...',
+                          hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                          filled: true,
+                          fillColor: AppColors.darkSurfaceCard,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          prefixIcon: const Icon(
+                            Icons.emergency_rounded,
+                            color: AppColors.tealPrimary,
+                            size: 20,
+                          ),
+                          suffixIcon: _textController.text.isNotEmpty && !controller.isGenerating
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear_rounded, size: 18),
+                                  color: AppColors.textMuted,
+                                  onPressed: () {
+                                    _textController.clear();
+                                    setState(() {});
+                                  },
+                                )
+                              : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(color: AppColors.tealAccent, width: 2),
+                          ),
                         ),
-                        suffixIcon: _textController.text.isNotEmpty && !controller.isGenerating
-                            ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, size: 18),
-                                color: AppColors.textMuted,
-                                onPressed: () {
-                                  _textController.clear();
-                                  setState(() {});
-                                },
-                              )
-                            : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => _submitQuery(controller),
                       ),
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: (_) => _submitQuery(controller),
                     ),
                   ),
                   const SizedBox(width: 10),
 
                   // Emergency Submit Button
                   SizedBox(
-                    height: 50,
-                    width: 50,
+                    height: 56,
+                    width: 56,
                     child: ElevatedButton(
                       onPressed: controller.isGenerating
                           ? null
                           : () => _submitQuery(controller),
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.zero,
-                        backgroundColor: AppColors.crimsonPrimary,
+                        backgroundColor: AppColors.coralEmergency,
                         disabledBackgroundColor: AppColors.darkSurfaceBorder,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        elevation: 4,
+                        elevation: 0,
                       ),
                       child: controller.isGenerating
                           ? const SizedBox(

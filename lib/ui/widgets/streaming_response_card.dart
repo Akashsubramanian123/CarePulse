@@ -23,7 +23,7 @@ class StreamingResponseCard extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: AppColors.darkSurfaceCard.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(color: AppColors.darkSurfaceBorder),
         ),
         child: Column(
@@ -31,13 +31,13 @@ class StreamingResponseCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
-                color: AppColors.crimsonGlow,
+                color: AppColors.tealGlow,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.health_and_safety_rounded,
                 size: 40,
-                color: AppColors.crimsonLight,
+                color: AppColors.tealPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -54,9 +54,9 @@ class StreamingResponseCard extends StatelessWidget {
               'Select a quick preset above or type an emergency scenario below to receive instant 3-step action guidance.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 14,
                 color: AppColors.textSecondary,
-                height: 1.4,
+                height: 1.5,
               ),
             ),
           ],
@@ -65,10 +65,10 @@ class StreamingResponseCard extends StatelessWidget {
     }
 
     return Card(
-      elevation: 6,
-      shadowColor: Colors.black45,
+      elevation: 0,
+      shadowColor: const Color(0x1A000000),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         side: BorderSide(
           color: isGenerating ? AppColors.tealAccent : AppColors.darkSurfaceBorder,
           width: isGenerating ? 1.5 : 1,
@@ -76,7 +76,7 @@ class StreamingResponseCard extends StatelessWidget {
       ),
       color: AppColors.darkSurfaceCard,
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -89,16 +89,14 @@ class StreamingResponseCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: isGenerating
-                            ? AppColors.tealPrimary.withValues(alpha: 0.2)
-                            : AppColors.crimsonPrimary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.tealPrimary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
                         isGenerating
                             ? Icons.psychology_rounded
                             : Icons.medical_information_rounded,
-                        color: isGenerating ? AppColors.tealAccent : AppColors.crimsonLight,
+                        color: AppColors.tealAccent,
                         size: 20,
                       ),
                     ),
@@ -150,7 +148,7 @@ class StreamingResponseCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.darkBackground.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.darkSurfaceBorder.withValues(alpha: 0.5)),
                 ),
                 child: Row(
@@ -203,8 +201,8 @@ class StreamingResponseCard extends StatelessWidget {
                 responseText.isEmpty ? 'No response generated.' : responseText,
                 style: const TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 15,
-                  height: 1.5,
+                  fontSize: 16,
+                  height: 1.6,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -240,3 +238,4 @@ class StreamingResponseCard extends StatelessWidget {
     );
   }
 }
+
