@@ -40,6 +40,10 @@ class TriageEngineService {
     final contextParams = ContextParams();
     contextParams.nCtx = AppConstants.defaultNCtx;
 
+    if (Platform.isIOS && Llama.libraryPath == null) {
+      Llama.libraryPath = 'Llama.framework/Llama';
+    }
+
     _llama = Llama(
       modelPath,
       modelParams: modelParams,
