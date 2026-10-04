@@ -375,6 +375,7 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-all_load",
+					"-Wl,-export_dynamic",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.carepulse.carepulse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -558,6 +559,7 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-all_load",
+					"-Wl,-export_dynamic",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.carepulse.carepulse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -584,6 +586,7 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-all_load",
+					"-Wl,-export_dynamic",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.carepulse.carepulse;
 				PRODUCT_NAME = "$(TARGET_NAME)";

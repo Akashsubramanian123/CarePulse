@@ -41,50 +41,15 @@ class TriageEngineService {
     contextParams.nCtx = AppConstants.defaultNCtx;
 
     if (Platform.isIOS) {
-      final candidatePaths = [
-        'Llama.framework/Llama',
-        'Frameworks/Llama.framework/Llama',
-        'llama_cpp_dart.framework/llama_cpp_dart',
-      ];
-
-      Llama? instance;
-      Object? lastError;
-
-      for (final path in candidatePaths) {
-        try {
-          Llama.libraryPath = path;
-          instance = Llama(
-            modelPath,
-            modelParams: modelParams,
-            contextParams: contextParams,
-          );
-          break;
-        } catch (e) {
-          lastError = e;
-        }
-      }
-
-      if (instance == null) {
-        try {
-          Llama.libraryPath = null;
-          _llama = Llama(
-            modelPath,
-            modelParams: modelParams,
-            contextParams: contextParams,
-          );
-        } catch (_) {
-          throw lastError ?? Exception('Failed to initialize Llama engine on iOS');
-        }
-      } else {
-        _llama = instance;
-      }
-    } else {
-      _llama = Llama(
-        modelPath,
-        modelParams: modelParams,
-        contextParams: contextParams,
-      );
+      // On iOS with static linkage, symbols are exported directly in executable process memory
+      Llama.libraryPath = null;
     }
+
+    _llama = Llama(
+      modelPath,
+      modelParams: modelParams,
+      contextParams: contextParams,
+    );
 
     _isInitialized = true;
   }
