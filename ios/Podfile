@@ -27,6 +27,31 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
+pre_install do |installer|
+  # Fix llama_cpp_dart: ensure Llama.xcframework exists in the plugin's ios directory
+  project_framework = File.join(__dir__, 'Frameworks', 'Llama.xcframework')
+  
+  # Search for any llama_cpp_dart plugin directories in pub cache or workspace
+  search_patterns = [
+    File.join(__dir__, 'Flutter', 'ephemeral', '.symlinks', 'plugins', 'llama_cpp_dart', 'ios'),
+    File.join(__dir__, '..', '**', 'llama_cpp_dart*', 'ios')
+  ]
+  
+  Dir.glob(search_patterns).each do |ios_dir|
+    target_framework = File.join(ios_dir, 'Llama.xcframework')
+    unless File.directory?(target_framework)
+      parent_dist = File.expand_path(File.join(ios_dir, '..', 'dist', 'Llama.xcframework'))
+      if File.directory?(parent_dist)
+        puts "[CarePulse Fix] Copying #{parent_dist} -> #{target_framework}"
+        FileUtils.cp_r(parent_dist, target_framework)
+      elsif File.directory?(project_framework)
+        puts "[CarePulse Fix] Copying project framework #{project_framework} -> #{target_framework}"
+        FileUtils.cp_r(project_framework, target_framework)
+      end
+    end
+  end
+end
+
 target 'Runner' do
   use_frameworks! :linkage => :static
   use_modular_headers!
