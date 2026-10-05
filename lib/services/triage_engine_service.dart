@@ -40,17 +40,46 @@ class TriageEngineService {
     final contextParams = ContextParams();
     contextParams.nCtx = AppConstants.defaultNCtx;
 
-    if (Platform.isIOS) {
-      final candidatePaths = [
-        'Llama.framework/Llama',
-        'Frameworks/Llama.framework/Llama',
-        'llama_cpp_dart.framework/llama_cpp_dart',
+    if (Platform.isAndroid) {
+      final androidCandidates = [
+        'libmtmd.so',
+        'libllama.so',
+        'libggml.so',
       ];
 
       Llama? instance;
       Object? lastError;
 
-      for (final path in candidatePaths) {
+      for (final lib in androidCandidates) {
+        try {
+          Llama.libraryPath = lib;
+          instance = Llama(
+            modelPath,
+            modelParams: modelParams,
+            contextParams: contextParams,
+          );
+          break;
+        } catch (e) {
+          lastError = e;
+        }
+      }
+
+      if (instance == null) {
+        throw lastError ?? Exception('Failed to initialize Llama engine on Android');
+      } else {
+        _llama = instance;
+      }
+    } else if (Platform.isIOS) {
+      final iosCandidates = [
+        'llama_cpp_dart.framework/llama_cpp_dart',
+        'Llama.framework/Llama',
+        'Frameworks/Llama.framework/Llama',
+      ];
+
+      Llama? instance;
+      Object? lastError;
+
+      for (final path in iosCandidates) {
         try {
           Llama.libraryPath = path;
           instance = Llama(

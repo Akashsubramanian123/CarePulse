@@ -159,7 +159,6 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
-				4C414D412000000000000004 /* Copy Llama Dylibs */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
 			buildRules = (
@@ -262,21 +261,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
-		};
-		4C414D412000000000000004 /* Copy Llama Dylibs */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Llama Dylibs";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ -d \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Llama.framework/Frameworks\" ]; then\n  echo \"Copying nested Llama dylibs to App Frameworks directory for dyld...\"\n  cp -a \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Llama.framework/Frameworks/\"*.dylib \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
