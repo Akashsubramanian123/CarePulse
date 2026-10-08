@@ -168,6 +168,37 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                     ),
 
                     const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                    if (controller.uploadedDocument != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.darkSurfaceCard,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.tealPrimary.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.description, color: AppColors.tealPrimary, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                controller.uploadedDocument!.fileName,
+                                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close, size: 18, color: AppColors.textMuted),
+                              onPressed: controller.clearDocument,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (controller.uploadedDocument != null)
+                      const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -228,6 +259,11 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                                 icon: Icon(_isListening ? Icons.mic : Icons.mic_none, size: 22),
                                 color: _isListening ? AppColors.coralEmergency : AppColors.textMuted,
                                 onPressed: _listen,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.attach_file, size: 22),
+                                color: AppColors.textMuted,
+                                onPressed: () => controller.pickDocument(),
                               ),
                             ],
                           ),

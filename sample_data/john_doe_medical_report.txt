@@ -1,24 +1,34 @@
-PATIENT NAME: John Doe
-DOB: 1978-04-12
-DATE OF TEST: 2026-10-01
+PATIENT MEDICAL & LAB REPORT
+-----------------------------------------
+Patient Name: John Doe
+DOB: 1978-05-12
+Date of Report: 2026-09-15
+Attending Physician: Dr. Sarah Jenkins
+-----------------------------------------
 
---- COMPREHENSIVE METABOLIC PANEL & HEMOGLOBIN A1C ---
+CLINICAL SUMMARY:
+Patient is a 48-year-old male presenting for routine annual check-up. History of Type 2 Diabetes Mellitus (T2DM) diagnosed 4 years ago. Mild peripheral neuropathy noted in the lower extremities. 
 
-TEST                RESULT      REFERENCE RANGE    FLAG
----------------------------------------------------------
-Glucose (Fasting)   185 mg/dL   70 - 99 mg/dL      HIGH
-Hemoglobin A1c      8.4 %       < 5.7 %            HIGH
+ALLERGIES:
+- Penicillin (Severe - Anaphylaxis)
+- Ibuprofen (Mild - Rash)
 
-Cholesterol, Total  240 mg/dL   < 200 mg/dL        HIGH
-Triglycerides       195 mg/dL   < 150 mg/dL        HIGH
-HDL Cholesterol     35 mg/dL    > 40 mg/dL         LOW
-LDL Cholesterol     160 mg/dL   < 100 mg/dL        HIGH
+CURRENT MEDICATIONS:
+- Metformin 1000mg twice daily
+- Lisinopril 10mg once daily
 
-Creatinine          1.1 mg/dL   0.7 - 1.3 mg/dL    NORMAL
-BUN                 18 mg/dL    7 - 20 mg/dL       NORMAL
+LABORATORY RESULTS (BLOOD TEST):
+- Hemoglobin A1c (HbA1c): 8.4% (HIGH - Target < 7.0%)
+- Fasting Blood Glucose: 172 mg/dL (HIGH - Normal: 70-99 mg/dL)
+- Total Cholesterol: 210 mg/dL (HIGH - Normal: < 200 mg/dL)
+- LDL Cholesterol: 135 mg/dL (HIGH - Normal: < 100 mg/dL)
+- HDL Cholesterol: 42 mg/dL (Normal: > 40 mg/dL)
+- Triglycerides: 165 mg/dL (HIGH - Normal: < 150 mg/dL)
+- Serum Creatinine: 1.1 mg/dL (Normal)
+- eGFR: 78 mL/min/1.73m2 (Normal)
 
---- CLINICAL NOTES ---
-Patient presents with symptoms of polyuria and polydipsia. 
-Diagnosis: Type 2 Diabetes Mellitus. 
-Patient is currently prescribed Metformin 500mg twice daily. 
-ALLERGIES: Patient has a known severe allergy to Penicillin (causes anaphylaxis) and NSAIDs (Ibuprofen, Naproxen - causes severe gastric bleeding). Do NOT administer NSAIDs.
+PHYSICIAN NOTES:
+The patient's HbA1c is significantly elevated at 8.4%, indicating poorly controlled blood sugar over the last 3 months. The patient admits to poor dietary adherence. Discussed the critical importance of reducing carbohydrate intake and increasing physical activity. Will increase Metformin dosage. Patient is instructed to monitor blood glucose daily and seek immediate emergency care if blood glucose exceeds 300 mg/dL or if experiencing symptoms of diabetic ketoacidosis (nausea, vomiting, confusion, fruity-smelling breath).
+
+WARNINGS:
+Due to peripheral neuropathy, patient must inspect feet daily for cuts or sores, as they may not feel pain from injuries, which can lead to severe infections or amputation.

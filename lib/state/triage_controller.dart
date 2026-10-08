@@ -5,7 +5,7 @@ import '../core/constants/app_constants.dart';
 import '../services/model_download_service.dart';
 import '../services/triage_engine_service.dart';
 import '../services/profile_service.dart';
-import '../services/medical_vault_service.dart';
+import '../services/document_service.dart';
 
 enum AppSetupStage {
   checking,
@@ -39,12 +39,12 @@ class TriageController extends ChangeNotifier {
 
   UserProfile? _userProfile;
   final ProfileService _profileService = ProfileService();
-  final MedicalVaultService _vaultService = MedicalVaultService();
+  final DocumentService _documentService = DocumentService();
+  UploadedDocument? _uploadedDocument;
 
   StreamSubscription<String>? _generationSubscription;
 
   // Getters
-  MedicalVaultService get vaultService => _vaultService;
   AppSetupStage get stage => _stage;
   bool get isChecking => _stage == AppSetupStage.checking;
   bool get isDownloading => _stage == AppSetupStage.downloading;
@@ -66,10 +66,25 @@ class TriageController extends ChangeNotifier {
   double get ramUsageMb => _ramUsageMb;
   String? get errorMessage => _errorMessage;
 
+  UploadedDocument? get uploadedDocument => _uploadedDocument;
+
   bool get isOffline => true; // Always 100% offline after model exists
 
   TriageController() {
     checkModelStatus();
+  }
+
+  Future<void> pickDocument() async {
+    final doc = await _documentService.pickAndParseDocument();
+    if (doc != null) {
+      _uploadedDocument = doc;
+      notifyListeners();
+    }
+  }
+
+  void clearDocument() {
+    _uploadedDocument = null;
+    notifyListeners();
   }
 
   /// Checks whether the model exists on-device and is ready.
@@ -172,12 +187,15 @@ class TriageController extends ChangeNotifier {
 
     try {
       _userProfile = await _profileService.loadProfile();
-      final vaultContext = _vaultService.retrieveRelevantContext(_currentQuery);
       
+      String fullQuery = _currentQuery;
+      if (_uploadedDocument != null) {
+        fullQuery += '\n\n[USER UPLOADED MEDICAL RECORD]:\n${_uploadedDocument!.content}';
+      }
+
       final stream = _engineService.generateTriage(
-        _currentQuery,
+        fullQuery,
         profile: _userProfile,
-        vaultContext: vaultContext,
         onTelemetryUpdate: (telemetry) {
           _ttftMs = telemetry.ttftMs;
           _tokensPerSec = telemetry.tokensPerSec;
