@@ -6,6 +6,8 @@ import '../../state/triage_controller.dart';
 import '../widgets/emergency_chips.dart';
 import '../widgets/streaming_response_card.dart';
 import '../widgets/telemetry_bar.dart';
+import 'profile_screen.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class EmergencyHomeScreen extends StatefulWidget {
   const EmergencyHomeScreen({super.key});
@@ -17,6 +19,36 @@ class EmergencyHomeScreen extends StatefulWidget {
 class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initSpeech();
+  }
+
+  void _initSpeech() async {
+    await _speech.initialize();
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) => setState(() {
+            _textController.text = val.recognizedWords;
+          }),
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
 
   @override
   void dispose() {
@@ -60,6 +92,12 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.person, color: AppColors.tealPrimary),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+            },
+          ),
           Container(
             margin: const EdgeInsets.only(right: 12),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -174,16 +212,25 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                             color: AppColors.tealPrimary,
                             size: 20,
                           ),
-                          suffixIcon: _textController.text.isNotEmpty && !controller.isGenerating
-                              ? IconButton(
+                          suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (_textController.text.isNotEmpty && !controller.isGenerating)
+                                IconButton(
                                   icon: const Icon(Icons.clear_rounded, size: 18),
                                   color: AppColors.textMuted,
                                   onPressed: () {
                                     _textController.clear();
                                     setState(() {});
                                   },
-                                )
-                              : null,
+                                ),
+                              IconButton(
+                                icon: Icon(_isListening ? Icons.mic : Icons.mic_none, size: 22),
+                                color: _isListening ? AppColors.coralEmergency : AppColors.textMuted,
+                                onPressed: _listen,
+                              ),
+                            ],
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
                             borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),

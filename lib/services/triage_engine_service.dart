@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:llama_cpp_dart/llama_cpp_dart.dart';
 import '../core/constants/app_constants.dart';
+import 'profile_service.dart';
 
 class TriageTelemetry {
   final int ttftMs;
@@ -51,12 +52,16 @@ class TriageEngineService {
   Stream<String> generateTriage(
     String query, {
     void Function(TriageTelemetry telemetry)? onTelemetryUpdate,
+    UserProfile? profile,
   }) async* {
     if (!_isInitialized || _engine == null) {
       throw StateError('Triage engine is not initialized');
     }
 
-    final formattedPrompt = AppConstants.formatEmergencyPrompt(query);
+    String profileText = profile?.promptContext ?? '';
+    String contextPrompt = profileText.isNotEmpty ? '$profileText\n\n' : '';
+    
+    final formattedPrompt = '$contextPrompt${AppConstants.formatEmergencyPrompt(query)}';
 
     final startTime = DateTime.now().millisecondsSinceEpoch;
     int? firstTokenTime;

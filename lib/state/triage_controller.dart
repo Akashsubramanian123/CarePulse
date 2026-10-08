@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../core/constants/app_constants.dart';
 import '../services/model_download_service.dart';
 import '../services/triage_engine_service.dart';
+import '../services/profile_service.dart';
 
 enum AppSetupStage {
   checking,
@@ -34,6 +35,9 @@ class TriageController extends ChangeNotifier {
   double _tokensPerSec = 0.0;
   double _ramUsageMb = 0.0;
   String? _errorMessage;
+
+  UserProfile? _userProfile;
+  final ProfileService _profileService = ProfileService();
 
   StreamSubscription<String>? _generationSubscription;
 
@@ -164,8 +168,11 @@ class TriageController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      _userProfile = await _profileService.loadProfile();
+      
       final stream = _engineService.generateTriage(
         _currentQuery,
+        profile: _userProfile,
         onTelemetryUpdate: (telemetry) {
           _ttftMs = telemetry.ttftMs;
           _tokensPerSec = telemetry.tokensPerSec;
