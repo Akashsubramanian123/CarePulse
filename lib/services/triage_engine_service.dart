@@ -16,7 +16,7 @@ class TriageTelemetry {
 }
 
 class TriageEngineService {
-  Llama? _llama;
+  LlamaEngine? _engine;
   bool _isInitialized = false;
   int _lastTtftMs = 0;
   double _lastTokensPerSec = 0.0;
@@ -34,86 +34,15 @@ class TriageEngineService {
       throw Exception('Model file does not exist at path: $modelPath');
     }
 
-    final modelParams = ModelParams();
-    modelParams.nGpuLayers = AppConstants.defaultNGpuLayers;
-
-    final contextParams = ContextParams();
-    contextParams.nCtx = AppConstants.defaultNCtx;
-
-    if (Platform.isAndroid) {
-      final androidCandidates = [
-        'libmtmd.so',
-        'libllama.so',
-        'libggml.so',
-      ];
-
-      Llama? instance;
-      Object? lastError;
-
-      for (final lib in androidCandidates) {
-        try {
-          Llama.libraryPath = lib;
-          instance = Llama(
-            modelPath,
-            modelParams: modelParams,
-            contextParams: contextParams,
-          );
-          break;
-        } catch (e) {
-          lastError = e;
-        }
-      }
-
-      if (instance == null) {
-        throw lastError ?? Exception('Failed to initialize Llama engine on Android');
-      } else {
-        _llama = instance;
-      }
-    } else if (Platform.isIOS) {
-      final iosCandidates = [
-        'llama_cpp_dart.framework/llama_cpp_dart',
-        'Llama.framework/Llama',
-        'Frameworks/Llama.framework/Llama',
-      ];
-
-      Llama? instance;
-      Object? lastError;
-
-      for (final path in iosCandidates) {
-        try {
-          Llama.libraryPath = path;
-          instance = Llama(
-            modelPath,
-            modelParams: modelParams,
-            contextParams: contextParams,
-          );
-          break;
-        } catch (e) {
-          lastError = e;
-        }
-      }
-
-      if (instance == null) {
-        try {
-          Llama.libraryPath = null;
-          _llama = Llama(
-            modelPath,
-            modelParams: modelParams,
-            contextParams: contextParams,
-          );
-        } catch (_) {
-          throw lastError ?? Exception('Failed to initialize Llama engine on iOS');
-        }
-      } else {
-        _llama = instance;
-      }
-    } else {
-      _llama = Llama(
-        modelPath,
-        modelParams: modelParams,
-        contextParams: contextParams,
-      );
-    }
+    _engine = await LlamaEngine.spawn(
+      modelParams: ModelParams(
+        path: modelPath, 
+        gpuLayers: AppConstants.defaultNGpuLayers
+      ),
+      contextParams: ContextParams(
+        nCtx: AppConstants.defaultNCtx
+      ),
+    );
 
     _isInitialized = true;
   }
@@ -123,41 +52,49 @@ class TriageEngineService {
     String query, {
     void Function(TriageTelemetry telemetry)? onTelemetryUpdate,
   }) async* {
-    if (!_isInitialized || _llama == null) {
+    if (!_isInitialized || _engine == null) {
       throw StateError('Triage engine is not initialized');
     }
 
     final formattedPrompt = AppConstants.formatEmergencyPrompt(query);
-    _llama!.setPrompt(formattedPrompt);
 
     final startTime = DateTime.now().millisecondsSinceEpoch;
     int? firstTokenTime;
     int tokenCount = 0;
 
-    await for (final token in _llama!.generateText()) {
-      tokenCount++;
-      final currentTime = DateTime.now().millisecondsSinceEpoch;
+    final session = await _engine!.createSession();
 
-      if (firstTokenTime == null) {
-        firstTokenTime = currentTime;
-        _lastTtftMs = firstTokenTime - startTime;
+    await for (final event in session.generate(
+      prompt: formattedPrompt,
+      addSpecial: true,
+      maxTokens: 512,
+    )) {
+      if (event is TokenEvent) {
+        tokenCount++;
+        final currentTime = DateTime.now().millisecondsSinceEpoch;
+
+        if (firstTokenTime == null) {
+          firstTokenTime = currentTime;
+          _lastTtftMs = firstTokenTime - startTime;
+        }
+
+        final elapsedTimeSec = (currentTime - startTime) / 1000.0;
+        if (elapsedTimeSec > 0) {
+          _lastTokensPerSec = tokenCount / elapsedTimeSec;
+        }
+
+        if (onTelemetryUpdate != null) {
+          onTelemetryUpdate(TriageTelemetry(
+            ttftMs: _lastTtftMs,
+            tokensPerSec: _lastTokensPerSec,
+            ramUsageMb: getEstimatedRamUsageMB(),
+          ));
+        }
+
+        yield event.text;
       }
-
-      final elapsedTimeSec = (currentTime - startTime) / 1000.0;
-      if (elapsedTimeSec > 0) {
-        _lastTokensPerSec = tokenCount / elapsedTimeSec;
-      }
-
-      if (onTelemetryUpdate != null) {
-        onTelemetryUpdate(TriageTelemetry(
-          ttftMs: _lastTtftMs,
-          tokensPerSec: _lastTokensPerSec,
-          ramUsageMb: getEstimatedRamUsageMB(),
-        ));
-      }
-
-      yield token;
     }
+    await session.dispose();
   }
 
   /// Returns estimated RAM usage in MBs for telemetry monitoring.
@@ -172,11 +109,11 @@ class TriageEngineService {
 
   /// Cleanly releases memory mapping and engine resources.
   void dispose() {
-    if (_llama != null) {
+    if (_engine != null) {
       try {
-        _llama!.dispose();
+        _engine!.dispose();
       } catch (_) {}
-      _llama = null;
+      _engine = null;
     }
     _isInitialized = false;
   }
