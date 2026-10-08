@@ -39,6 +39,8 @@ class TriageController extends ChangeNotifier {
   UserProfile? _userProfile;
   final ProfileService _profileService = ProfileService();
 
+  bool _isEmergencyMode = true;
+
   StreamSubscription<String>? _generationSubscription;
 
   // Getters
@@ -49,6 +51,13 @@ class TriageController extends ChangeNotifier {
   bool get isLoadingEngine => _stage == AppSetupStage.loadingEngine;
   bool get isReady => _stage == AppSetupStage.ready;
   bool get hasError => _stage == AppSetupStage.error;
+
+  bool get isEmergencyMode => _isEmergencyMode;
+
+  void toggleEmergencyMode(bool value) {
+    _isEmergencyMode = value;
+    notifyListeners();
+  }
 
   double get downloadProgress => _downloadProgress;
   double get downloadedMB => _downloadedMB;
@@ -173,6 +182,7 @@ class TriageController extends ChangeNotifier {
       final stream = _engineService.generateTriage(
         _currentQuery,
         profile: _userProfile,
+        isEmergency: _isEmergencyMode,
         onTelemetryUpdate: (telemetry) {
           _ttftMs = telemetry.ttftMs;
           _tokensPerSec = telemetry.tokensPerSec;
