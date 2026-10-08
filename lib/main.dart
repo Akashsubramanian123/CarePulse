@@ -21,7 +21,7 @@ class CarePulseApp extends StatelessWidget {
       child: MaterialApp(
         title: AppConstants.appName,
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.darkTheme,
         home: const RootScreenRouter(),
       ),
     );

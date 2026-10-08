@@ -28,11 +28,6 @@ jobs:
 
       - name: Build iOS Application (Unsigned)
         run: |
-          # Force Xcode to skip code signing for device builds
-          echo "CODE_SIGNING_REQUIRED=NO" >> ios/Flutter/Release.xcconfig
-          echo "CODE_SIGNING_ALLOWED=NO" >> ios/Flutter/Release.xcconfig
-          echo "EXPANDED_CODE_SIGN_IDENTITY=" >> ios/Flutter/Release.xcconfig
-
           # Build Flutter assets and native dependencies
           flutter build ios --release --no-codesign
 
