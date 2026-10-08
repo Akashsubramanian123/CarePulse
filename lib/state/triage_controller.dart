@@ -5,6 +5,7 @@ import '../core/constants/app_constants.dart';
 import '../services/model_download_service.dart';
 import '../services/triage_engine_service.dart';
 import '../services/profile_service.dart';
+import '../services/medical_vault_service.dart';
 
 enum AppSetupStage {
   checking,
@@ -38,10 +39,12 @@ class TriageController extends ChangeNotifier {
 
   UserProfile? _userProfile;
   final ProfileService _profileService = ProfileService();
+  final MedicalVaultService _vaultService = MedicalVaultService();
 
   StreamSubscription<String>? _generationSubscription;
 
   // Getters
+  MedicalVaultService get vaultService => _vaultService;
   AppSetupStage get stage => _stage;
   bool get isChecking => _stage == AppSetupStage.checking;
   bool get isDownloading => _stage == AppSetupStage.downloading;
@@ -169,10 +172,12 @@ class TriageController extends ChangeNotifier {
 
     try {
       _userProfile = await _profileService.loadProfile();
+      final vaultContext = _vaultService.retrieveRelevantContext(_currentQuery);
       
       final stream = _engineService.generateTriage(
         _currentQuery,
         profile: _userProfile,
+        vaultContext: vaultContext,
         onTelemetryUpdate: (telemetry) {
           _ttftMs = telemetry.ttftMs;
           _tokensPerSec = telemetry.tokensPerSec;

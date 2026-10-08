@@ -53,6 +53,7 @@ class TriageEngineService {
     String query, {
     void Function(TriageTelemetry telemetry)? onTelemetryUpdate,
     UserProfile? profile,
+    String? vaultContext,
   }) async* {
     if (!_isInitialized || _engine == null) {
       throw StateError('Triage engine is not initialized');
@@ -60,8 +61,9 @@ class TriageEngineService {
 
     String profileText = profile?.promptContext ?? '';
     String contextPrompt = profileText.isNotEmpty ? '$profileText\n\n' : '';
+    String vaultText = vaultContext != null && vaultContext.isNotEmpty ? '$vaultContext\n\n' : '';
     
-    final formattedPrompt = '$contextPrompt${AppConstants.formatEmergencyPrompt(query)}';
+    final formattedPrompt = '$contextPrompt$vaultText${AppConstants.formatEmergencyPrompt(query)}';
 
     final startTime = DateTime.now().millisecondsSinceEpoch;
     int? firstTokenTime;
