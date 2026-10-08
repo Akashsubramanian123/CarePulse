@@ -146,9 +146,13 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
             // Top Telemetry Bar
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -312,6 +316,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
