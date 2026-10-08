@@ -189,42 +189,9 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                   ),
                 ],
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            controller.isEmergencyMode ? Icons.emergency : Icons.chat_bubble_outline,
-                            color: controller.isEmergencyMode ? AppColors.coralEmergency : AppColors.tealPrimary,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            controller.isEmergencyMode ? 'Emergency Mode' : 'General Chat Mode',
-                            style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      Switch(
-                        value: controller.isEmergencyMode,
-                        onChanged: (val) {
-                          controller.toggleEmergencyMode(val);
-                        },
-                        activeColor: AppColors.coralEmergency,
-                        activeTrackColor: AppColors.coralEmergency.withValues(alpha: 0.3),
-                        inactiveThumbColor: AppColors.tealPrimary,
-                        inactiveTrackColor: AppColors.tealPrimary.withValues(alpha: 0.3),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      // Text Field Input
+                  // Text Field Input
                   Expanded(
                     child: SizedBox(
                       height: 56,

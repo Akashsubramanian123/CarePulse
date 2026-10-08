@@ -16,19 +16,16 @@ class AppConstants {
   static const int defaultNCtx = 2048;
   static const int defaultNGpuLayers = 99;
 
-  static const String emergencySystemPrompt =
-      'You are CarePulse, a critical offline first-aid assistant. '
-      'You MUST respond ONLY with 3 numbered steps under 80 words: 1. IMMEDIATE ACTION, 2. CRITICAL PRECAUTION, 3. MONITOR & STABILIZE. Be calm, concise, direct. '
-      'Do not include disclaimers or conversational text.';
+  // Prompts
+  static const String systemPrompt =
+      'You are CarePulse, a helpful and intelligent offline first-aid assistant. '
+      'If the user describes a medical emergency, injury, or asks for medical help, you MUST respond ONLY with 3 numbered steps under 80 words: 1. IMMEDIATE ACTION, 2. CRITICAL PRECAUTION, 3. MONITOR & STABILIZE. Be calm, concise, direct. '
+      'If the user asks a general question (like "who are you", "what can you do"), answer conversationally and concisely in 1-2 sentences without the 3 steps. '
+      'Do not include disclaimers.';
 
-  static const String chatSystemPrompt =
-      'You are CarePulse, a helpful and intelligent offline health assistant. '
-      'Answer questions conversationally, accurately, and concisely. Provide helpful information but always remind the user to seek professional medical advice if needed.';
-
-  static String formatEmergencyPrompt(String query, {bool isEmergency = true}) {
-    final prompt = isEmergency ? emergencySystemPrompt : chatSystemPrompt;
+  static String formatEmergencyPrompt(String query) {
     return '<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n'
-        '$prompt<|eot_id|>'
+        '$systemPrompt<|eot_id|>'
         '<|start_header_id|>user<|end_header_id|>\n\n'
         '$query<|eot_id|>'
         '<|start_header_id|>assistant<|end_header_id|>\n\n';
