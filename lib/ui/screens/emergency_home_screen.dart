@@ -92,6 +92,29 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
           ],
         ),
         actions: [
+          DropdownButtonHideUnderline(
+            child: DropdownButton<ChatMode>(
+              value: controller.currentMode,
+              icon: const Icon(Icons.arrow_drop_down, color: AppColors.tealPrimary),
+              dropdownColor: AppColors.darkSurfaceCard,
+              style: const TextStyle(color: AppColors.tealPrimary, fontWeight: FontWeight.bold),
+              onChanged: (ChatMode? newMode) {
+                if (newMode != null) {
+                  controller.setMode(newMode);
+                }
+              },
+              items: const [
+                DropdownMenuItem(
+                  value: ChatMode.emergency,
+                  child: Text('Emergency Mode'),
+                ),
+                DropdownMenuItem(
+                  value: ChatMode.general,
+                  child: Text('Chat Mode'),
+                ),
+              ],
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.person, color: AppColors.tealPrimary),
             onPressed: () {
