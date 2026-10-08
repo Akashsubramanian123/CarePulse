@@ -58,10 +58,33 @@ class TriageEngineService {
       throw StateError('Triage engine is not initialized');
     }
 
-    String profileText = profile?.promptContext ?? '';
-    String contextPrompt = profileText.isNotEmpty ? '$profileText\n\n' : '';
+    // PASS 1: Intent Routing
+    final routerSession = await _engine!.createSession();
+    final routerPrompt = AppConstants.formatPrompt(AppConstants.routerSystemPrompt, query);
     
-    final formattedPrompt = '$contextPrompt${AppConstants.formatEmergencyPrompt(query)}';
+    String intentResult = '';
+    await for (final event in routerSession.generate(
+      prompt: routerPrompt,
+      addSpecial: true,
+      maxTokens: 10,
+    )) {
+      if (event is TokenEvent) {
+        intentResult += event.text;
+      }
+    }
+    await routerSession.dispose();
+
+    bool isEmergency = intentResult.toUpperCase().contains('EMERGENCY');
+
+    // PASS 2: Actual Generation
+    String profileText = profile?.promptContext ?? '';
+    String contextPrompt = (isEmergency && profileText.isNotEmpty) ? '$profileText\n\n' : '';
+    
+    final selectedSystemPrompt = isEmergency 
+        ? AppConstants.emergencySystemPrompt 
+        : AppConstants.chatSystemPrompt;
+
+    final formattedPrompt = AppConstants.formatPrompt(selectedSystemPrompt, '$contextPrompt$query');
 
     final startTime = DateTime.now().millisecondsSinceEpoch;
     int? firstTokenTime;
