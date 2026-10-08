@@ -16,29 +16,18 @@ class AppConstants {
   static const int defaultNCtx = 2048;
   static const int defaultNGpuLayers = 99;
 
-enum ChatMode { emergency, general }
-
   // Prompts
-  static const String systemPromptEmergency =
-      'You are CarePulse, a highly intelligent offline first-aid emergency assistant. '
-      'The user is currently in an EMERGENCY situation. '
-      'You MUST respond ONLY with 3 numbered steps under 80 words: 1. IMMEDIATE ACTION, 2. CRITICAL PRECAUTION, 3. MONITOR & STABILIZE. Be calm, concise, direct. '
-      'No disclaimers.';
+  static const String systemPrompt =
+      'You are CarePulse, a helpful and intelligent offline first-aid assistant. '
+      'If the user describes a medical emergency, injury, or asks for medical help, you MUST respond ONLY with 3 numbered steps under 80 words: 1. IMMEDIATE ACTION, 2. CRITICAL PRECAUTION, 3. MONITOR & STABILIZE. Be calm, concise, direct. '
+      'If the user asks a general question (like "who are you", "what can you do"), answer conversationally and concisely in 1-2 sentences without the 3 steps. '
+      'Do not include disclaimers.';
 
-  static const String systemPromptGeneral =
-      'You are CarePulse, a helpful offline medical assistant. '
-      'The user is asking a general medical or conversational question. '
-      'Provide a concise, helpful, and informative response in a conversational tone. '
-      'Keep your answer under 100 words. Do not use the 3-step emergency format.';
-
-  static String formatEmergencyPrompt(String query, ChatMode mode) {
-    final systemPrompt = mode == ChatMode.emergency ? systemPromptEmergency : systemPromptGeneral;
-    final prefix = mode == ChatMode.emergency ? 'EMERGENCY: ' : '';
-    
+  static String formatEmergencyPrompt(String query) {
     return '<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n'
         '$systemPrompt<|eot_id|>'
         '<|start_header_id|>user<|end_header_id|>\n\n'
-        '$prefix$query<|eot_id|>'
+        '$query<|eot_id|>'
         '<|start_header_id|>assistant<|end_header_id|>\n\n';
   }
 }

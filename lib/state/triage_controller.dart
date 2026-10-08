@@ -63,15 +63,6 @@ class TriageController extends ChangeNotifier {
   double get ramUsageMb => _ramUsageMb;
   String? get errorMessage => _errorMessage;
 
-  ChatMode _currentMode = ChatMode.emergency;
-  ChatMode get currentMode => _currentMode;
-
-  void setMode(ChatMode mode) {
-    if (_isGenerating) return;
-    _currentMode = mode;
-    notifyListeners();
-  }
-
   bool get isOffline => true; // Always 100% offline after model exists
 
   TriageController() {
@@ -182,7 +173,6 @@ class TriageController extends ChangeNotifier {
       final stream = _engineService.generateTriage(
         _currentQuery,
         profile: _userProfile,
-        mode: _currentMode,
         onTelemetryUpdate: (telemetry) {
           _ttftMs = telemetry.ttftMs;
           _tokensPerSec = telemetry.tokensPerSec;
