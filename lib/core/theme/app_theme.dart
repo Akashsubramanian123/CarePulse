@@ -1,56 +1,58 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Calm Backgrounds (Eliminate pure black #000000 and harsh blue-black #0B0F19)
-  static const Color darkBackground = Color(0xFF121A22); // Deep calm blue-gray
-  static const Color darkSurface = Color(0xFF1B242D);    // Soft elevated surface
-  static const Color darkSurfaceCard = Color(0xFF242F3A);// Card surface
-  static const Color darkSurfaceBorder = Color(0xFF334250);// Low-contrast borders
-
-  static const Color lightBackground = Color(0xFFF7F5F2);// Warm off-white
-  static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightSurfaceBorder = Color(0xFFE2DDD5);
+  // Light Glassmorphic Backgrounds
+  static const Color lightBackground = Color(0xFFE8F1F5); // Soft teal-tinted white
+  static const Color lightSurface = Color(0x99FFFFFF);    // Semi-transparent white for glass
+  static const Color lightSurfaceCard = Color(0xB3FFFFFF);// Slightly more opaque for cards
+  static const Color lightSurfaceBorder = Color(0x33000000); // Soft border for glass
 
   // Calming Medical Primaries
-  static const Color tealPrimary = Color(0xFF2F8F9D);     // Soft healthcare teal
-  static const Color tealAccent = Color(0xFF3EA3B3);      // Calming interaction accent
-  static const Color tealLight = Color(0xFF72C2CE);       // Gentle highlight
-  static const Color tealGlow = Color(0x262F8F9D);        // Soft teal ambient aura
+  static const Color tealPrimary = Color(0xFF2CB1BA);     // Vibrant yet calming teal
+  static const Color tealAccent = Color(0xFF4ACFD8);      
+  static const Color tealLight = Color(0xFFB5E8EB);       
+  static const Color peachGradientEnd = Color(0xFFFFCFA8); // Peach/Coral gradient end
 
-  // Emergency & Alert Colors (Reserved STRICTLY for SOS and immediate harm actions)
-  static const Color coralEmergency = Color(0xFFE05A4F);  // Muted coral-red (less alarming than neon crimson)
-  static const Color coralGlow = Color(0x26E05A4F);
+  // Emergency & Alert Colors
+  static const Color coralEmergency = Color(0xFFFF6B6B);  // Soft vibrant coral
   
   // Status Colors
-  static const Color safeGreen = Color(0xFF6BAA8E);       // Sage green for Offline / Safe
-  static const Color warningAmber = Color(0xFFE8B04B);    // Soft warm amber
+  static const Color safeGreen = Color(0xFF38B27A);       
+  static const Color warningAmber = Color(0xFFF9B234);    
 
-  // High-Legibility Typography Colors
-  static const Color textPrimary = Color(0xFFE6EDF3);     // Soft white on dark
-  static const Color textSecondary = Color(0xFF9AA7B4);   // Subdued secondary text
-  static const Color textMuted = Color(0xFF637381);       // Hints and labels
+  // Typography Colors
+  static const Color textPrimary = Color(0xFF1E293B);     // Dark slate blue
+  static const Color textSecondary = Color(0xFF475569);   
+  static const Color textMuted = Color(0xFF94A3B8);       
+
+  // Legacy variables to not break existing code entirely
+  static const Color darkBackground = lightBackground;
+  static const Color darkSurface = lightSurface;
+  static const Color darkSurfaceCard = lightSurfaceCard;
+  static const Color darkSurfaceBorder = lightSurfaceBorder;
 }
 
 class AppTheme {
-  static ThemeData get darkTheme {
+  static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.darkBackground,
-      colorScheme: const ColorScheme.dark(
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: Colors.transparent, // We will use a gradient background in Scaffold
+      colorScheme: const ColorScheme.light(
         primary: AppColors.tealPrimary,
         secondary: AppColors.tealAccent,
-        surface: AppColors.darkSurface,
+        surface: AppColors.lightSurface,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
         error: AppColors.coralEmergency,
       ),
-      fontFamily: 'Roboto',
+      fontFamily: 'Outfit', // Or any modern font, assuming Roboto is default
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.darkSurface,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        iconTheme: IconThemeData(color: AppColors.textPrimary),
         titleTextStyle: TextStyle(
           color: AppColors.textPrimary,
           fontSize: 20,
@@ -59,26 +61,26 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.darkSurfaceCard,
+        color: AppColors.lightSurfaceCard,
         elevation: 0,
         shadowColor: const Color(0x1A000000),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: AppColors.darkSurfaceBorder, width: 1),
+          side: const BorderSide(color: AppColors.lightSurfaceBorder, width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.darkSurface,
+        fillColor: AppColors.lightSurface,
         hintStyle: const TextStyle(color: AppColors.textMuted),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
+          borderSide: const BorderSide(color: AppColors.lightSurfaceBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
+          borderSide: const BorderSide(color: AppColors.lightSurfaceBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
@@ -90,8 +92,8 @@ class AppTheme {
           minimumSize: const Size.fromHeight(56),
           backgroundColor: AppColors.tealPrimary,
           foregroundColor: Colors.white,
-          elevation: 0,
-          shadowColor: const Color(0x1A000000),
+          elevation: 8,
+          shadowColor: AppColors.tealPrimary.withOpacity(0.4),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),

@@ -73,8 +73,19 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<TriageController>();
 
-    return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.tealLight,
+            AppColors.peachGradientEnd,
+          ],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -324,6 +335,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
