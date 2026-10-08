@@ -17,23 +17,15 @@ class AppConstants {
   static const int defaultNGpuLayers = 99;
 
   // Prompts
-  static const String routerSystemPrompt =
-      'You are a classification routing engine. '
-      'Classify the user input as either "EMERGENCY" if it describes a medical issue, injury, symptom, or asks for first-aid help. '
-      'Classify it as "CHAT" if it is a general question, greeting, or about the app itself. '
-      'Respond ONLY with the single word "EMERGENCY" or "CHAT" and nothing else.';
-
-  static const String emergencySystemPrompt =
-      'You are CarePulse, an offline first-aid emergency assistant. '
-      'Respond ONLY with 3 numbered steps under 80 words: 1. IMMEDIATE ACTION, 2. CRITICAL PRECAUTION, 3. MONITOR & STABILIZE. Be calm, concise, direct. No disclaimers.';
-
-  static const String chatSystemPrompt =
+  static const String systemPrompt =
       'You are CarePulse, a helpful and intelligent offline first-aid assistant. '
-      'Answer the user\'s general question conversationally and concisely in 1-2 sentences. Do not use a numbered list unless asked. No medical disclaimers.';
+      'If the user describes a medical emergency, injury, or asks for medical help, you MUST respond ONLY with 3 numbered steps under 80 words: 1. IMMEDIATE ACTION, 2. CRITICAL PRECAUTION, 3. MONITOR & STABILIZE. Be calm, concise, direct. '
+      'If the user asks a general question (like "who are you", "what can you do"), answer conversationally and concisely in 1-2 sentences without the 3 steps. '
+      'Do not include disclaimers.';
 
-  static String formatPrompt(String system, String query) {
+  static String formatEmergencyPrompt(String query) {
     return '<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n'
-        '$system<|eot_id|>'
+        '$systemPrompt<|eot_id|>'
         '<|start_header_id|>user<|end_header_id|>\n\n'
         '$query<|eot_id|>'
         '<|start_header_id|>assistant<|end_header_id|>\n\n';
