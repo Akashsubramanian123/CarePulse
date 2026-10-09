@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
+import 'glass_card.dart';
 
 class EmergencyChips extends StatelessWidget {
   final Function(EmergencyPreset preset) onPresetSelected;
@@ -31,17 +32,19 @@ class EmergencyChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glass = Theme.of(context).extension<CarePulseGlass>()!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          children: const [
-            Icon(Icons.bolt_rounded, size: 16, color: AppColors.tealAccent),
-            SizedBox(width: 4),
+          children: [
+            Icon(Icons.bolt_rounded, size: 16, color: glass.accentMint),
+            const SizedBox(width: 4),
             Text(
               'QUICK EMERGENCY TRIGGERS',
               style: TextStyle(
-                color: AppColors.textSecondary,
+                color: glass.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.0,
@@ -50,51 +53,60 @@ class EmergencyChips extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 10),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: emergencyPresets.map((preset) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: SizedBox(
-                  height: 50,
-                  child: ActionChip(
-                    elevation: 0,
-                    pressElevation: 2,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    avatar: Icon(
-                      _getPresetIcon(preset.iconName),
-                      size: 18,
-                      color: isDisabled ? AppColors.textMuted : AppColors.tealPrimary,
-                    ),
-                    label: Text(
-                      preset.title,
-                      style: TextStyle(
-                        color: isDisabled ? AppColors.textMuted : AppColors.textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            mainAxisExtent: 84, // height ~84
+          ),
+          itemCount: emergencyPresets.length,
+          itemBuilder: (context, index) {
+            final preset = emergencyPresets[index];
+            return Opacity(
+              opacity: isDisabled ? 0.5 : 1.0,
+              child: GlassCard(
+                borderRadius: 24,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                onTap: isDisabled ? null : () => onPresetSelected(preset),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: glass.iconTintGradient,
+                        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                      ),
+                      child: Icon(
+                        _getPresetIcon(preset.iconName),
+                        size: 20,
+                        color: glass.accentMint,
                       ),
                     ),
-                    backgroundColor: AppColors.darkSurfaceCard,
-                    side: BorderSide(
-                      color: isDisabled
-                          ? AppColors.darkSurfaceBorder
-                          : AppColors.tealPrimary.withValues(alpha: 0.5),
-                      width: 1,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        preset.title,
+                        style: TextStyle(
+                          color: glass.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    onPressed: isDisabled ? null : () => onPresetSelected(preset),
-                  ),
+                  ],
                 ),
-              );
-            }).toList(),
-          ),
+              ),
+            );
+          },
         ),
       ],
     );
   }
 }
-

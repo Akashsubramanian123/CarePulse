@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
 import '../../state/triage_controller.dart';
 import '../widgets/emergency_chips.dart';
 import '../widgets/streaming_response_card.dart';
 import '../widgets/telemetry_bar.dart';
+import '../widgets/glass_card.dart';
 import 'profile_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -22,6 +24,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
 
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isListening = false;
+  bool _telemetryExpanded = false;
 
   @override
   void initState() {
@@ -69,276 +72,328 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     controller.submitEmergencyQuery(queryText);
   }
 
+  Future<void> _callEmergency() async {
+    final uri = Uri(scheme: 'tel', path: '112');
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        throw Exception('Could not launch $uri');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to open dialer. Please dial 112 manually.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<TriageController>();
+    final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Background handled by outer container
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.medical_services_rounded, color: AppColors.tealPrimary, size: 24),
-            SizedBox(width: 8),
-            Text(
-              AppConstants.appName,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                letterSpacing: 0.5,
-                color: Color(0xFF1E293B),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: GlassCard(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          borderRadius: 24,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.medical_services_rounded, color: glass.accentMint, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                AppConstants.appName,
+                style: TextStyle(
+                  color: glass.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.person, color: AppColors.tealPrimary),
+            icon: Icon(Icons.person, color: glass.accentMint),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
             },
           ),
           Container(
             margin: const EdgeInsets.only(right: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.safeGreen.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.safeGreen.withValues(alpha: 0.4)),
-            ),
-            child: Row(
-              children: const [
-                Icon(Icons.circle, size: 8, color: AppColors.safeGreen),
-                SizedBox(width: 6),
-                Text(
-                  'Offline • AI Ready',
-                  style: TextStyle(
-                    color: AppColors.safeGreen,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+            child: GlassCard(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              borderRadius: 20,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.circle, size: 8, color: glass.successDot),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Offline • AI Ready',
+                    style: TextStyle(
+                      color: glass.textPrimary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF1F5F9), // Light slate
-              Color(0xFFE2E8F0), // Slate
-              Color(0xFFF8FAFC), // Very light
-            ],
-          ),
-        ),
+      body: GradientBackground(
         child: SafeArea(
           child: Column(
-          children: [
-            // Top Telemetry Bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: TelemetryBar(
-                ttftMs: controller.ttftMs,
-                tokensPerSec: controller.tokensPerSec,
-                ramUsageMb: controller.ramUsageMb,
-                isOffline: controller.isOffline,
-                isGenerating: controller.isGenerating,
-              ),
-            ),
-
-            // Scrollable Content Area
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Quick-Trigger Emergency Chips
-                    EmergencyChips(
-                      isDisabled: controller.isGenerating,
-                      onPresetSelected: (preset) {
-                        _submitQuery(controller, preset.query);
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Streaming Response Card
-                    StreamingResponseCard(
-                      query: controller.currentQuery,
-                      responseText: controller.streamedResponse,
-                      isGenerating: controller.isGenerating,
-                      onClear: () {
-                        _textController.clear();
-                        controller.clearResponse();
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-                    const SizedBox(height: 16),
-                    if (controller.uploadedDocument != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.darkSurfaceCard,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.tealPrimary.withOpacity(0.3)),
+            children: [
+              // Scrollable Content Area
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Emergency Call Button
+                      InkWell(
+                        onTap: _callEmergency,
+                        borderRadius: BorderRadius.circular(24),
+                        child: Container(
+                          height: 68,
+                          decoration: BoxDecoration(
+                            gradient: glass.emergencyGradient,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.phone, color: Colors.white, size: 26),
+                              SizedBox(width: 12),
+                              Text(
+                                "Call emergency · 112",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                        child: Row(
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Performance Chevron
+                      GlassCard(
+                        borderRadius: 24,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        onTap: () {
+                          setState(() {
+                            _telemetryExpanded = !_telemetryExpanded;
+                          });
+                        },
+                        child: Column(
                           children: [
-                            const Icon(Icons.description, color: AppColors.tealPrimary, size: 20),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                controller.uploadedDocument!.fileName,
-                                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Performance", style: TextStyle(color: glass.textPrimary, fontWeight: FontWeight.bold)),
+                                Row(
+                                  children: [
+                                    Text("Tap to expand", style: TextStyle(color: glass.textSecondary, fontSize: 12)),
+                                    Icon(_telemetryExpanded ? Icons.expand_less : Icons.expand_more, color: glass.textSecondary, size: 16),
+                                  ],
+                                ),
+                              ],
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.close, size: 18, color: AppColors.textMuted),
-                              onPressed: controller.clearDocument,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 300),
+                              child: _telemetryExpanded
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(top: 12.0),
+                                      child: TelemetryBar(
+                                        ttftMs: controller.ttftMs,
+                                        tokensPerSec: controller.tokensPerSec,
+                                        ramUsageMb: controller.ramUsageMb,
+                                        isOffline: controller.isOffline,
+                                        isGenerating: controller.isGenerating,
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
                             ),
                           ],
                         ),
                       ),
-                    if (controller.uploadedDocument != null)
+                      
+                      const SizedBox(height: 24),
+                      Text("What's happening?", style: TextStyle(color: glass.textPrimary, fontSize: 20, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            ),
 
-            // Bottom Input Bar
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.darkSurface,
-                border: const Border(
-                  top: BorderSide(color: AppColors.darkSurfaceBorder, width: 1),
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x1A000000),
-                    blurRadius: 16,
-                    offset: Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  // Text Field Input
-                  Expanded(
-                    child: SizedBox(
-                      height: 56,
-                      child: TextField(
-                        controller: _textController,
-                        focusNode: _focusNode,
-                        enabled: !controller.isGenerating,
-                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-                        decoration: InputDecoration(
-                          hintText: 'Describe emergency situation...',
-                          hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                          filled: true,
-                          fillColor: AppColors.darkSurfaceCard,
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          prefixIcon: const Icon(
-                            Icons.emergency_rounded,
-                            color: AppColors.tealPrimary,
-                            size: 20,
-                          ),
-                          suffixIcon: Row(
-                            mainAxisSize: MainAxisSize.min,
+                      // Quick-Trigger Emergency Chips
+                      EmergencyChips(
+                        isDisabled: controller.isGenerating,
+                        onPresetSelected: (preset) {
+                          _submitQuery(controller, preset.query);
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Streaming Response Card
+                      StreamingResponseCard(
+                        query: controller.currentQuery,
+                        responseText: controller.streamedResponse,
+                        isGenerating: controller.isGenerating,
+                        onClear: () {
+                          _textController.clear();
+                          controller.clearResponse();
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+                      if (controller.uploadedDocument != null)
+                        GlassCard(
+                          padding: const EdgeInsets.all(12),
+                          borderRadius: 12,
+                          child: Row(
                             children: [
-                              if (_textController.text.isNotEmpty && !controller.isGenerating)
-                                IconButton(
-                                  icon: const Icon(Icons.clear_rounded, size: 18),
-                                  color: AppColors.textMuted,
-                                  onPressed: () {
-                                    _textController.clear();
-                                    setState(() {});
-                                  },
+                              Icon(Icons.description, color: glass.accentMint, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  controller.uploadedDocument!.fileName,
+                                  style: TextStyle(color: glass.textPrimary, fontSize: 13),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              IconButton(
-                                icon: Icon(_isListening ? Icons.mic : Icons.mic_none, size: 22),
-                                color: _isListening ? AppColors.coralEmergency : AppColors.textMuted,
-                                onPressed: _listen,
                               ),
                               IconButton(
-                                icon: const Icon(Icons.attach_file, size: 22),
-                                color: AppColors.textMuted,
-                                onPressed: () => controller.pickDocument(),
+                                icon: Icon(Icons.close, size: 18, color: glass.textSecondary),
+                                onPressed: controller.clearDocument,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
                               ),
                             ],
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: const BorderSide(color: AppColors.tealAccent, width: 2),
-                          ),
                         ),
-                        onChanged: (_) => setState(() {}),
-                        onSubmitted: (_) => _submitQuery(controller),
-                      ),
-                    ),
+                      if (controller.uploadedDocument != null)
+                        const SizedBox(height: 16),
+                    ],
                   ),
-                  const SizedBox(width: 10),
-
-                  // Emergency Submit Button
-                  SizedBox(
-                    height: 56,
-                    width: 56,
-                    child: ElevatedButton(
-                      onPressed: controller.isGenerating
-                          ? null
-                          : () => _submitQuery(controller),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        backgroundColor: AppColors.coralEmergency,
-                        disabledBackgroundColor: AppColors.darkSurfaceBorder,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: controller.isGenerating
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.send_rounded,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+
+              // Bottom Input Bar
+              Container(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    // Text Field Input
+                    Expanded(
+                      child: GlassCard(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        borderRadius: 22,
+                        child: SizedBox(
+                          height: 58,
+                          child: TextField(
+                            controller: _textController,
+                            focusNode: _focusNode,
+                            enabled: !controller.isGenerating,
+                            style: TextStyle(color: glass.textPrimary, fontSize: 14),
+                            decoration: InputDecoration(
+                              hintText: 'Describe what happened...',
+                              hintStyle: TextStyle(color: glass.textSecondary, fontSize: 13),
+                              filled: false,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              prefixIcon: Icon(
+                                Icons.emergency_rounded,
+                                color: glass.accentMint,
+                                size: 20,
+                              ),
+                              suffixIcon: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (_textController.text.isNotEmpty && !controller.isGenerating)
+                                    IconButton(
+                                      icon: const Icon(Icons.clear_rounded, size: 18),
+                                      color: glass.textSecondary,
+                                      onPressed: () {
+                                        _textController.clear();
+                                        setState(() {});
+                                      },
+                                    ),
+                                  IconButton(
+                                    icon: Icon(_isListening ? Icons.mic : Icons.mic_none, size: 22),
+                                    color: _isListening ? glass.successDot : glass.textSecondary,
+                                    onPressed: _listen,
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.attach_file, size: 22),
+                                    color: glass.textSecondary,
+                                    onPressed: () => controller.pickDocument(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            onChanged: (_) => setState(() {}),
+                            onSubmitted: (_) => _submitQuery(controller),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Emergency Submit Button
+                    Container(
+                      height: 58,
+                      width: 58,
+                      decoration: BoxDecoration(
+                        gradient: glass.primaryActionGradient,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: controller.isGenerating
+                              ? null
+                              : () => _submitQuery(controller),
+                          child: controller.isGenerating
+                              ? const Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.send_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

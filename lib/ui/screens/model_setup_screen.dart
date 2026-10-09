@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
 import '../../state/triage_controller.dart';
+import '../widgets/glass_card.dart';
 
 class ModelSetupScreen extends StatelessWidget {
   const ModelSetupScreen({super.key});
@@ -10,104 +11,79 @@ class ModelSetupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<TriageController>();
+    final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-              padding: const EdgeInsets.all(24.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - 48.0,
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Spacer(),
+      backgroundColor: Colors.transparent,
+      body: GradientBackground(
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                padding: const EdgeInsets.all(24.0),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - 48.0,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Spacer(),
 
-                      // CarePulse App Logo Icon
-                      Center(
-                        child: Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: AppColors.tealGlow,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.tealPrimary, width: 2),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: AppColors.tealGlow,
-                                blurRadius: 24,
-                                spreadRadius: 4,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.medical_services_rounded,
-                            size: 52,
-                            color: AppColors.tealAccent,
+                        // CarePulse App Logo Icon
+                        Center(
+                          child: GlassCard(
+                            borderRadius: 50,
+                            padding: const EdgeInsets.all(24),
+                            tint: glass.accentMint,
+                            child: Icon(
+                              Icons.medical_services_rounded,
+                              size: 52,
+                              color: glass.accentMint,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      // Title & Subtitle
-                      const Text(
-                        AppConstants.appName,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.textPrimary,
-                          letterSpacing: 1.0,
+                        // Title & Subtitle
+                        Text(
+                          AppConstants.appName,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            color: glass.textPrimary,
+                            letterSpacing: 1.0,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        AppConstants.tagLine,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.tealAccent,
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(height: 6),
+                        Text(
+                          AppConstants.tagLine,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: glass.accentMint,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                      // Main Status Card
-                      Card(
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          side: const BorderSide(color: AppColors.darkSurfaceBorder),
-                        ),
-                        color: AppColors.darkSurface,
-                        child: Padding(
+                        // Main Status Card
+                        GlassCard(
                           padding: const EdgeInsets.all(24.0),
                           child: Column(
                             children: [
-                              const Text(
-                                'Downloading Offline Emergency AI Model (~808 MB)',
+                              Text(
+                                'One-time setup. Download the offline AI model (~808 MB) while you have Wi-Fi. After this, CarePulse works with no internet.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Once downloaded, CarePulse runs 100% offline with zero server calls. Perfect for remote areas, blackouts, and airplane mode.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: glass.textPrimary,
                                   height: 1.4,
                                 ),
                               ),
@@ -115,16 +91,22 @@ class ModelSetupScreen extends StatelessWidget {
 
                               // Progress Bar & Stats
                               if (controller.isDownloading || controller.isLoadingEngine) ...[
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: LinearProgressIndicator(
-                                    value: controller.isLoadingEngine
-                                        ? null
-                                        : controller.downloadProgress,
-                                    minHeight: 12,
-                                    backgroundColor: AppColors.darkSurfaceBorder,
-                                    valueColor: const AlwaysStoppedAnimation<Color>(
-                                      AppColors.tealPrimary,
+                                Container(
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white.withOpacity(0.3)),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: LinearProgressIndicator(
+                                      value: controller.isLoadingEngine
+                                          ? null
+                                          : controller.downloadProgress,
+                                      backgroundColor: Colors.transparent,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        glass.accentMint,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -134,19 +116,19 @@ class ModelSetupScreen extends StatelessWidget {
                                   children: [
                                     Text(
                                       controller.isLoadingEngine
-                                          ? 'Initializing Llama engine...'
+                                          ? 'Initializing AI engine...'
                                           : '${(controller.downloadProgress * 100).toStringAsFixed(1)}%',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.tealAccent,
+                                        color: glass.accentMint,
                                       ),
                                     ),
                                     Text(
                                       '${controller.downloadedMB.toStringAsFixed(1)} MB / ${controller.totalMB.toStringAsFixed(1)} MB',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 13,
-                                        color: AppColors.textSecondary,
+                                        color: glass.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -155,24 +137,22 @@ class ModelSetupScreen extends StatelessWidget {
 
                               // Error Banner
                               if (controller.hasError && controller.errorMessage != null) ...[
-                                Container(
+                                GlassCard(
                                   padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.coralEmergency.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: AppColors.coralEmergency.withValues(alpha: 0.4)),
-                                  ),
+                                  borderRadius: 16,
+                                  tint: const Color(0xFFE05A4F),
                                   child: Row(
                                     children: [
                                       const Icon(Icons.error_outline_rounded,
-                                          color: AppColors.coralEmergency, size: 20),
+                                          color: Colors.white, size: 20),
                                       const SizedBox(width: 10),
                                       Expanded(
                                         child: Text(
                                           controller.errorMessage!,
                                           style: const TextStyle(
                                             fontSize: 12,
-                                            color: AppColors.coralEmergency,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
@@ -184,60 +164,78 @@ class ModelSetupScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ),
 
-                      const Spacer(),
+                        const Spacer(),
 
-                      // Action Buttons
-                      if (controller.isDownloadRequired || controller.hasError)
-                        SizedBox(
-                          height: 56,
-                          child: ElevatedButton.icon(
-                            onPressed: () => controller.startModelDownload(),
-                            icon: const Icon(Icons.download_rounded),
-                            label: const Text('Download Emergency AI Model'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.tealPrimary,
-                              foregroundColor: Colors.white,
-                              minimumSize: const Size.fromHeight(56),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                        // Action Buttons
+                        if (controller.isDownloadRequired || controller.hasError)
+                          InkWell(
+                            onTap: () => controller.startModelDownload(),
+                            borderRadius: BorderRadius.circular(24),
+                            child: Container(
+                              height: 56,
+                              decoration: BoxDecoration(
+                                gradient: glass.primaryActionGradient,
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
                               ),
-                              elevation: 0,
-                            ),
-                          ),
-                        )
-                      else if (controller.isDownloading)
-                        SizedBox(
-                          height: 56,
-                          child: OutlinedButton.icon(
-                            onPressed: () => controller.cancelDownload(),
-                            icon: const Icon(Icons.cancel_outlined, color: AppColors.textSecondary),
-                            label: const Text(
-                              'Cancel Download',
-                              style: TextStyle(color: AppColors.textSecondary),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: AppColors.darkSurfaceBorder),
-                              minimumSize: const Size.fromHeight(56),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.download_rounded, color: Colors.white),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Download Emergency AI Model',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                ],
                               ),
                             ),
+                          )
+                        else if (controller.isDownloading)
+                          InkWell(
+                            onTap: () => controller.cancelDownload(),
+                            borderRadius: BorderRadius.circular(24),
+                            child: Container(
+                              height: 56,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: glass.glassBorderColor, width: 1),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.cancel_outlined, color: glass.textPrimary),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Cancel Download',
+                                    style: TextStyle(
+                                      color: glass.textPrimary,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                        else if (controller.isLoadingEngine || controller.isChecking)
+                          Center(
+                            child: CircularProgressIndicator(color: glass.accentMint),
                           ),
-                        )
-                      else if (controller.isLoadingEngine || controller.isChecking)
-                        const Center(
-                          child: CircularProgressIndicator(color: AppColors.tealAccent),
-                        ),
 
-                      const SizedBox(height: 16),
-                    ],
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
