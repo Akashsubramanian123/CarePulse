@@ -35,22 +35,10 @@ class RootScreenRouter extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = context.watch<TriageController>();
 
-    Widget currentScreen = controller.isReady 
-        ? const EmergencyHomeScreen() 
-        : const ModelSetupScreen();
-
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.lightBackgroundStart,
-            AppColors.lightBackgroundEnd,
-          ],
-        ),
-      ),
-      child: currentScreen,
-    );
+    if (controller.isReady) {
+      return const EmergencyHomeScreen();
+    } else {
+      return const ModelSetupScreen();
+    }
   }
 }

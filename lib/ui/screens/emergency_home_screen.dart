@@ -74,7 +74,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     final controller = context.watch<TriageController>();
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.transparent, // Background handled by outer container
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -87,6 +87,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
                 letterSpacing: 0.5,
+                color: Color(0xFF1E293B),
               ),
             ),
           ],
@@ -123,8 +124,20 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF1F5F9), // Light slate
+              Color(0xFFE2E8F0), // Slate
+              Color(0xFFF8FAFC), // Very light
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
           children: [
             // Top Telemetry Bar
             Padding(
@@ -173,9 +186,9 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.glassSurface,
+                          color: AppColors.darkSurfaceCard,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.glassBorder),
+                          border: Border.all(color: AppColors.tealPrimary.withOpacity(0.3)),
                         ),
                         child: Row(
                           children: [
@@ -207,12 +220,12 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
             // Bottom Input Bar
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: AppColors.glassSurface,
-                border: Border(
-                  top: BorderSide(color: AppColors.glassBorder, width: 1),
+              decoration: BoxDecoration(
+                color: AppColors.darkSurface,
+                border: const Border(
+                  top: BorderSide(color: AppColors.darkSurfaceBorder, width: 1),
                 ),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Color(0x1A000000),
                     blurRadius: 16,
@@ -234,7 +247,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                         decoration: InputDecoration(
                           hintText: 'Describe emergency situation...',
                           hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                          // Use theme default for filled and border
+                          filled: true,
+                          fillColor: AppColors.darkSurfaceCard,
                           contentPadding:
                               const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                           prefixIcon: const Icon(
@@ -266,6 +280,18 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                               ),
                             ],
                           ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(color: AppColors.tealAccent, width: 2),
+                          ),
                         ),
                         onChanged: (_) => setState(() {}),
                         onSubmitted: (_) => _submitQuery(controller),
@@ -285,6 +311,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.zero,
                         backgroundColor: AppColors.coralEmergency,
+                        disabledBackgroundColor: AppColors.darkSurfaceBorder,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -311,6 +338,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
