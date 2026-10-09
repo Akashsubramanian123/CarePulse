@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
@@ -75,8 +74,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     final controller = context.watch<TriageController>();
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -125,22 +123,9 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFE0F2F1), // Soft light teal
-              Color(0xFFF1F8E9), // Soft light green
-              Color(0xFFE3F2FD), // Soft light blue
-            ],
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
+      body: SafeArea(
+        child: Column(
+          children: [
             // Top Telemetry Bar
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -185,18 +170,14 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                     const SizedBox(height: 16),
                     const SizedBox(height: 16),
                     if (controller.uploadedDocument != null)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
-                            ),
-                            child: Row(
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.darkSurfaceCard,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.tealPrimary.withOpacity(0.3)),
+                        ),
+                        child: Row(
                           children: [
                             const Icon(Icons.description, color: AppColors.tealPrimary, size: 20),
                             const SizedBox(width: 8),
@@ -224,19 +205,23 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
             ),
 
             // Bottom Input Bar
-            ClipRRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    border: Border(
-                      top: BorderSide(color: Colors.white.withValues(alpha: 0.6), width: 1),
-                    ),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.darkSurface,
+                border: const Border(
+                  top: BorderSide(color: AppColors.darkSurfaceBorder, width: 1),
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x1A000000),
+                    blurRadius: 16,
+                    offset: Offset(0, -4),
                   ),
-                  child: Row(
-                    children: [
+                ],
+              ),
+              child: Row(
+                children: [
                   // Text Field Input
                   Expanded(
                     child: SizedBox(
@@ -337,8 +322,6 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                   ),
                 ],
               ),
-            ),
-            ),
             ),
           ],
         ),
