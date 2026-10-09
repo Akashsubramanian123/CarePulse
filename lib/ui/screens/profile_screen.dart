@@ -59,12 +59,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        backgroundColor: AppColors.darkBackground,
+        backgroundColor: Colors.transparent,
         body: Center(child: CircularProgressIndicator()),
       );
     }
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Medical Profile'),
         actions: [
@@ -80,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             const Text(
               "This data is stored 100% locally on your device and injected directly into the offline AI model during an emergency.",
-              style: TextStyle(color: AppColors.textMuted),
+              style: TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 20),
             _buildField("Name", _nameController),
@@ -101,13 +101,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         controller: controller,
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
         maxLines: maxLines,
-        style: const TextStyle(color: AppColors.textPrimary),
+        // using theme's default decoration and styles
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(color: AppColors.textMuted),
-          filled: true,
-          fillColor: AppColors.darkSurfaceCard,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );

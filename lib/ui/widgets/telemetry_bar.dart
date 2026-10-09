@@ -22,9 +22,9 @@ class TelemetryBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface.withValues(alpha: 0.8),
+        color: AppColors.glassSurface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.darkSurfaceBorder),
+        border: Border.all(color: AppColors.glassBorder),
         boxShadow: const [
           BoxShadow(
             color: Color(0x1A000000),
@@ -132,9 +132,9 @@ class _TelemetryPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.darkSurfaceCard,
+        color: AppColors.glassSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.darkSurfaceBorder.withValues(alpha: 0.6)),
+        border: Border.all(color: AppColors.glassBorder),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

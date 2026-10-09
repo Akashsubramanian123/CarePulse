@@ -22,9 +22,9 @@ class StreamingResponseCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: AppColors.darkSurfaceCard.withValues(alpha: 0.5),
+          color: AppColors.glassSurface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.darkSurfaceBorder),
+          border: Border.all(color: AppColors.glassBorder),
         ),
         child: Column(
           children: [
@@ -70,11 +70,11 @@ class StreamingResponseCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
         side: BorderSide(
-          color: isGenerating ? AppColors.tealAccent : AppColors.darkSurfaceBorder,
+          color: isGenerating ? AppColors.tealAccent : AppColors.glassBorder,
           width: isGenerating ? 1.5 : 1,
         ),
       ),
-      color: AppColors.darkSurfaceCard,
+      color: AppColors.glassSurface,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -139,7 +139,7 @@ class StreamingResponseCard extends StatelessWidget {
                 ),
               ],
             ),
-            const Divider(color: AppColors.darkSurfaceBorder, height: 20),
+            const Divider(color: AppColors.glassBorder, height: 20),
 
             // User Emergency Query Box
             if (query.isNotEmpty)
@@ -147,9 +147,9 @@ class StreamingResponseCard extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 14),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: AppColors.darkBackground.withValues(alpha: 0.6),
+                  color: AppColors.glassBorder.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.darkSurfaceBorder.withValues(alpha: 0.5)),
+                  border: Border.all(color: AppColors.glassBorder),
                 ),
                 child: Row(
                   children: [

@@ -74,7 +74,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     final controller = context.watch<TriageController>();
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -173,9 +173,9 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.darkSurfaceCard,
+                          color: AppColors.glassSurface,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.tealPrimary.withOpacity(0.3)),
+                          border: Border.all(color: AppColors.glassBorder),
                         ),
                         child: Row(
                           children: [
@@ -207,12 +207,12 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
             // Bottom Input Bar
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.darkSurface,
-                border: const Border(
-                  top: BorderSide(color: AppColors.darkSurfaceBorder, width: 1),
+              decoration: const BoxDecoration(
+                color: AppColors.glassSurface,
+                border: Border(
+                  top: BorderSide(color: AppColors.glassBorder, width: 1),
                 ),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
                     color: Color(0x1A000000),
                     blurRadius: 16,
@@ -234,8 +234,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                         decoration: InputDecoration(
                           hintText: 'Describe emergency situation...',
                           hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                          filled: true,
-                          fillColor: AppColors.darkSurfaceCard,
+                          // Use theme default for filled and border
                           contentPadding:
                               const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                           prefixIcon: const Icon(
@@ -267,18 +266,6 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                               ),
                             ],
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: const BorderSide(color: AppColors.darkSurfaceBorder),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: const BorderSide(color: AppColors.tealAccent, width: 2),
-                          ),
                         ),
                         onChanged: (_) => setState(() {}),
                         onSubmitted: (_) => _submitQuery(controller),
@@ -298,7 +285,6 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.zero,
                         backgroundColor: AppColors.coralEmergency,
-                        disabledBackgroundColor: AppColors.darkSurfaceBorder,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),

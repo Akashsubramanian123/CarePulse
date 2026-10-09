@@ -21,7 +21,7 @@ class CarePulseApp extends StatelessWidget {
       child: MaterialApp(
         title: AppConstants.appName,
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
+        theme: AppTheme.lightTheme,
         home: const RootScreenRouter(),
       ),
     );
@@ -35,10 +35,22 @@ class RootScreenRouter extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = context.watch<TriageController>();
 
-    if (controller.isReady) {
-      return const EmergencyHomeScreen();
-    } else {
-      return const ModelSetupScreen();
-    }
+    Widget currentScreen = controller.isReady 
+        ? const EmergencyHomeScreen() 
+        : const ModelSetupScreen();
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.lightBackgroundStart,
+            AppColors.lightBackgroundEnd,
+          ],
+        ),
+      ),
+      child: currentScreen,
+    );
   }
 }

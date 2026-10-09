@@ -76,10 +76,10 @@ class EmergencyChips extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    backgroundColor: AppColors.darkSurfaceCard,
+                    backgroundColor: AppColors.glassSurface,
                     side: BorderSide(
                       color: isDisabled
-                          ? AppColors.darkSurfaceBorder
+                          ? AppColors.glassBorder
                           : AppColors.tealPrimary.withValues(alpha: 0.5),
                       width: 1,
                     ),
