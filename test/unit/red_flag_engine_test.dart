@@ -22,13 +22,15 @@ void main() {
       expect(bleeding, isNotNull);
       expect(bleeding!.protocolId, equals('bleeding'));
 
-      final chestPain = engine.evaluate('my father has chest pain and sweating');
+      final chestPain =
+          engine.evaluate('my father has chest pain and sweating');
       expect(chestPain, isNotNull);
       expect(chestPain!.protocolId, equals('chest_pain'));
 
       final choking = engine.evaluate('child choking cannot cough');
       expect(choking, isNotNull);
-      expect(choking!.protocolId, anyOf(equals('choking'), equals('choking_child')));
+      expect(choking!.protocolId,
+          anyOf(equals('choking'), equals('choking_child')));
 
       final snakebite = engine.evaluate('snake bit my foot');
       expect(snakebite, isNotNull);

@@ -64,30 +64,41 @@ class CarePulseGlass extends ThemeExtension<CarePulseGlass> {
       iconTintGradient: iconTintGradient ?? this.iconTintGradient,
       successDot: successDot ?? this.successDot,
       emergencyGradient: emergencyGradient ?? this.emergencyGradient,
-      primaryActionGradient: primaryActionGradient ?? this.primaryActionGradient,
+      primaryActionGradient:
+          primaryActionGradient ?? this.primaryActionGradient,
     );
   }
 
   @override
-  ThemeExtension<CarePulseGlass> lerp(covariant ThemeExtension<CarePulseGlass>? other, double t) {
+  ThemeExtension<CarePulseGlass> lerp(
+      covariant ThemeExtension<CarePulseGlass>? other, double t) {
     if (other is! CarePulseGlass) {
       return this;
     }
     return CarePulseGlass(
-      backgroundGradient: LinearGradient.lerp(backgroundGradient, other.backgroundGradient, t)!,
-      glowTopLeftColor: Color.lerp(glowTopLeftColor, other.glowTopLeftColor, t)!,
-      glowBottomRightColor: Color.lerp(glowBottomRightColor, other.glowBottomRightColor, t)!,
-      glassFillGradient: LinearGradient.lerp(glassFillGradient, other.glassFillGradient, t)!,
-      glassBorderColor: Color.lerp(glassBorderColor, other.glassBorderColor, t)!,
-      innerHighlightColor: Color.lerp(innerHighlightColor, other.innerHighlightColor, t)!,
+      backgroundGradient:
+          LinearGradient.lerp(backgroundGradient, other.backgroundGradient, t)!,
+      glowTopLeftColor:
+          Color.lerp(glowTopLeftColor, other.glowTopLeftColor, t)!,
+      glowBottomRightColor:
+          Color.lerp(glowBottomRightColor, other.glowBottomRightColor, t)!,
+      glassFillGradient:
+          LinearGradient.lerp(glassFillGradient, other.glassFillGradient, t)!,
+      glassBorderColor:
+          Color.lerp(glassBorderColor, other.glassBorderColor, t)!,
+      innerHighlightColor:
+          Color.lerp(innerHighlightColor, other.innerHighlightColor, t)!,
       shadowColor: Color.lerp(shadowColor, other.shadowColor, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       accentMint: Color.lerp(accentMint, other.accentMint, t)!,
-      iconTintGradient: LinearGradient.lerp(iconTintGradient, other.iconTintGradient, t)!,
+      iconTintGradient:
+          LinearGradient.lerp(iconTintGradient, other.iconTintGradient, t)!,
       successDot: Color.lerp(successDot, other.successDot, t)!,
-      emergencyGradient: LinearGradient.lerp(emergencyGradient, other.emergencyGradient, t)!,
-      primaryActionGradient: LinearGradient.lerp(primaryActionGradient, other.primaryActionGradient, t)!,
+      emergencyGradient:
+          LinearGradient.lerp(emergencyGradient, other.emergencyGradient, t)!,
+      primaryActionGradient: LinearGradient.lerp(
+          primaryActionGradient, other.primaryActionGradient, t)!,
     );
   }
 }
@@ -109,7 +120,10 @@ class AppTheme {
     glowTopLeftColor: const Color.fromRGBO(79, 179, 191, 0.55),
     glowBottomRightColor: const Color.fromRGBO(239, 123, 112, 0.40),
     glassFillGradient: LinearGradient(
-      colors: [Colors.white.withValues(alpha: 0.20), Colors.white.withValues(alpha: 0.06)],
+      colors: [
+        Colors.white.withValues(alpha: 0.20),
+        Colors.white.withValues(alpha: 0.06)
+      ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ),
@@ -120,7 +134,10 @@ class AppTheme {
     textSecondary: Colors.white.withValues(alpha: 0.72),
     accentMint: const Color(0xFF9FF0E3),
     iconTintGradient: const LinearGradient(
-      colors: [Color.fromRGBO(94, 234, 212, 0.45), Color.fromRGBO(79, 179, 191, 0.18)],
+      colors: [
+        Color.fromRGBO(94, 234, 212, 0.45),
+        Color.fromRGBO(79, 179, 191, 0.18)
+      ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ),
@@ -143,7 +160,10 @@ class AppTheme {
     glowTopLeftColor: const Color.fromRGBO(94, 200, 205, 0.55),
     glowBottomRightColor: const Color.fromRGBO(251, 170, 150, 0.50),
     glassFillGradient: LinearGradient(
-      colors: [Colors.white.withValues(alpha: 0.78), Colors.white.withValues(alpha: 0.42)],
+      colors: [
+        Colors.white.withValues(alpha: 0.78),
+        Colors.white.withValues(alpha: 0.42)
+      ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ),
@@ -154,7 +174,10 @@ class AppTheme {
     textSecondary: const Color(0xFF52606D),
     accentMint: const Color(0xFF1F7480),
     iconTintGradient: const LinearGradient(
-      colors: [Color.fromRGBO(47, 143, 157, 0.30), Color.fromRGBO(79, 179, 191, 0.12)],
+      colors: [
+        Color.fromRGBO(47, 143, 157, 0.30),
+        Color.fromRGBO(79, 179, 191, 0.12)
+      ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ),
@@ -172,7 +195,8 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       fontFamily: 'Nunito',
-      scaffoldBackgroundColor: Colors.transparent, // Background handled by GradientBackground
+      scaffoldBackgroundColor:
+          Colors.transparent, // Background handled by GradientBackground
       colorScheme: ColorScheme.dark(
         primary: const Color(0xFF2FB5C4),
         onPrimary: Colors.white,

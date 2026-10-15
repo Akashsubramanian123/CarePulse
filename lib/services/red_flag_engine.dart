@@ -12,9 +12,26 @@ class RedFlagResult {
 
 class RedFlagEngine {
   static const List<String> _negationTokens = [
-    'not', 'no', 'never', 'without', "isn't", "isnt", "aren't", "arent",
-    "wasn't", "wasnt", "doesn't", "doesnt", "didn't", "didnt", 'stopped',
-    'stopped', 'clear', 'free', 'resolved', 'none',
+    'not',
+    'no',
+    'never',
+    'without',
+    "isn't",
+    "isnt",
+    "aren't",
+    "arent",
+    "wasn't",
+    "wasnt",
+    "doesn't",
+    "doesnt",
+    "didn't",
+    "didnt",
+    'stopped',
+    'stopped',
+    'clear',
+    'free',
+    'resolved',
+    'none',
   ];
 
   /// Evaluates the input text against red-flag clinical rules.
@@ -50,7 +67,8 @@ class RedFlagEngine {
   }
 
   /// Checks if a matched phrase has a negation token immediately preceding it (within 1-3 words).
-  static bool _isNegatedBefore(String text, String phrase, {int maxPrecedingWords = 3}) {
+  static bool _isNegatedBefore(String text, String phrase,
+      {int maxPrecedingWords = 3}) {
     final idx = text.indexOf(phrase);
     if (idx <= 0) return false;
 
@@ -209,9 +227,15 @@ class RedFlagEngine {
     for (final trigger in triggers) {
       if (norm.contains(trigger) && !_isNegatedBefore(norm, trigger)) {
         // Map pediatric vs adult if mentioned
-        final isChild = norm.contains('child') || norm.contains('kid') || norm.contains('toddler');
-        final isInfant = norm.contains('infant') || norm.contains('baby') || norm.contains('newborn');
-        final targetId = isInfant ? 'choking_infant' : (isChild ? 'choking_child' : 'choking');
+        final isChild = norm.contains('child') ||
+            norm.contains('kid') ||
+            norm.contains('toddler');
+        final isInfant = norm.contains('infant') ||
+            norm.contains('baby') ||
+            norm.contains('newborn');
+        final targetId = isInfant
+            ? 'choking_infant'
+            : (isChild ? 'choking_child' : 'choking');
 
         return RedFlagResult(
           protocolId: targetId,

@@ -2,11 +2,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class TtsService {
-  static final TtsService _instance = TtsService._internal();
+  static TtsService _instance = TtsService._internal();
   factory TtsService() => _instance;
   TtsService._internal();
 
-  final FlutterTts _flutterTts = FlutterTts();
+  @visibleForTesting
+  static void setMockInstance(TtsService mock) {
+    _instance = mock;
+  }
+
+  FlutterTts? _flutterTts;
+  FlutterTts get _tts => _flutterTts ??= FlutterTts();
+
   final ValueNotifier<bool> isSpeakingNotifier = ValueNotifier<bool>(false);
   bool _isInitialized = false;
 
@@ -15,18 +22,18 @@ class TtsService {
   Future<void> _init() async {
     if (_isInitialized) return;
     try {
-      await _flutterTts.setSpeechRate(0.45);
-      await _flutterTts.awaitSpeakCompletion(true);
-      _flutterTts.setStartHandler(() {
+      await _tts.setSpeechRate(0.45);
+      await _tts.awaitSpeakCompletion(true);
+      _tts.setStartHandler(() {
         isSpeakingNotifier.value = true;
       });
-      _flutterTts.setCompletionHandler(() {
+      _tts.setCompletionHandler(() {
         isSpeakingNotifier.value = false;
       });
-      _flutterTts.setCancelHandler(() {
+      _tts.setCancelHandler(() {
         isSpeakingNotifier.value = false;
       });
-      _flutterTts.setErrorHandler((_) {
+      _tts.setErrorHandler((_) {
         isSpeakingNotifier.value = false;
       });
       _isInitialized = true;
@@ -39,9 +46,9 @@ class TtsService {
     if (text.trim().isEmpty) return;
     await _init();
     try {
-      await _flutterTts.stop();
+      await _tts.stop();
       isSpeakingNotifier.value = true;
-      await _flutterTts.speak(text);
+      await _tts.speak(text);
     } catch (_) {
       isSpeakingNotifier.value = false;
     }
@@ -49,7 +56,9 @@ class TtsService {
 
   Future<void> stop() async {
     try {
-      await _flutterTts.stop();
+      if (_flutterTts != null) {
+        await _tts.stop();
+      }
     } catch (_) {}
     isSpeakingNotifier.value = false;
   }

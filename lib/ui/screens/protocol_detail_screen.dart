@@ -49,7 +49,9 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to open dialer. Please dial $emergencyNumber manually.')),
+          const SnackBar(
+              content: Text(
+                  'Failed to open dialer. Please dial $emergencyNumber manually.')),
         );
       }
     }
@@ -108,7 +110,9 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
             height: 48,
             child: IconButton(
               icon: Icon(
-                _isSpeaking ? Icons.stop_circle_rounded : Icons.volume_up_rounded,
+                _isSpeaking
+                    ? Icons.stop_circle_rounded
+                    : Icons.volume_up_rounded,
                 color: _isSpeaking ? const Color(0xFFE05A4F) : glass.accentMint,
               ),
               tooltip: _isSpeaking ? 'Stop reading' : 'Read aloud',
@@ -121,7 +125,8 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
       body: GradientBackground(
         child: SafeArea(
           child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics()),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -131,13 +136,19 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
                   onTap: _callEmergency,
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 14, horizontal: 16),
                     decoration: BoxDecoration(
-                      gradient: p.callEmergency ? glass.emergencyGradient : glass.primaryActionGradient,
+                      gradient: p.callEmergency
+                          ? glass.emergencyGradient
+                          : glass.primaryActionGradient,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: (p.callEmergency ? const Color(0xFFE05A4F) : glass.accentMint).withValues(alpha: 0.3),
+                          color: (p.callEmergency
+                                  ? const Color(0xFFE05A4F)
+                                  : glass.accentMint)
+                              .withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -146,11 +157,14 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.phone_in_talk_rounded, color: Colors.white, size: 24),
+                        const Icon(Icons.phone_in_talk_rounded,
+                            color: Colors.white, size: 24),
                         const SizedBox(width: 10),
                         Flexible(
                           child: Text(
-                            p.callEmergency ? 'Call Emergency · $emergencyNumber Now' : 'Call Help · $emergencyNumber',
+                            p.callEmergency
+                                ? 'Call Emergency · $emergencyNumber Now'
+                                : 'Call Help · $emergencyNumber',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -170,7 +184,8 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
                   borderRadius: 18,
                   child: Row(
                     children: [
-                      Icon(Icons.verified_rounded, size: 20, color: glass.accentMint),
+                      Icon(Icons.verified_rounded,
+                          size: 20, color: glass.accentMint),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -188,11 +203,14 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
                 const SizedBox(height: 16),
 
                 // 3 Standard Emergency Steps
-                _buildStepCard(context, glass, '1', 'IMMEDIATE ACTION', p.immediate),
+                _buildStepCard(
+                    context, glass, '1', 'IMMEDIATE ACTION', p.immediate),
                 const SizedBox(height: 12),
-                _buildStepCard(context, glass, '2', 'CRITICAL PRECAUTION', p.precaution),
+                _buildStepCard(
+                    context, glass, '2', 'CRITICAL PRECAUTION', p.precaution),
                 const SizedBox(height: 12),
-                _buildStepCard(context, glass, '3', 'MONITOR & STABILIZE', p.monitor),
+                _buildStepCard(
+                    context, glass, '3', 'MONITOR & STABILIZE', p.monitor),
                 const SizedBox(height: 18),
 
                 // "Do Not" Contraindications
@@ -206,7 +224,8 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
                       children: [
                         Row(
                           children: const [
-                            Icon(Icons.block_rounded, color: Color(0xFFE05A4F), size: 22),
+                            Icon(Icons.block_rounded,
+                                color: Color(0xFFE05A4F), size: 22),
                             SizedBox(width: 8),
                             Text(
                               'DO NOT',
@@ -226,7 +245,11 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('• ', style: TextStyle(color: Color(0xFFE05A4F), fontSize: 16, fontWeight: FontWeight.bold)),
+                                const Text('• ',
+                                    style: TextStyle(
+                                        color: Color(0xFFE05A4F),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold)),
                                 Expanded(
                                   child: Text(
                                     item,
@@ -266,7 +289,8 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
     );
   }
 
-  Widget _buildStepCard(BuildContext context, CarePulseGlass glass, String number, String label, String text) {
+  Widget _buildStepCard(BuildContext context, CarePulseGlass glass,
+      String number, String label, String text) {
     return GlassCard(
       borderRadius: 20,
       padding: const EdgeInsets.all(16),
@@ -279,12 +303,16 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
             decoration: BoxDecoration(
               gradient: glass.primaryActionGradient,
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1),
+              border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.4), width: 1),
             ),
             alignment: Alignment.center,
             child: Text(
               number,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
             ),
           ),
           const SizedBox(width: 12),

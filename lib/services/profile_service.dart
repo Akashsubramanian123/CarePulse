@@ -16,7 +16,10 @@ class UserProfile {
   });
 
   String get promptContext {
-    if (age == 0 && conditions.isEmpty && allergies.isEmpty && medications.isEmpty) {
+    if (age == 0 &&
+        conditions.isEmpty &&
+        allergies.isEmpty &&
+        medications.isEmpty) {
       return "";
     }
     return """
@@ -37,22 +40,28 @@ class ProfileService {
   static const _keyMedications = 'profile_medications';
 
   Future<UserProfile> loadProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    return UserProfile(
-      name: prefs.getString(_keyName) ?? '',
-      age: prefs.getInt(_keyAge) ?? 0,
-      conditions: prefs.getString(_keyConditions) ?? '',
-      allergies: prefs.getString(_keyAllergies) ?? '',
-      medications: prefs.getString(_keyMedications) ?? '',
-    );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return UserProfile(
+        name: prefs.getString(_keyName) ?? '',
+        age: prefs.getInt(_keyAge) ?? 0,
+        conditions: prefs.getString(_keyConditions) ?? '',
+        allergies: prefs.getString(_keyAllergies) ?? '',
+        medications: prefs.getString(_keyMedications) ?? '',
+      );
+    } catch (_) {
+      return UserProfile();
+    }
   }
 
   Future<void> saveProfile(UserProfile profile) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyName, profile.name);
-    await prefs.setInt(_keyAge, profile.age);
-    await prefs.setString(_keyConditions, profile.conditions);
-    await prefs.setString(_keyAllergies, profile.allergies);
-    await prefs.setString(_keyMedications, profile.medications);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyName, profile.name);
+      await prefs.setInt(_keyAge, profile.age);
+      await prefs.setString(_keyConditions, profile.conditions);
+      await prefs.setString(_keyAllergies, profile.allergies);
+      await prefs.setString(_keyMedications, profile.medications);
+    } catch (_) {}
   }
 }

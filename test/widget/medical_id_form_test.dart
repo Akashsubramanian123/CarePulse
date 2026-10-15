@@ -7,7 +7,9 @@ import 'package:carepulse/services/medical_id_store.dart';
 import 'package:carepulse/ui/screens/medical_id_screen.dart';
 
 void main() {
-  testWidgets('MedicalIdScreen validates phone numbers and saves valid medical ID', (WidgetTester tester) async {
+  testWidgets(
+      'MedicalIdScreen validates phone numbers and saves valid medical ID',
+      (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     final store = MedicalIdStore();
     await store.saveMedicalId(const MedicalId());

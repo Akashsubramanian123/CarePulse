@@ -170,7 +170,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1B242D) : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: SafeArea(
                 child: Column(
@@ -206,7 +207,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                       ),
                       subtitle: Text(
                         'Speaks out emergency steps as soon as generated',
-                        style: TextStyle(color: glass.textSecondary, fontSize: 12),
+                        style:
+                            TextStyle(color: glass.textSecondary, fontSize: 12),
                       ),
                       value: _autoReadAloud,
                       activeThumbColor: glass.accentMint,
@@ -273,7 +275,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.medical_services_rounded, color: glass.accentMint, size: 20),
+              Icon(Icons.medical_services_rounded,
+                  color: glass.accentMint, size: 20),
               const SizedBox(width: 8),
               Text(
                 AppConstants.appName,
@@ -342,8 +345,10 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
               // Scrollable Content Area
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics()),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -353,13 +358,15 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                           onTap: _callEmergency,
                           borderRadius: BorderRadius.circular(24),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 16),
                             decoration: BoxDecoration(
                               gradient: glass.emergencyGradient,
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFE05A4F).withValues(alpha: 0.5),
+                                  color: const Color(0xFFE05A4F)
+                                      .withValues(alpha: 0.5),
                                   blurRadius: 22,
                                   spreadRadius: 2,
                                 ),
@@ -368,7 +375,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                Icon(Icons.warning_rounded, color: Colors.white, size: 28),
+                                Icon(Icons.warning_rounded,
+                                    color: Colors.white, size: 28),
                                 SizedBox(width: 10),
                                 Flexible(
                                   child: Text(
@@ -400,7 +408,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                Icon(Icons.phone, color: Colors.white, size: 26),
+                                Icon(Icons.phone,
+                                    color: Colors.white, size: 26),
                                 SizedBox(width: 12),
                                 Text(
                                   'Call emergency · 112',
@@ -420,7 +429,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                       // Performance Chevron
                       GlassCard(
                         borderRadius: 24,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                         onTap: () {
                           setState(() {
                             _telemetryExpanded = !_telemetryExpanded;
@@ -495,7 +505,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                         responseText: controller.streamedResponse,
                         isGenerating: controller.isGenerating,
                         sourceLabel: controller.answerSource?.label,
-                        onSpeak: () => _toggleSpeak(controller.streamedResponse),
+                        onSpeak: () =>
+                            _toggleSpeak(controller.streamedResponse),
                         isSpeaking: _isSpeaking,
                         onStopSpeaking: () => _tts.stop(),
                         onClear: () {
@@ -512,17 +523,20 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                           borderRadius: 12,
                           child: Row(
                             children: [
-                              Icon(Icons.description, color: glass.accentMint, size: 20),
+                              Icon(Icons.description,
+                                  color: glass.accentMint, size: 20),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   controller.uploadedDocument!.fileName,
-                                  style: TextStyle(color: glass.textPrimary, fontSize: 13),
+                                  style: TextStyle(
+                                      color: glass.textPrimary, fontSize: 13),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.close, size: 18, color: glass.textSecondary),
+                                icon: Icon(Icons.close,
+                                    size: 18, color: glass.textSecondary),
                                 onPressed: controller.clearDocument,
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
@@ -540,7 +554,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
               // Subtle note if cloud fallback is used
               if (_voiceCloudNote)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: Text(
                     'Voice may need internet on this device',
                     style: TextStyle(color: glass.accentMint, fontSize: 12),
@@ -564,7 +579,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                             controller: _textController,
                             focusNode: _focusNode,
                             enabled: !controller.isGenerating,
-                            style: TextStyle(color: glass.textPrimary, fontSize: 14),
+                            style: TextStyle(
+                                color: glass.textPrimary, fontSize: 14),
                             decoration: InputDecoration(
                               hintText: 'Describe what happened...',
                               hintStyle: TextStyle(
@@ -587,7 +603,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                                       width: 48,
                                       height: 48,
                                       child: IconButton(
-                                        icon: const Icon(Icons.clear_rounded, size: 18),
+                                        icon: const Icon(Icons.clear_rounded,
+                                            size: 18),
                                         color: glass.textSecondary,
                                         onPressed: () {
                                           _textController.clear();
@@ -601,7 +618,9 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                                     height: 48,
                                     child: IconButton(
                                       icon: Icon(
-                                        _isListening ? Icons.mic : Icons.mic_none,
+                                        _isListening
+                                            ? Icons.mic
+                                            : Icons.mic_none,
                                         size: 22,
                                       ),
                                       color: _isListening
@@ -617,10 +636,12 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                                     width: 48,
                                     height: 48,
                                     child: IconButton(
-                                      icon: const Icon(Icons.attach_file, size: 20),
+                                      icon: const Icon(Icons.attach_file,
+                                          size: 20),
                                       color: glass.textSecondary,
                                       tooltip: 'Attach record',
-                                      onPressed: () => controller.pickDocument(),
+                                      onPressed: () =>
+                                          controller.pickDocument(),
                                     ),
                                   ),
                                 ],
@@ -642,7 +663,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                         gradient: glass.primaryActionGradient,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.4), width: 1),
+                            color: Colors.white.withValues(alpha: 0.4),
+                            width: 1),
                       ),
                       child: Material(
                         color: Colors.transparent,

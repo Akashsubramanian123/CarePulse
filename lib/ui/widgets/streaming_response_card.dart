@@ -32,10 +32,26 @@ class StreamingResponseCard extends StatelessWidget {
     final parts = text.split(RegExp(r'\n?[123]\.\s+'));
     // Usually parts[0] is empty or intro text. The steps should be parts 1, 2, 3
     if (parts.length >= 4) {
+      String step1 = parts[1].trim();
+      String step2 = parts[2].trim();
+      String step3 = parts[3].trim();
+
+      step1 = step1.replaceFirst(
+          RegExp(r'^(IMMEDIATE ACTION:?|IMMEDIATE:?)\s*', caseSensitive: false),
+          '');
+      step2 = step2.replaceFirst(
+          RegExp(r'^(CRITICAL PRECAUTION:?|PRECAUTION:?)\s*',
+              caseSensitive: false),
+          '');
+      step3 = step3.replaceFirst(
+          RegExp(r'^(MONITOR & STABILIZE:?|MONITOR:?)\s*',
+              caseSensitive: false),
+          '');
+
       return [
-        parts[1].trim(),
-        parts[2].trim(),
-        parts[3].trim(),
+        step1.trim(),
+        step2.trim(),
+        step3.trim(),
       ];
     }
     return null;
@@ -158,9 +174,8 @@ class StreamingResponseCard extends StatelessWidget {
                             : glass.accentMint,
                         tooltip:
                             isSpeaking ? 'Stop reading' : 'Read guidance aloud',
-                        onPressed: isSpeaking
-                            ? (onStopSpeaking ?? onSpeak)
-                            : onSpeak,
+                        onPressed:
+                            isSpeaking ? (onStopSpeaking ?? onSpeak) : onSpeak,
                       ),
                     ),
                   if (responseText.isNotEmpty)
@@ -206,8 +221,8 @@ class StreamingResponseCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: glass.accentMint.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: glass.accentMint.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: glass.accentMint.withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

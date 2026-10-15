@@ -33,7 +33,7 @@ class EmergencyChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -69,7 +69,8 @@ class EmergencyChips extends StatelessWidget {
               opacity: isDisabled ? 0.5 : 1.0,
               child: GlassCard(
                 borderRadius: 24,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 onTap: isDisabled ? null : () => onPresetSelected(preset),
                 child: Row(
                   children: [
@@ -79,7 +80,9 @@ class EmergencyChips extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: glass.iconTintGradient,
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 1),
                       ),
                       child: Icon(
                         _getPresetIcon(preset.iconName),

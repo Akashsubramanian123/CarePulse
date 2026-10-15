@@ -11,7 +11,8 @@ class ProtocolRepository {
   ProtocolRepository({this.assetPath = _defaultAssetPath});
 
   /// Allows supplying in-memory protocols directly (ideal for unit testing).
-  ProtocolRepository.fromList(List<Protocol> protocols, {this.assetPath = _defaultAssetPath}) {
+  ProtocolRepository.fromList(List<Protocol> protocols,
+      {this.assetPath = _defaultAssetPath}) {
     _cachedProtocols = List.unmodifiable(protocols);
   }
 

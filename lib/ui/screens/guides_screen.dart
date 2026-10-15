@@ -77,7 +77,9 @@ class _GuidesScreenState extends State<GuidesScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to open dialer. Please dial $emergencyNumber manually.')),
+          const SnackBar(
+              content: Text(
+                  'Failed to open dialer. Please dial $emergencyNumber manually.')),
         );
       }
     }
@@ -159,14 +161,17 @@ class _GuidesScreenState extends State<GuidesScreen> {
               child: TextButton.icon(
                 onPressed: _callEmergency,
                 style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFE05A4F).withValues(alpha: 0.18),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  backgroundColor:
+                      const Color(0xFFE05A4F).withValues(alpha: 0.18),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                     side: const BorderSide(color: Color(0xFFE05A4F), width: 1),
                   ),
                 ),
-                icon: const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
+                icon:
+                    const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
                 label: const Text(
                   '112',
                   style: TextStyle(
@@ -186,9 +191,11 @@ class _GuidesScreenState extends State<GuidesScreen> {
             children: [
               // Search Bar
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: GlassCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   borderRadius: 20,
                   child: TextField(
                     controller: _searchController,
@@ -196,9 +203,11 @@ class _GuidesScreenState extends State<GuidesScreen> {
                     style: TextStyle(color: glass.textPrimary, fontSize: 14),
                     decoration: InputDecoration(
                       hintText: 'Search guides, symptoms, injuries...',
-                      hintStyle: TextStyle(color: glass.textSecondary, fontSize: 13),
+                      hintStyle:
+                          TextStyle(color: glass.textSecondary, fontSize: 13),
                       border: InputBorder.none,
-                      prefixIcon: Icon(Icons.search_rounded, color: glass.accentMint, size: 22),
+                      prefixIcon: Icon(Icons.search_rounded,
+                          color: glass.accentMint, size: 22),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? SizedBox(
                               width: 48,
@@ -221,33 +230,40 @@ class _GuidesScreenState extends State<GuidesScreen> {
               // Protocol List
               Expanded(
                 child: _isLoading
-                    ? Center(child: CircularProgressIndicator(color: glass.accentMint))
+                    ? Center(
+                        child:
+                            CircularProgressIndicator(color: glass.accentMint))
                     : _filteredProtocols.isEmpty
                         ? Center(
                             child: Padding(
                               padding: const EdgeInsets.all(24.0),
                               child: Text(
                                 'No protocols matching "${_searchController.text}".',
-                                style: TextStyle(color: glass.textSecondary, fontSize: 14),
+                                style: TextStyle(
+                                    color: glass.textSecondary, fontSize: 14),
                                 textAlign: TextAlign.center,
                               ),
                             ),
                           )
                         : ListView.separated(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                            physics: const AlwaysScrollableScrollPhysics(
+                                parent: BouncingScrollPhysics()),
                             itemCount: _filteredProtocols.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 10),
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 10),
                             itemBuilder: (context, index) {
                               final protocol = _filteredProtocols[index];
                               return GlassCard(
                                 borderRadius: 18,
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 12),
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => ProtocolDetailScreen(protocol: protocol),
+                                      builder: (_) => ProtocolDetailScreen(
+                                          protocol: protocol),
                                     ),
                                   );
                                 },
@@ -264,14 +280,17 @@ class _GuidesScreenState extends State<GuidesScreen> {
                                       ),
                                       child: Icon(
                                         _getIconForProtocol(protocol),
-                                        color: protocol.callEmergency ? Colors.white : glass.accentMint,
+                                        color: protocol.callEmergency
+                                            ? Colors.white
+                                            : glass.accentMint,
                                         size: 22,
                                       ),
                                     ),
                                     const SizedBox(width: 14),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Row(
                                             children: [
@@ -282,25 +301,39 @@ class _GuidesScreenState extends State<GuidesScreen> {
                                                     color: glass.textPrimary,
                                                     fontSize: 15,
                                                     fontWeight: FontWeight.bold,
-                                                 ),
-                                                  overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ),
                                               if (protocol.callEmergency)
                                                 Container(
-                                                  margin: const EdgeInsets.only(left: 6),
-                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  margin: const EdgeInsets.only(
+                                                      left: 6),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2),
                                                   decoration: BoxDecoration(
-                                                    color: const Color(0xFFE05A4F).withValues(alpha: 0.2),
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    border: Border.all(color: const Color(0xFFE05A4F), width: 0.8),
+                                                    color:
+                                                        const Color(0xFFE05A4F)
+                                                            .withValues(
+                                                                alpha: 0.2),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    border: Border.all(
+                                                        color: const Color(
+                                                            0xFFE05A4F),
+                                                        width: 0.8),
                                                   ),
                                                   child: const Text(
                                                     'CALL 112',
                                                     style: TextStyle(
                                                       color: Color(0xFFE05A4F),
                                                       fontSize: 9,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
                                                 ),

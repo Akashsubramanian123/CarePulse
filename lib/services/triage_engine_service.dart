@@ -37,12 +37,8 @@ class TriageEngineService {
 
     _engine = await LlamaEngine.spawn(
       modelParams: ModelParams(
-        path: modelPath, 
-        gpuLayers: AppConstants.defaultNGpuLayers
-      ),
-      contextParams: ContextParams(
-        nCtx: AppConstants.defaultNCtx
-      ),
+          path: modelPath, gpuLayers: AppConstants.defaultNGpuLayers),
+      contextParams: ContextParams(nCtx: AppConstants.defaultNCtx),
     );
 
     _isInitialized = true;
@@ -61,7 +57,7 @@ class TriageEngineService {
 
     String profileText = profile?.promptContext ?? '';
     String contextPrompt = profileText.isNotEmpty ? '$profileText\n\n' : '';
-    
+
     final formattedPrompt =
         '$contextPrompt${AppConstants.formatEmergencyPrompt(query, context: context)}';
 

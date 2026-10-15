@@ -23,7 +23,8 @@ void main() {
     });
 
     test('he is shaking and fell, foaming at the mouth matches seizure', () {
-      final matches = retriever.topMatches('he is shaking and fell, foaming at the mouth');
+      final matches =
+          retriever.topMatches('he is shaking and fell, foaming at the mouth');
       expect(matches, isNotEmpty);
       expect(matches.first.id, equals('seizure'));
     });
@@ -35,7 +36,8 @@ void main() {
     });
 
     test('gibberish query yields no match above threshold', () {
-      final matches = retriever.topMatches('aslkdjf zxcvbnm qwertyuiop lkjhgfds');
+      final matches =
+          retriever.topMatches('aslkdjf zxcvbnm qwertyuiop lkjhgfds');
       expect(matches, isEmpty);
     });
   });

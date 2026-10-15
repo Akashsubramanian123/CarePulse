@@ -49,7 +49,8 @@ class TelemetryBar extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricItem(BuildContext context, CarePulseGlass glass, {required IconData icon, required String label, required String value}) {
+  Widget _buildMetricItem(BuildContext context, CarePulseGlass glass,
+      {required IconData icon, required String label, required String value}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

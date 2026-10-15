@@ -11,7 +11,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileService _profileService = ProfileService();
-  
+
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
   final _conditionsController = TextEditingController();
@@ -85,16 +85,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 20),
             _buildField("Name", _nameController),
             _buildField("Age", _ageController, isNumber: true),
-            _buildField("Pre-existing Conditions", _conditionsController, maxLines: 3),
+            _buildField("Pre-existing Conditions", _conditionsController,
+                maxLines: 3),
             _buildField("Allergies", _allergiesController, maxLines: 3),
-            _buildField("Current Medications", _medicationsController, maxLines: 3),
+            _buildField("Current Medications", _medicationsController,
+                maxLines: 3),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildField(String label, TextEditingController controller, {bool isNumber = false, int maxLines = 1}) {
+  Widget _buildField(String label, TextEditingController controller,
+      {bool isNumber = false, int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextField(

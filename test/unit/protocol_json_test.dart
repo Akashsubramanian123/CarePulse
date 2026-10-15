@@ -13,7 +13,8 @@ void main() {
 
     setUpAll(() async {
       final file = File('assets/protocols/protocols.json');
-      expect(file.existsSync(), isTrue, reason: 'assets/protocols/protocols.json must exist');
+      expect(file.existsSync(), isTrue,
+          reason: 'assets/protocols/protocols.json must exist');
       jsonString = await file.readAsString();
       repo = ProtocolRepository();
       protocols = repo.loadFromJsonString(jsonString);
@@ -29,20 +30,30 @@ void main() {
     test('all protocol IDs are unique', () {
       final ids = protocols.map((p) => p.id).toList();
       final uniqueIds = ids.toSet();
-      expect(uniqueIds.length, equals(ids.length), reason: 'Duplicate protocol IDs found!');
+      expect(uniqueIds.length, equals(ids.length),
+          reason: 'Duplicate protocol IDs found!');
     });
 
     test('all required fields are present and non-empty', () {
       for (final p in protocols) {
-        expect(p.id.trim(), isNotEmpty, reason: 'Protocol ${p.id} has empty id');
-        expect(p.title.trim(), isNotEmpty, reason: 'Protocol ${p.id} has empty title');
-        expect(p.keywords, isNotEmpty, reason: 'Protocol ${p.id} has empty keywords');
-        expect(p.synonyms, isNotEmpty, reason: 'Protocol ${p.id} has empty synonyms');
-        expect(p.immediate.trim(), isNotEmpty, reason: 'Protocol ${p.id} has empty immediate action');
-        expect(p.precaution.trim(), isNotEmpty, reason: 'Protocol ${p.id} has empty precaution');
-        expect(p.monitor.trim(), isNotEmpty, reason: 'Protocol ${p.id} has empty monitor instruction');
-        expect(p.doNot, isNotEmpty, reason: 'Protocol ${p.id} has empty doNot list');
-        expect(p.sources, isNotEmpty, reason: 'Protocol ${p.id} has empty sources list');
+        expect(p.id.trim(), isNotEmpty,
+            reason: 'Protocol ${p.id} has empty id');
+        expect(p.title.trim(), isNotEmpty,
+            reason: 'Protocol ${p.id} has empty title');
+        expect(p.keywords, isNotEmpty,
+            reason: 'Protocol ${p.id} has empty keywords');
+        expect(p.synonyms, isNotEmpty,
+            reason: 'Protocol ${p.id} has empty synonyms');
+        expect(p.immediate.trim(), isNotEmpty,
+            reason: 'Protocol ${p.id} has empty immediate action');
+        expect(p.precaution.trim(), isNotEmpty,
+            reason: 'Protocol ${p.id} has empty precaution');
+        expect(p.monitor.trim(), isNotEmpty,
+            reason: 'Protocol ${p.id} has empty monitor instruction');
+        expect(p.doNot, isNotEmpty,
+            reason: 'Protocol ${p.id} has empty doNot list');
+        expect(p.sources, isNotEmpty,
+            reason: 'Protocol ${p.id} has empty sources list');
       }
     });
 
@@ -52,7 +63,8 @@ void main() {
         expect(
           match,
           isNotNull,
-          reason: 'Emergency preset "${preset.id}" (${preset.title}) does not map to any protocol ID!',
+          reason:
+              'Emergency preset "${preset.id}" (${preset.title}) does not map to any protocol ID!',
         );
       }
     });
@@ -81,7 +93,8 @@ void main() {
         expect(
           match,
           isNotNull,
-          reason: 'Red flag target ID "$targetId" does not exist in protocols.json!',
+          reason:
+              'Red flag target ID "$targetId" does not exist in protocols.json!',
         );
       }
     });

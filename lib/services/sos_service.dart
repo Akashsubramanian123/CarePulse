@@ -18,7 +18,8 @@ class SosService {
       final lat = position.latitude.toStringAsFixed(6);
       final lng = position.longitude.toStringAsFixed(6);
       final acc = position.accuracy.round();
-      buffer.write(' Location: https://maps.google.com/?q=$lat,$lng (accuracy ~${acc}m).');
+      buffer.write(
+          ' Location: https://maps.google.com/?q=$lat,$lng (accuracy ~${acc}m).');
     } else {
       buffer.write(' Location: unavailable.');
     }
@@ -60,7 +61,8 @@ class SosService {
   }
 
   /// Obtains current GPS coordinates with an 8-second timeout, falling back to last known position.
-  Future<Position?> getCurrentLocation({Duration timeout = const Duration(seconds: 8)}) async {
+  Future<Position?> getCurrentLocation(
+      {Duration timeout = const Duration(seconds: 8)}) async {
     try {
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {

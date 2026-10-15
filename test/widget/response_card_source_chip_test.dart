@@ -4,9 +4,9 @@ import 'package:carepulse/core/theme/app_theme.dart';
 import 'package:carepulse/ui/widgets/streaming_response_card.dart';
 
 void main() {
-  testWidgets('StreamingResponseCard displays source chip and parsed steps', (WidgetTester tester) async {
-    const stepsText =
-        '1. IMMEDIATE ACTION: Apply direct pressure to wound.\n'
+  testWidgets('StreamingResponseCard displays source chip and parsed steps',
+      (WidgetTester tester) async {
+    const stepsText = '1. IMMEDIATE ACTION: Apply direct pressure to wound.\n'
         '2. CRITICAL PRECAUTION: Do not remove soaked cloths.\n'
         '3. MONITOR & STABILIZE: Keep person calm and check pulse.';
 
@@ -14,12 +14,14 @@ void main() {
       MaterialApp(
         theme: AppTheme.lightTheme,
         home: Scaffold(
-          body: StreamingResponseCard(
-            query: 'Spurting blood from arm',
-            responseText: stepsText,
-            isGenerating: false,
-            sourceLabel: 'Verified protocol',
-            onClear: () {},
+          body: SingleChildScrollView(
+            child: StreamingResponseCard(
+              query: 'Spurting blood from arm',
+              responseText: stepsText,
+              isGenerating: false,
+              sourceLabel: 'Verified protocol',
+              onClear: () {},
+            ),
           ),
         ),
       ),

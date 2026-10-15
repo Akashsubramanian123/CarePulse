@@ -6,8 +6,9 @@ class AppConstants {
   static const String modelUrl =
       'https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf';
   static const String modelFileName = 'Llama-3.2-1B-Instruct-Q4_K_M.gguf';
-  static const String tempModelFileName = 'Llama-3.2-1B-Instruct-Q4_K_M.gguf.tmp';
-  
+  static const String tempModelFileName =
+      'Llama-3.2-1B-Instruct-Q4_K_M.gguf.tmp';
+
   // Model size (~808 MB = 847,249,408 bytes, threshold 700 MB)
   static const int minModelSizeBytes = 700 * 1024 * 1024;
   static const double estimatedModelSizeMb = 808.0;
@@ -76,7 +77,8 @@ const List<EmergencyPreset> emergencyPresets = [
   EmergencyPreset(
     id: 'heatstroke',
     title: 'Heatstroke',
-    query: 'Person collapsed from extreme heat with high body temperature and confusion',
+    query:
+        'Person collapsed from extreme heat with high body temperature and confusion',
     iconName: 'wb_sunny',
   ),
   EmergencyPreset(

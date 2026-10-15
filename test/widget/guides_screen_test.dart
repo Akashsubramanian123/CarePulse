@@ -1,20 +1,36 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:carepulse/core/theme/app_theme.dart';
+import 'package:carepulse/services/model_download_service.dart';
 import 'package:carepulse/services/protocol_repository.dart';
 import 'package:carepulse/state/triage_controller.dart';
 import 'package:carepulse/ui/screens/guides_screen.dart';
 
+class FakeModelDownloadService extends ModelDownloadService {
+  @override
+  Future<bool> isModelReady() async => false;
+}
+
 void main() {
-  testWidgets('GuidesScreen displays searchable list and opens protocol details', (WidgetTester tester) async {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  testWidgets(
+      'GuidesScreen displays searchable list and opens protocol details',
+      (WidgetTester tester) async {
     final file = File('assets/protocols/protocols.json');
-    final jsonStr = await file.readAsString();
+    final jsonStr = file.readAsStringSync();
     final repo = ProtocolRepository();
     repo.loadFromJsonString(jsonStr);
 
-    final controller = TriageController(protocolRepository: repo);
+    final controller = TriageController(
+      downloadService: FakeModelDownloadService(),
+      protocolRepository: repo,
+    );
 
     await tester.pumpWidget(
       ChangeNotifierProvider<TriageController>.value(

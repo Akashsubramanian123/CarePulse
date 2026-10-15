@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:carepulse/models/profile.dart';
+import 'package:carepulse/services/profile_service.dart';
 import 'package:carepulse/services/model_download_service.dart';
 import 'package:carepulse/services/protocol_repository.dart';
 import 'package:carepulse/services/protocol_retriever.dart';
@@ -84,7 +84,9 @@ void main() {
       expect(fakeEngine.lastPassedQuery, isNull);
     });
 
-    test('Non-red-flag query when model is not ready shows friendly guidance message', () async {
+    test(
+        'Non-red-flag query when model is not ready shows friendly guidance message',
+        () async {
       final fakeEngine = FakeTriageEngineService();
       final fakeDownload = FakeModelDownloadService(ready: false);
 
@@ -100,12 +102,15 @@ void main() {
 
       await controller.submitEmergencyQuery('how to treat a mild headache');
 
-      expect(controller.streamedResponse, contains('offline AI model is not downloaded yet'));
+      expect(controller.streamedResponse,
+          contains('offline AI model is not downloaded yet'));
       expect(controller.streamedResponse, contains('Guides tab'));
       expect(fakeEngine.lastPassedQuery, isNull);
     });
 
-    test('Non-red-flag query when model is ready uses AI engine with protocol context', () async {
+    test(
+        'Non-red-flag query when model is ready uses AI engine with protocol context',
+        () async {
       final fakeEngine = FakeTriageEngineService();
       final fakeDownload = FakeModelDownloadService(ready: true);
 

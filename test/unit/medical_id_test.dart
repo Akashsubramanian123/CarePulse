@@ -4,9 +4,12 @@ import 'package:carepulse/models/medical_id.dart';
 void main() {
   group('MedicalId Unit Tests', () {
     test('Phone sanitization keeps only digits and leading plus', () {
-      expect(EmergencyContact.sanitizePhone('+1 (555) 123-4567'), equals('+15551234567'));
-      expect(EmergencyContact.sanitizePhone('  080-1234-5678  '), equals('08012345678'));
-      expect(EmergencyContact.sanitizePhone('+91 98765 43210'), equals('+919876543210'));
+      expect(EmergencyContact.sanitizePhone('+1 (555) 123-4567'),
+          equals('+15551234567'));
+      expect(EmergencyContact.sanitizePhone('  080-1234-5678  '),
+          equals('08012345678'));
+      expect(EmergencyContact.sanitizePhone('+91 98765 43210'),
+          equals('+919876543210'));
       expect(EmergencyContact.sanitizePhone('abc-def'), equals(''));
       expect(EmergencyContact.sanitizePhone(''), equals(''));
     });
@@ -21,8 +24,10 @@ void main() {
         medications: 'Albuterol inhaler',
         notes: 'Carries EpiPen',
         contacts: [
-          EmergencyContact(name: 'John Doe', phone: '+15551234567', relation: 'Spouse'),
-          EmergencyContact(name: 'Mary Doe', phone: '+15559876543', relation: 'Mother'),
+          EmergencyContact(
+              name: 'John Doe', phone: '+15551234567', relation: 'Spouse'),
+          EmergencyContact(
+              name: 'Mary Doe', phone: '+15559876543', relation: 'Mother'),
         ],
       );
 
@@ -57,7 +62,8 @@ void main() {
 
       final parsed = MedicalId.fromJson(jsonWith5Contacts);
       expect(parsed.contacts.length, equals(3));
-      expect(parsed.contacts.map((c) => c.name).toList(), equals(['C1', 'C2', 'C3']));
+      expect(parsed.contacts.map((c) => c.name).toList(),
+          equals(['C1', 'C2', 'C3']));
 
       final copied = parsed.copyWith(contacts: [
         const EmergencyContact(name: 'A', phone: '1', relation: 'R'),

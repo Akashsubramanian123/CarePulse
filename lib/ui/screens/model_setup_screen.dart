@@ -58,7 +58,9 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to open dialer. Please dial 112 manually.')),
+          const SnackBar(
+              content:
+                  Text('Failed to open dialer. Please dial 112 manually.')),
         );
       }
     }
@@ -135,14 +137,17 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
               child: TextButton.icon(
                 onPressed: _callEmergency,
                 style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFE05A4F).withValues(alpha: 0.18),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  backgroundColor:
+                      const Color(0xFFE05A4F).withValues(alpha: 0.18),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                     side: const BorderSide(color: Color(0xFFE05A4F), width: 1),
                   ),
                 ),
-                icon: const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
+                icon:
+                    const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
                 label: const Text(
                   '112',
                   style: TextStyle(
@@ -159,7 +164,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
       body: GradientBackground(
         child: SafeArea(
           child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics()),
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -176,7 +182,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFE05A4F).withValues(alpha: 0.5),
+                            color:
+                                const Color(0xFFE05A4F).withValues(alpha: 0.5),
                             blurRadius: 20,
                             spreadRadius: 2,
                           ),
@@ -185,7 +192,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
-                          Icon(Icons.warning_rounded, color: Colors.white, size: 28),
+                          Icon(Icons.warning_rounded,
+                              color: Colors.white, size: 28),
                           SizedBox(width: 10),
                           Flexible(
                             child: Text(
@@ -214,7 +222,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.flash_on_rounded, color: glass.accentMint, size: 20),
+                          Icon(Icons.flash_on_rounded,
+                              color: glass.accentMint, size: 20),
                           const SizedBox(width: 8),
                           Text(
                             'Instant Red-Flag Emergency Triage',
@@ -229,7 +238,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                       const SizedBox(height: 10),
                       EmergencyChips(
                         isDisabled: false,
-                        onPresetSelected: (preset) => _submitQuery(controller, preset.query),
+                        onPresetSelected: (preset) =>
+                            _submitQuery(controller, preset.query),
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -238,26 +248,38 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                             child: TextField(
                               controller: _textController,
                               focusNode: _focusNode,
-                              style: TextStyle(color: glass.textPrimary, fontSize: 13),
+                              style: TextStyle(
+                                  color: glass.textPrimary, fontSize: 13),
                               decoration: InputDecoration(
-                                hintText: 'Describe urgent injury or symptom...',
-                                hintStyle: TextStyle(color: glass.textSecondary, fontSize: 12),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                hintText:
+                                    'Describe urgent injury or symptom...',
+                                hintStyle: TextStyle(
+                                    color: glass.textSecondary, fontSize: 12),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16)),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 12),
                                 suffixIcon: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     if (_textController.text.isNotEmpty)
                                       IconButton(
-                                        icon: const Icon(Icons.clear_rounded, size: 16),
+                                        icon: const Icon(Icons.clear_rounded,
+                                            size: 16),
                                         onPressed: () {
                                           _textController.clear();
                                           setState(() {});
                                         },
                                       ),
                                     IconButton(
-                                      icon: Icon(_isListening ? Icons.mic : Icons.mic_none, size: 20),
-                                      color: _isListening ? const Color(0xFFE05A4F) : glass.accentMint,
+                                      icon: Icon(
+                                          _isListening
+                                              ? Icons.mic
+                                              : Icons.mic_none,
+                                          size: 20),
+                                      color: _isListening
+                                          ? const Color(0xFFE05A4F)
+                                          : glass.accentMint,
                                       onPressed: _toggleListening,
                                     ),
                                   ],
@@ -275,7 +297,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                                 padding: EdgeInsets.zero,
                                 backgroundColor: glass.accentMint,
                                 foregroundColor: Colors.black87,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16)),
                               ),
                               onPressed: () => _submitQuery(controller),
                               child: const Icon(Icons.send_rounded, size: 18),
@@ -289,7 +312,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                 const SizedBox(height: 16),
 
                 // Response Card if query was submitted
-                if (controller.streamedResponse.isNotEmpty || controller.currentQuery.isNotEmpty) ...[
+                if (controller.streamedResponse.isNotEmpty ||
+                    controller.currentQuery.isNotEmpty) ...[
                   StreamingResponseCard(
                     query: controller.currentQuery,
                     responseText: controller.streamedResponse,
@@ -353,19 +377,24 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                       const SizedBox(height: 16),
 
                       // Progress Bar & Stats
-                      if (controller.isDownloading || controller.isLoadingEngine) ...[
+                      if (controller.isDownloading ||
+                          controller.isLoadingEngine) ...[
                         Container(
                           height: 10,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3)),
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: LinearProgressIndicator(
-                              value: controller.isLoadingEngine ? null : controller.downloadProgress,
+                              value: controller.isLoadingEngine
+                                  ? null
+                                  : controller.downloadProgress,
                               backgroundColor: Colors.transparent,
-                              valueColor: AlwaysStoppedAnimation<Color>(glass.accentMint),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  glass.accentMint),
                             ),
                           ),
                         ),
@@ -385,7 +414,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                             ),
                             Text(
                               '${controller.downloadedMB.toStringAsFixed(1)} MB / ${controller.totalMB.toStringAsFixed(1)} MB',
-                              style: TextStyle(fontSize: 12, color: glass.textSecondary),
+                              style: TextStyle(
+                                  fontSize: 12, color: glass.textSecondary),
                             ),
                           ],
                         ),
@@ -393,17 +423,20 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                       ],
 
                       // Error Banner
-                      if (controller.hasError && controller.errorMessage != null) ...[
+                      if (controller.hasError &&
+                          controller.errorMessage != null) ...[
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE05A4F).withValues(alpha: 0.2),
+                            color:
+                                const Color(0xFFE05A4F).withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: const Color(0xFFE05A4F)),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline_rounded, color: Color(0xFFE05A4F), size: 20),
+                              const Icon(Icons.error_outline_rounded,
+                                  color: Color(0xFFE05A4F), size: 20),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -435,7 +468,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                Icon(Icons.download_rounded, color: Colors.white),
+                                Icon(Icons.download_rounded,
+                                    color: Colors.white),
                                 SizedBox(width: 8),
                                 Text(
                                   'Download Emergency AI Model',
@@ -462,7 +496,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.cancel_outlined, color: glass.textPrimary),
+                                Icon(Icons.cancel_outlined,
+                                    color: glass.textPrimary),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Cancel Download',
@@ -476,9 +511,11 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                             ),
                           ),
                         )
-                      else if (controller.isLoadingEngine || controller.isChecking)
+                      else if (controller.isLoadingEngine ||
+                          controller.isChecking)
                         Center(
-                          child: CircularProgressIndicator(color: glass.accentMint),
+                          child: CircularProgressIndicator(
+                              color: glass.accentMint),
                         ),
                     ],
                   ),

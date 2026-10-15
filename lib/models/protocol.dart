@@ -33,14 +33,17 @@ class Protocol {
     return Protocol(
       id: json['id'] as String,
       title: json['title'] as String,
-      keywords: (json['keywords'] as List<dynamic>).map((e) => e.toString()).toList(),
-      synonyms: (json['synonyms'] as List<dynamic>).map((e) => e.toString()).toList(),
+      keywords:
+          (json['keywords'] as List<dynamic>).map((e) => e.toString()).toList(),
+      synonyms:
+          (json['synonyms'] as List<dynamic>).map((e) => e.toString()).toList(),
       immediate: json['immediate'] as String,
       precaution: json['precaution'] as String,
       monitor: json['monitor'] as String,
       doNot: (json['doNot'] as List<dynamic>).map((e) => e.toString()).toList(),
       callEmergency: json['callEmergency'] as bool? ?? false,
-      sources: (json['sources'] as List<dynamic>).map((e) => e.toString()).toList(),
+      sources:
+          (json['sources'] as List<dynamic>).map((e) => e.toString()).toList(),
       lastReviewed: json['lastReviewed'] as String?,
       reviewedBy: json['reviewedBy'] as String?,
       iconName: json['iconName'] as String?,

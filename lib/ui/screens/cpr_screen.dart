@@ -48,7 +48,8 @@ class _CprScreenState extends State<CprScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
       _cprController.pause();
     }
   }
@@ -114,14 +115,17 @@ class _CprScreenState extends State<CprScreen>
               child: TextButton.icon(
                 onPressed: _callEmergency,
                 style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFE05A4F).withValues(alpha: 0.18),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  backgroundColor:
+                      const Color(0xFFE05A4F).withValues(alpha: 0.18),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                     side: const BorderSide(color: Color(0xFFE05A4F), width: 1),
                   ),
                 ),
-                icon: const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
+                icon:
+                    const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
                 label: const Text(
                   '112',
                   style: TextStyle(
@@ -141,8 +145,10 @@ class _CprScreenState extends State<CprScreen>
             animation: _cprController,
             builder: (context, _) {
               return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics()),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -191,10 +197,14 @@ class _CprScreenState extends State<CprScreen>
             ],
           ),
           const SizedBox(height: 10),
-          _buildChecklistItem('1. Check scene safety (hazards, traffic, electricity)', glass),
-          _buildChecklistItem('2. Tap shoulders firmly and shout loudly', glass),
-          _buildChecklistItem('3. Look for normal breathing (max 10 seconds)', glass),
-          _buildChecklistItem('4. Shout for help and call 112 immediately', glass),
+          _buildChecklistItem(
+              '1. Check scene safety (hazards, traffic, electricity)', glass),
+          _buildChecklistItem(
+              '2. Tap shoulders firmly and shout loudly', glass),
+          _buildChecklistItem(
+              '3. Look for normal breathing (max 10 seconds)', glass),
+          _buildChecklistItem(
+              '4. Shout for help and call 112 immediately', glass),
           const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
@@ -203,11 +213,13 @@ class _CprScreenState extends State<CprScreen>
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFFE05A4F),
                 side: const BorderSide(color: Color(0xFFE05A4F)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
                 minimumSize: const Size(double.infinity, 48),
               ),
               icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
-              label: const Text('Call 112 Now', style: TextStyle(fontWeight: FontWeight.bold)),
+              label: const Text('Call 112 Now',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -249,7 +261,8 @@ class _CprScreenState extends State<CprScreen>
                       icon: const Icon(Icons.remove_circle_outline_rounded),
                       color: glass.accentMint,
                       tooltip: 'Decrease BPM',
-                      onPressed: () => _cprController.setBpm(_cprController.bpm - 2),
+                      onPressed: () =>
+                          _cprController.setBpm(_cprController.bpm - 2),
                     ),
                   ),
                   Text(
@@ -267,7 +280,8 @@ class _CprScreenState extends State<CprScreen>
                       icon: const Icon(Icons.add_circle_outline_rounded),
                       color: glass.accentMint,
                       tooltip: 'Increase BPM',
-                      onPressed: () => _cprController.setBpm(_cprController.bpm + 2),
+                      onPressed: () =>
+                          _cprController.setBpm(_cprController.bpm + 2),
                     ),
                   ),
                 ],
@@ -279,10 +293,15 @@ class _CprScreenState extends State<CprScreen>
                 height: 48,
                 child: IconButton(
                   icon: Icon(
-                    _cprController.isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                    color: _cprController.isMuted ? const Color(0xFFE05A4F) : glass.accentMint,
+                    _cprController.isMuted
+                        ? Icons.volume_off_rounded
+                        : Icons.volume_up_rounded,
+                    color: _cprController.isMuted
+                        ? const Color(0xFFE05A4F)
+                        : glass.accentMint,
                   ),
-                  tooltip: _cprController.isMuted ? 'Unmute audio' : 'Mute audio',
+                  tooltip:
+                      _cprController.isMuted ? 'Unmute audio' : 'Mute audio',
                   onPressed: () => _cprController.toggleMute(),
                 ),
               ),
@@ -352,22 +371,36 @@ class _CprScreenState extends State<CprScreen>
             children: [
               Column(
                 children: [
-                  Text('CYCLE (30x)', style: TextStyle(color: glass.textSecondary, fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text('CYCLE (30x)',
+                      style: TextStyle(
+                          color: glass.textSecondary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text(
                     'Cycle ${_cprController.currentCycle}',
-                    style: TextStyle(color: glass.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: glass.textPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
               Container(width: 1, height: 32, color: glass.glassBorderColor),
               Column(
                 children: [
-                  Text('ELAPSED', style: TextStyle(color: glass.textSecondary, fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text('ELAPSED',
+                      style: TextStyle(
+                          color: glass.textSecondary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text(
                     _formatDuration(_cprController.elapsedTime),
-                    style: TextStyle(color: glass.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: glass.textPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -393,12 +426,15 @@ class _CprScreenState extends State<CprScreen>
                     height: 56,
                     decoration: BoxDecoration(
                       gradient: _cprController.isRunning
-                          ? const LinearGradient(colors: [Color(0xFFE8B04B), Color(0xFFD48B30)])
+                          ? const LinearGradient(
+                              colors: [Color(0xFFE8B04B), Color(0xFFD48B30)])
                           : glass.primaryActionGradient,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: (_cprController.isRunning ? const Color(0xFFE8B04B) : glass.accentMint)
+                          color: (_cprController.isRunning
+                                  ? const Color(0xFFE8B04B)
+                                  : glass.accentMint)
                               .withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
@@ -409,7 +445,9 @@ class _CprScreenState extends State<CprScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          _cprController.isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          _cprController.isRunning
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
                           color: Colors.white,
                           size: 28,
                         ),
@@ -427,7 +465,8 @@ class _CprScreenState extends State<CprScreen>
                   ),
                 ),
               ),
-              if (_cprController.compressionCount > 0 || _cprController.isRunning) ...[
+              if (_cprController.compressionCount > 0 ||
+                  _cprController.isRunning) ...[
                 const SizedBox(width: 12),
                 SizedBox(
                   width: 56,
@@ -436,8 +475,10 @@ class _CprScreenState extends State<CprScreen>
                     onPressed: () => _cprController.stop(),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFE05A4F),
-                      side: const BorderSide(color: Color(0xFFE05A4F), width: 1.5),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      side: const BorderSide(
+                          color: Color(0xFFE05A4F), width: 1.5),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
                       padding: EdgeInsets.zero,
                     ),
                     child: const Icon(Icons.stop_rounded, size: 28),
@@ -469,7 +510,9 @@ class _CprScreenState extends State<CprScreen>
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: _selectedAgeCategory == i ? Colors.white : glass.textSecondary,
+                        color: _selectedAgeCategory == i
+                            ? Colors.white
+                            : glass.textSecondary,
                       ),
                     ),
                   ),
@@ -516,13 +559,23 @@ class _CprScreenState extends State<CprScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(color: glass.accentMint, fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(title,
+              style: TextStyle(
+                  color: glass.accentMint,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16)),
           const SizedBox(height: 8),
-          Text(technique, style: TextStyle(color: glass.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+          Text(technique,
+              style: TextStyle(
+                  color: glass.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
-          Text(depth, style: TextStyle(color: glass.textSecondary, fontSize: 13)),
+          Text(depth,
+              style: TextStyle(color: glass.textSecondary, fontSize: 13)),
           const SizedBox(height: 4),
-          Text(breaths, style: TextStyle(color: glass.textSecondary, fontSize: 13)),
+          Text(breaths,
+              style: TextStyle(color: glass.textSecondary, fontSize: 13)),
         ],
       ),
     );

@@ -72,23 +72,29 @@ class _MainShellState extends State<MainShell> {
           indicatorColor: glass.accentMint.withValues(alpha: 0.25),
           destinations: [
             NavigationDestination(
-              icon: Icon(Icons.health_and_safety_outlined, color: glass.textSecondary),
-              selectedIcon: Icon(Icons.health_and_safety_rounded, color: glass.accentMint),
+              icon: Icon(Icons.health_and_safety_outlined,
+                  color: glass.textSecondary),
+              selectedIcon: Icon(Icons.health_and_safety_rounded,
+                  color: glass.accentMint),
               label: 'Assistant',
             ),
             NavigationDestination(
               icon: Icon(Icons.menu_book_outlined, color: glass.textSecondary),
-              selectedIcon: Icon(Icons.menu_book_rounded, color: glass.accentMint),
+              selectedIcon:
+                  Icon(Icons.menu_book_rounded, color: glass.accentMint),
               label: 'Guides',
             ),
             NavigationDestination(
-              icon: Icon(Icons.favorite_outline_rounded, color: glass.textSecondary),
-              selectedIcon: Icon(Icons.favorite_rounded, color: const Color(0xFFE05A4F)),
+              icon: Icon(Icons.favorite_outline_rounded,
+                  color: glass.textSecondary),
+              selectedIcon:
+                  Icon(Icons.favorite_rounded, color: const Color(0xFFE05A4F)),
               label: 'CPR',
             ),
             NavigationDestination(
               icon: Icon(Icons.emergency_outlined, color: glass.textSecondary),
-              selectedIcon: Icon(Icons.emergency_rounded, color: const Color(0xFFE05A4F)),
+              selectedIcon:
+                  Icon(Icons.emergency_rounded, color: const Color(0xFFE05A4F)),
               label: 'SOS',
             ),
           ],

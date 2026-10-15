@@ -53,7 +53,9 @@ class _SosScreenState extends State<SosScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to open dialer. Please dial $emergencyNumber manually.')),
+          const SnackBar(
+              content: Text(
+                  'Failed to open dialer. Please dial $emergencyNumber manually.')),
         );
       }
     }
@@ -78,7 +80,8 @@ class _SosScreenState extends State<SosScreen> {
   }
 
   Future<void> _onSendSosPressed() async {
-    final validContacts = _medicalId.contacts.where((c) => c.phone.isNotEmpty).toList();
+    final validContacts =
+        _medicalId.contacts.where((c) => c.phone.isNotEmpty).toList();
     if (validContacts.isEmpty) {
       _showNoContactsDialog();
       return;
@@ -131,7 +134,8 @@ class _SosScreenState extends State<SosScreen> {
               Navigator.pop(ctx);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => MedicalIdScreen(store: _store)),
+                MaterialPageRoute(
+                    builder: (_) => MedicalIdScreen(store: _store)),
               ).then((_) => _loadData());
             },
             child: const Text('Add Contacts'),
@@ -141,7 +145,8 @@ class _SosScreenState extends State<SosScreen> {
     );
   }
 
-  void _showSosPreviewSheet(String initialMessage, List<EmergencyContact> contacts) {
+  void _showSosPreviewSheet(
+      String initialMessage, List<EmergencyContact> contacts) {
     final textController = TextEditingController(text: initialMessage);
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
@@ -202,7 +207,8 @@ class _SosScreenState extends State<SosScreen> {
                 style: TextStyle(color: glass.textPrimary, fontSize: 13),
                 decoration: InputDecoration(
                   labelText: 'Emergency Message',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16)),
                   filled: true,
                   fillColor: Colors.black.withValues(alpha: 0.05),
                 ),
@@ -219,7 +225,8 @@ class _SosScreenState extends State<SosScreen> {
                   if (!success && mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Failed to open SMS composer. Please check permissions or device settings.'),
+                        content: Text(
+                            'Failed to open SMS composer. Please check permissions or device settings.'),
                       ),
                     );
                   }
@@ -282,10 +289,12 @@ class _SosScreenState extends State<SosScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => MedicalIdScreen(store: _store)),
+                    MaterialPageRoute(
+                        builder: (_) => MedicalIdScreen(store: _store)),
                   ).then((_) => _loadData());
                 },
-                icon: Icon(Icons.badge_rounded, color: glass.accentMint, size: 20),
+                icon: Icon(Icons.badge_rounded,
+                    color: glass.accentMint, size: 20),
                 label: Text(
                   'Medical ID',
                   style: TextStyle(
@@ -302,10 +311,13 @@ class _SosScreenState extends State<SosScreen> {
       body: GradientBackground(
         child: SafeArea(
           child: _isLoading
-              ? Center(child: CircularProgressIndicator(color: glass.accentMint))
+              ? Center(
+                  child: CircularProgressIndicator(color: glass.accentMint))
               : SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics()),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -320,7 +332,8 @@ class _SosScreenState extends State<SosScreen> {
                             borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFE05A4F).withValues(alpha: 0.4),
+                                color: const Color(0xFFE05A4F)
+                                    .withValues(alpha: 0.4),
                                 blurRadius: 24,
                                 offset: const Offset(0, 8),
                               ),
@@ -353,7 +366,8 @@ class _SosScreenState extends State<SosScreen> {
                                 : Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: const [
-                                      Icon(Icons.emergency_share_rounded, color: Colors.white, size: 32),
+                                      Icon(Icons.emergency_share_rounded,
+                                          color: Colors.white, size: 32),
                                       SizedBox(width: 12),
                                       Text(
                                         'SEND SOS ALERT',
@@ -376,7 +390,8 @@ class _SosScreenState extends State<SosScreen> {
                         onTap: _callEmergency,
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 14, horizontal: 16),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(20),
@@ -385,7 +400,8 @@ class _SosScreenState extends State<SosScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.phone_rounded, color: glass.accentMint, size: 22),
+                              Icon(Icons.phone_rounded,
+                                  color: glass.accentMint, size: 22),
                               const SizedBox(width: 10),
                               Text(
                                 'Call Emergency · $emergencyNumber',
@@ -417,12 +433,16 @@ class _SosScreenState extends State<SosScreen> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => MedicalIdScreen(store: _store)),
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        MedicalIdScreen(store: _store)),
                               ).then((_) => _loadData());
                             },
                             child: Text(
                               _medicalId.contacts.isEmpty ? 'Add' : 'Manage',
-                              style: TextStyle(color: glass.accentMint, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: glass.accentMint,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -436,7 +456,8 @@ class _SosScreenState extends State<SosScreen> {
                           borderRadius: 20,
                           child: Column(
                             children: [
-                              Icon(Icons.person_add_rounded, size: 36, color: glass.accentMint),
+                              Icon(Icons.person_add_rounded,
+                                  size: 36, color: glass.accentMint),
                               const SizedBox(height: 10),
                               Text(
                                 'No Emergency Contacts Added',
@@ -450,22 +471,28 @@ class _SosScreenState extends State<SosScreen> {
                               Text(
                                 'Add up to 3 contacts so CarePulse can notify them instantly via SMS with your GPS location and medical profile.',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(color: glass.textSecondary, fontSize: 13),
+                                style: TextStyle(
+                                    color: glass.textSecondary, fontSize: 13),
                               ),
                               const SizedBox(height: 12),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: glass.accentMint,
                                   foregroundColor: Colors.black87,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16)),
                                 ),
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (_) => MedicalIdScreen(store: _store)),
+                                    MaterialPageRoute(
+                                        builder: (_) =>
+                                            MedicalIdScreen(store: _store)),
                                   ).then((_) => _loadData());
                                 },
-                                child: const Text('Add Emergency Contacts', style: TextStyle(fontWeight: FontWeight.bold)),
+                                child: const Text('Add Emergency Contacts',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
@@ -480,13 +507,16 @@ class _SosScreenState extends State<SosScreen> {
                               child: Row(
                                 children: [
                                   CircleAvatar(
-                                    backgroundColor: glass.accentMint.withValues(alpha: 0.15),
-                                    child: Icon(Icons.person_rounded, color: glass.accentMint),
+                                    backgroundColor: glass.accentMint
+                                        .withValues(alpha: 0.15),
+                                    child: Icon(Icons.person_rounded,
+                                        color: glass.accentMint),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           contact.name,
@@ -498,7 +528,9 @@ class _SosScreenState extends State<SosScreen> {
                                         ),
                                         Text(
                                           '${contact.relation.isNotEmpty ? "${contact.relation} • " : ""}${contact.phone}',
-                                          style: TextStyle(color: glass.textSecondary, fontSize: 13),
+                                          style: TextStyle(
+                                              color: glass.textSecondary,
+                                              fontSize: 13),
                                         ),
                                       ],
                                     ),
@@ -508,10 +540,12 @@ class _SosScreenState extends State<SosScreen> {
                                     width: 48,
                                     height: 48,
                                     child: IconButton(
-                                      icon: const Icon(Icons.call_rounded, size: 22),
+                                      icon: const Icon(Icons.call_rounded,
+                                          size: 22),
                                       color: const Color(0xFF6BAA8E),
                                       tooltip: 'Call ${contact.name}',
-                                      onPressed: () => _callContact(contact.phone),
+                                      onPressed: () =>
+                                          _callContact(contact.phone),
                                     ),
                                   ),
                                 ],
@@ -543,7 +577,9 @@ class _SosScreenState extends State<SosScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    _medicalId.name.isEmpty ? 'Name: Not provided' : _medicalId.name,
+                                    _medicalId.name.isEmpty
+                                        ? 'Name: Not provided'
+                                        : _medicalId.name,
                                     style: TextStyle(
                                       color: glass.textPrimary,
                                       fontSize: 18,
@@ -553,11 +589,15 @@ class _SosScreenState extends State<SosScreen> {
                                 ),
                                 if (_medicalId.bloodGroup.isNotEmpty)
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFE05A4F).withValues(alpha: 0.2),
+                                      color: const Color(0xFFE05A4F)
+                                          .withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: const Color(0xFFE05A4F), width: 1),
+                                      border: Border.all(
+                                          color: const Color(0xFFE05A4F),
+                                          width: 1),
                                     ),
                                     child: Text(
                                       'Blood: ${_medicalId.bloodGroup}',
@@ -571,11 +611,27 @@ class _SosScreenState extends State<SosScreen> {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            _buildSummaryRow('Allergies', _medicalId.allergies.isEmpty ? 'None recorded' : _medicalId.allergies, glass),
-                            _buildSummaryRow('Conditions', _medicalId.conditions.isEmpty ? 'None recorded' : _medicalId.conditions, glass),
-                            _buildSummaryRow('Medications', _medicalId.medications.isEmpty ? 'None recorded' : _medicalId.medications, glass),
+                            _buildSummaryRow(
+                                'Allergies',
+                                _medicalId.allergies.isEmpty
+                                    ? 'None recorded'
+                                    : _medicalId.allergies,
+                                glass),
+                            _buildSummaryRow(
+                                'Conditions',
+                                _medicalId.conditions.isEmpty
+                                    ? 'None recorded'
+                                    : _medicalId.conditions,
+                                glass),
+                            _buildSummaryRow(
+                                'Medications',
+                                _medicalId.medications.isEmpty
+                                    ? 'None recorded'
+                                    : _medicalId.medications,
+                                glass),
                             if (_medicalId.notes.isNotEmpty)
-                              _buildSummaryRow('Notes', _medicalId.notes, glass),
+                              _buildSummaryRow(
+                                  'Notes', _medicalId.notes, glass),
                           ],
                         ),
                       ),
@@ -598,7 +654,10 @@ class _SosScreenState extends State<SosScreen> {
             width: 90,
             child: Text(
               '$label:',
-              style: TextStyle(color: glass.textSecondary, fontSize: 13, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: glass.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(

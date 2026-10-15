@@ -5,7 +5,15 @@ import 'package:carepulse/state/cpr_controller.dart';
 import 'package:carepulse/ui/screens/cpr_screen.dart';
 
 void main() {
-  testWidgets('CprScreen renders safety checklist and starts/pauses CPR', (WidgetTester tester) async {
+  testWidgets('CprScreen renders safety checklist and starts/pauses CPR',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     final cprController = CprController();
 
     await tester.pumpWidget(
@@ -21,6 +29,7 @@ void main() {
     expect(find.text('Start CPR'), findsOneWidget);
 
     // Tap Start CPR
+    await tester.ensureVisible(find.text('Start CPR'));
     await tester.tap(find.text('Start CPR'));
     await tester.pump();
 

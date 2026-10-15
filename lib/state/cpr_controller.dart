@@ -76,13 +76,13 @@ class CprController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Starts or resumes the CPR rhythm session.
   Future<void> start() async {
     if (_isRunning) return;
 
     _isRunning = true;
     _stopwatch ??= _clock.createStopwatch();
     _stopwatch!.start();
+    notifyListeners();
 
     // Enable wakelock to prevent screen sleep during an active resuscitation attempt
     try {
@@ -100,8 +100,6 @@ class CprController extends ChangeNotifier {
       const Duration(milliseconds: 20),
       (_) => _onClockTick(),
     );
-
-    notifyListeners();
   }
 
   void _onClockTick() {
@@ -126,10 +124,10 @@ class CprController extends ChangeNotifier {
 
     if (!_isMuted) {
       try {
-        HapticFeedback.mediumImpact();
+        HapticFeedback.mediumImpact().catchError((_) {});
       } catch (_) {}
       try {
-        SystemSound.play(SystemSoundType.click);
+        SystemSound.play(SystemSoundType.click).catchError((_) {});
       } catch (_) {}
     }
 
@@ -161,13 +159,12 @@ class CprController extends ChangeNotifier {
     _stopwatch?.stop();
     _tickerTimer?.cancel();
     _tickerTimer = null;
+    _ttsService.stop();
+    notifyListeners();
 
     try {
       await WakelockPlus.disable();
     } catch (_) {}
-
-    _ttsService.stop();
-    notifyListeners();
   }
 
   /// Stops and completely resets the session.
@@ -177,19 +174,16 @@ class CprController extends ChangeNotifier {
     _tickerTimer = null;
     _stopwatch?.stop();
     _stopwatch?.reset();
-
-    try {
-      await WakelockPlus.disable();
-    } catch (_) {}
-
-    _ttsService.stop();
-
     _compressionCount = 0;
     _currentCycle = 1;
     _nextBeatMs = 0.0;
     _lastVoicePrompt = null;
-
+    _ttsService.stop();
     notifyListeners();
+
+    try {
+      await WakelockPlus.disable();
+    } catch (_) {}
   }
 
   @override

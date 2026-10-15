@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:carepulse/core/theme/app_theme.dart';
 import 'package:carepulse/services/model_download_service.dart';
@@ -14,9 +15,14 @@ class FakeModelDownloadService extends ModelDownloadService {
 }
 
 void main() {
-  testWidgets('MainShell displays 4 tabs and switches between them', (WidgetTester tester) async {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  testWidgets('MainShell displays 4 tabs and switches between them',
+      (WidgetTester tester) async {
     final file = File('assets/protocols/protocols.json');
-    final jsonStr = await file.readAsString();
+    final jsonStr = file.readAsStringSync();
     final repo = ProtocolRepository();
     repo.loadFromJsonString(jsonStr);
 

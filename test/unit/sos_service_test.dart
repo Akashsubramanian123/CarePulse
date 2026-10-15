@@ -26,7 +26,10 @@ void main() {
       );
 
       expect(msg, contains('EMERGENCY! I need help.'));
-      expect(msg, contains('Location: https://maps.google.com/?q=37.774929,-122.419416 (accuracy ~12m).'));
+      expect(
+          msg,
+          contains(
+              'Location: https://maps.google.com/?q=37.774929,-122.419416 (accuracy ~12m).'));
       expect(msg, contains('Blood group: B+.'));
       expect(msg, contains('Allergies: Penicillin.'));
       expect(msg, contains('Conditions: Asthma.'));
@@ -53,7 +56,10 @@ void main() {
         conditions: null,
       );
 
-      expect(msg, equals('EMERGENCY! I need help. Location: unavailable. Sent from CarePulse.'));
+      expect(
+          msg,
+          equals(
+              'EMERGENCY! I need help. Location: unavailable. Sent from CarePulse.'));
       expect(msg, isNot(contains('Blood group:')));
       expect(msg, isNot(contains('Allergies:')));
       expect(msg, isNot(contains('Conditions:')));

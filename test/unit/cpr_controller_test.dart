@@ -30,6 +30,9 @@ class FakeStopwatch implements Stopwatch {
   int get elapsedMilliseconds => _elapsedMs;
 
   @override
+  int get elapsedMicroseconds => _elapsedMs * 1000;
+
+  @override
   Duration get elapsed => Duration(milliseconds: _elapsedMs);
 
   @override
@@ -79,6 +82,8 @@ class FakeCprClock implements CprClock {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('CprController Unit Tests', () {
     late FakeCprClock fakeClock;
     late CprController controller;

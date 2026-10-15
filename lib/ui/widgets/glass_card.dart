@@ -24,14 +24,17 @@ class GlassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final glassParams = theme.extension<CarePulseGlass>()!;
-    
+
     Widget content = Container(
       padding: padding,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
         gradient: tint != null
             ? LinearGradient(
-                colors: [tint!.withValues(alpha: 0.3), tint!.withValues(alpha: 0.1)],
+                colors: [
+                  tint!.withValues(alpha: 0.3),
+                  tint!.withValues(alpha: 0.1)
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
@@ -97,7 +100,7 @@ class GradientBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glassParams = Theme.of(context).extension<CarePulseGlass>()!;
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: glassParams.backgroundGradient,

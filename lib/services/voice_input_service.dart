@@ -41,7 +41,8 @@ class VoiceInputService {
       final success = await initialize(onError: onError);
       if (!success) {
         if (onError != null) {
-          onError('Microphone permission denied or speech recognition unavailable');
+          onError(
+              'Microphone permission denied or speech recognition unavailable');
         }
         return false;
       }

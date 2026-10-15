@@ -112,7 +112,8 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
     final contacts = <EmergencyContact>[];
     for (int i = 0; i < 3; i++) {
       final name = _contactNameControllers[i].text.trim();
-      final phone = EmergencyContact.sanitizePhone(_contactPhoneControllers[i].text);
+      final phone =
+          EmergencyContact.sanitizePhone(_contactPhoneControllers[i].text);
       final rel = _contactRelationControllers[i].text.trim();
 
       if (name.isNotEmpty || phone.isNotEmpty) {
@@ -184,8 +185,10 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
                       });
                     }
                   },
-                  icon: Icon(_isEditing ? Icons.check_rounded : Icons.edit_rounded,
-                      color: glass.accentMint, size: 20),
+                  icon: Icon(
+                      _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+                      color: glass.accentMint,
+                      size: 20),
                   label: Text(
                     _isEditing ? 'Save' : 'Edit',
                     style: TextStyle(
@@ -202,11 +205,16 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
       body: GradientBackground(
         child: SafeArea(
           child: _isLoading
-              ? Center(child: CircularProgressIndicator(color: glass.accentMint))
+              ? Center(
+                  child: CircularProgressIndicator(color: glass.accentMint))
               : SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: _isEditing ? _buildEditForm(glass) : _buildMedicalCardView(glass),
+                  physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics()),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: _isEditing
+                      ? _buildEditForm(glass)
+                      : _buildMedicalCardView(glass),
                 ),
         ),
       ),
@@ -233,7 +241,8 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
                       gradient: glass.primaryActionGradient,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Icon(Icons.badge_rounded, color: Colors.white, size: 28),
+                    child: const Icon(Icons.badge_rounded,
+                        color: Colors.white, size: 28),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -241,7 +250,9 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _currentMedicalId.name.isEmpty ? 'Anonymous User' : _currentMedicalId.name,
+                          _currentMedicalId.name.isEmpty
+                              ? 'Anonymous User'
+                              : _currentMedicalId.name,
                           style: TextStyle(
                             color: glass.textPrimary,
                             fontSize: 20,
@@ -251,18 +262,21 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
                         if (_currentMedicalId.ageOrDob.isNotEmpty)
                           Text(
                             'Age / DOB: ${_currentMedicalId.ageOrDob}',
-                            style: TextStyle(color: glass.textSecondary, fontSize: 13),
+                            style: TextStyle(
+                                color: glass.textSecondary, fontSize: 13),
                           ),
                       ],
                     ),
                   ),
                   if (_currentMedicalId.bloodGroup.isNotEmpty)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE05A4F).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFE05A4F), width: 1),
+                        border: Border.all(
+                            color: const Color(0xFFE05A4F), width: 1),
                       ),
                       child: Text(
                         _currentMedicalId.bloodGroup,
@@ -278,11 +292,16 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
               const SizedBox(height: 20),
               const Divider(color: Colors.white24, height: 1),
               const SizedBox(height: 16),
-
-              _buildCardItem('Allergies', _currentMedicalId.allergies, glass, icon: Icons.warning_amber_rounded),
-              _buildCardItem('Medical Conditions', _currentMedicalId.conditions, glass, icon: Icons.healing_rounded),
-              _buildCardItem('Medications', _currentMedicalId.medications, glass, icon: Icons.medication_rounded),
-              _buildCardItem('Important Notes', _currentMedicalId.notes, glass, icon: Icons.note_rounded),
+              _buildCardItem('Allergies', _currentMedicalId.allergies, glass,
+                  icon: Icons.warning_amber_rounded),
+              _buildCardItem(
+                  'Medical Conditions', _currentMedicalId.conditions, glass,
+                  icon: Icons.healing_rounded),
+              _buildCardItem(
+                  'Medications', _currentMedicalId.medications, glass,
+                  icon: Icons.medication_rounded),
+              _buildCardItem('Important Notes', _currentMedicalId.notes, glass,
+                  icon: Icons.note_rounded),
             ],
           ),
         ),
@@ -305,7 +324,8 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
             borderRadius: 18,
             child: Row(
               children: [
-                Icon(Icons.contact_phone_outlined, color: glass.accentMint, size: 24),
+                Icon(Icons.contact_phone_outlined,
+                    color: glass.accentMint, size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -315,7 +335,8 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
                 ),
                 TextButton(
                   onPressed: () => setState(() => _isEditing = true),
-                  child: Text('Add Now', style: TextStyle(color: glass.accentMint)),
+                  child: Text('Add Now',
+                      style: TextStyle(color: glass.accentMint)),
                 ),
               ],
             ),
@@ -331,7 +352,8 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
                   children: [
                     CircleAvatar(
                       backgroundColor: glass.accentMint.withValues(alpha: 0.15),
-                      child: Icon(Icons.person_rounded, color: glass.accentMint),
+                      child:
+                          Icon(Icons.person_rounded, color: glass.accentMint),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -340,11 +362,15 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
                         children: [
                           Text(
                             contact.name,
-                            style: TextStyle(color: glass.textPrimary, fontWeight: FontWeight.bold, fontSize: 15),
+                            style: TextStyle(
+                                color: glass.textPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15),
                           ),
                           Text(
                             '${contact.relation.isNotEmpty ? "${contact.relation} • " : ""}${contact.phone}',
-                            style: TextStyle(color: glass.textSecondary, fontSize: 13),
+                            style: TextStyle(
+                                color: glass.textSecondary, fontSize: 13),
                           ),
                         ],
                       ),
@@ -358,7 +384,8 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
     );
   }
 
-  Widget _buildCardItem(String label, String value, CarePulseGlass glass, {required IconData icon}) {
+  Widget _buildCardItem(String label, String value, CarePulseGlass glass,
+      {required IconData icon}) {
     if (value.trim().isEmpty) return const SizedBox.shrink();
 
     return Padding(
@@ -372,11 +399,18 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: TextStyle(color: glass.textSecondary, fontSize: 11, fontWeight: FontWeight.bold)),
+                Text(label,
+                    style: TextStyle(
+                        color: glass.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold)),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: TextStyle(color: glass.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                      color: glass.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -398,7 +432,11 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Personal Details', style: TextStyle(color: glass.accentMint, fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('Personal Details',
+                    style: TextStyle(
+                        color: glass.accentMint,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16)),
                 const SizedBox(height: 12),
                 _buildFormField(
                   controller: _nameController,
@@ -439,7 +477,11 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Medical Information', style: TextStyle(color: glass.accentMint, fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('Medical Information',
+                    style: TextStyle(
+                        color: glass.accentMint,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16)),
                 const SizedBox(height: 12),
                 _buildFormField(
                   controller: _allergiesController,
@@ -481,10 +523,18 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Emergency Contacts (Up to 3)', style: TextStyle(color: glass.accentMint, fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('Emergency Contacts (Up to 3)',
+                    style: TextStyle(
+                        color: glass.accentMint,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16)),
                 const SizedBox(height: 12),
                 for (int i = 0; i < 3; i++) ...[
-                  Text('Contact ${i + 1}', style: TextStyle(color: glass.textSecondary, fontWeight: FontWeight.bold, fontSize: 12)),
+                  Text('Contact ${i + 1}',
+                      style: TextStyle(
+                          color: glass.textSecondary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12)),
                   const SizedBox(height: 6),
                   _buildFormField(
                     controller: _contactNameControllers[i],
@@ -505,7 +555,8 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
                           keyboardType: TextInputType.phone,
                           validator: (value) {
                             if (value != null && value.trim().isNotEmpty) {
-                              final sanitized = EmergencyContact.sanitizePhone(value);
+                              final sanitized =
+                                  EmergencyContact.sanitizePhone(value);
                               if (sanitized.length < 3) {
                                 return 'Enter valid phone number';
                               }
@@ -546,7 +597,10 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
               child: const Center(
                 child: Text(
                   'Save Medical ID',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
                 ),
               ),
             ),
@@ -576,7 +630,8 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
         labelText: label,
         labelStyle: TextStyle(color: glass.textSecondary, fontSize: 12),
         hintText: hint,
-        hintStyle: TextStyle(color: glass.textSecondary.withValues(alpha: 0.6), fontSize: 13),
+        hintStyle: TextStyle(
+            color: glass.textSecondary.withValues(alpha: 0.6), fontSize: 13),
         filled: true,
         fillColor: Colors.white.withValues(alpha: 0.05),
         border: OutlineInputBorder(
@@ -591,7 +646,8 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: glass.accentMint, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
     );
   }
