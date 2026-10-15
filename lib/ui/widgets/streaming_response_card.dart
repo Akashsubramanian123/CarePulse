@@ -8,6 +8,10 @@ class StreamingResponseCard extends StatelessWidget {
   final String responseText;
   final bool isGenerating;
   final VoidCallback onClear;
+  final String? sourceLabel;
+  final VoidCallback? onSpeak;
+  final bool isSpeaking;
+  final VoidCallback? onStopSpeaking;
 
   const StreamingResponseCard({
     super.key,
@@ -15,11 +19,15 @@ class StreamingResponseCard extends StatelessWidget {
     required this.responseText,
     required this.isGenerating,
     required this.onClear,
+    this.sourceLabel,
+    this.onSpeak,
+    this.isSpeaking = false,
+    this.onStopSpeaking,
   });
 
   List<String>? _parseSteps(String text) {
     if (isGenerating) return null; // Wait until stream is done to parse cleanly
-    
+
     // Attempt basic parsing of "1. ... 2. ... 3. ..."
     final parts = text.split(RegExp(r'\n?[123]\.\s+'));
     // Usually parts[0] is empty or intro text. The steps should be parts 1, 2, 3
@@ -47,7 +55,8 @@ class StreamingResponseCard extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: glass.iconTintGradient,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3), width: 1),
               ),
               child: Icon(
                 Icons.health_and_safety_rounded,
@@ -90,37 +99,70 @@ class StreamingResponseCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      gradient: glass.iconTintGradient,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        gradient: glass.iconTintGradient,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 1),
+                      ),
+                      child: Icon(
+                        isGenerating
+                            ? Icons.psychology_rounded
+                            : Icons.medical_information_rounded,
+                        color: glass.accentMint,
+                        size: 20,
+                      ),
                     ),
-                    child: Icon(
-                      isGenerating
-                          ? Icons.psychology_rounded
-                          : Icons.medical_information_rounded,
-                      color: glass.accentMint,
-                      size: 20,
+                    const SizedBox(width: 10),
+                    Flexible(
+                      child: Text(
+                        isGenerating
+                            ? 'PREPARING GUIDANCE...'
+                            : 'EMERGENCY GUIDANCE',
+                        style: TextStyle(
+                          color: isGenerating
+                              ? glass.accentMint
+                              : glass.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    isGenerating ? 'PREPARING GUIDANCE...' : 'EMERGENCY GUIDANCE',
-                    style: TextStyle(
-                      color: isGenerating ? glass.accentMint : glass.textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Text-to-speech button
+                  if (onSpeak != null && responseText.isNotEmpty)
+                    SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: IconButton(
+                        icon: Icon(
+                          isSpeaking
+                              ? Icons.stop_circle_rounded
+                              : Icons.volume_up_rounded,
+                          size: 22,
+                        ),
+                        color: isSpeaking
+                            ? const Color(0xFFE05A4F)
+                            : glass.accentMint,
+                        tooltip:
+                            isSpeaking ? 'Stop reading' : 'Read guidance aloud',
+                        onPressed: isSpeaking
+                            ? (onStopSpeaking ?? onSpeak)
+                            : onSpeak,
+                      ),
+                    ),
                   if (responseText.isNotEmpty)
                     SizedBox(
                       width: 48,
@@ -133,7 +175,8 @@ class StreamingResponseCard extends StatelessWidget {
                           Clipboard.setData(ClipboardData(text: responseText));
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Triage response copied to clipboard'),
+                              content:
+                                  Text('Triage response copied to clipboard'),
                               duration: Duration(seconds: 2),
                             ),
                           );
@@ -154,6 +197,46 @@ class StreamingResponseCard extends StatelessWidget {
               ),
             ],
           ),
+
+          // Source Chip
+          if (sourceLabel != null && responseText.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: glass.accentMint.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: glass.accentMint.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    sourceLabel!.contains('Verified')
+                        ? Icons.verified_user_rounded
+                        : (sourceLabel!.contains('guided')
+                            ? Icons.auto_awesome_rounded
+                            : Icons.info_outline_rounded),
+                    size: 14,
+                    color: glass.accentMint,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      sourceLabel!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: glass.accentMint,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           const SizedBox(height: 12),
           Container(height: 1, color: glass.glassBorderColor),
           const SizedBox(height: 16),
@@ -163,10 +246,11 @@ class StreamingResponseCard extends StatelessWidget {
             GlassCard(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               borderRadius: 16,
-              tint: glass.textSecondary.withOpacity(0.1),
+              tint: glass.textSecondary.withValues(alpha: 0.1),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, size: 16, color: glass.textSecondary),
+                  Icon(Icons.warning_amber_rounded,
+                      size: 16, color: glass.textSecondary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -213,11 +297,14 @@ class StreamingResponseCard extends StatelessWidget {
           else if (parsedSteps != null)
             Column(
               children: [
-                _buildStepCard(context, glass, '1', 'IMMEDIATE ACTION', parsedSteps[0]),
+                _buildStepCard(
+                    context, glass, '1', 'IMMEDIATE ACTION', parsedSteps[0]),
                 const SizedBox(height: 12),
-                _buildStepCard(context, glass, '2', 'CRITICAL PRECAUTION', parsedSteps[1]),
+                _buildStepCard(
+                    context, glass, '2', 'CRITICAL PRECAUTION', parsedSteps[1]),
                 const SizedBox(height: 12),
-                _buildStepCard(context, glass, '3', 'MONITOR & STABILIZE', parsedSteps[2]),
+                _buildStepCard(
+                    context, glass, '3', 'MONITOR & STABILIZE', parsedSteps[2]),
               ],
             )
           else
@@ -256,22 +343,23 @@ class StreamingResponseCard extends StatelessWidget {
                 ],
               ),
             ),
-          
+
           const SizedBox(height: 24),
           Text(
-            "First-aid guidance only. Call emergency services for serious situations.",
+            'First-aid guidance only. Call emergency services for serious situations.',
             style: TextStyle(
               color: glass.textSecondary,
               fontSize: 11,
             ),
             textAlign: TextAlign.center,
-          )
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStepCard(BuildContext context, CarePulseGlass glass, String number, String label, String text) {
+  Widget _buildStepCard(BuildContext context, CarePulseGlass glass,
+      String number, String label, String text) {
     return GlassCard(
       borderRadius: 20,
       padding: const EdgeInsets.all(16),
@@ -284,12 +372,16 @@ class StreamingResponseCard extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: glass.primaryActionGradient,
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
+              border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.4), width: 1),
             ),
             alignment: Alignment.center,
             child: Text(
               number,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
             ),
           ),
           const SizedBox(width: 12),

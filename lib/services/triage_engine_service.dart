@@ -53,6 +53,7 @@ class TriageEngineService {
     String query, {
     void Function(TriageTelemetry telemetry)? onTelemetryUpdate,
     UserProfile? profile,
+    String? context,
   }) async* {
     if (!_isInitialized || _engine == null) {
       throw StateError('Triage engine is not initialized');
@@ -61,7 +62,8 @@ class TriageEngineService {
     String profileText = profile?.promptContext ?? '';
     String contextPrompt = profileText.isNotEmpty ? '$profileText\n\n' : '';
     
-    final formattedPrompt = '$contextPrompt${AppConstants.formatEmergencyPrompt(query)}';
+    final formattedPrompt =
+        '$contextPrompt${AppConstants.formatEmergencyPrompt(query, context: context)}';
 
     final startTime = DateTime.now().millisecondsSinceEpoch;
     int? firstTokenTime;
@@ -69,37 +71,44 @@ class TriageEngineService {
 
     final session = await _engine!.createSession();
 
-    await for (final event in session.generate(
-      prompt: formattedPrompt,
-      addSpecial: true,
-      maxTokens: 512,
-    )) {
-      if (event is TokenEvent) {
-        tokenCount++;
-        final currentTime = DateTime.now().millisecondsSinceEpoch;
+    try {
+      await session.clear();
+      await for (final event in session.generate(
+        prompt: formattedPrompt,
+        addSpecial: true,
+        maxTokens: 512,
+      )) {
+        if (event is TokenEvent) {
+          tokenCount++;
+          final currentTime = DateTime.now().millisecondsSinceEpoch;
 
-        if (firstTokenTime == null) {
-          firstTokenTime = currentTime;
-          _lastTtftMs = firstTokenTime - startTime;
+          if (firstTokenTime == null) {
+            firstTokenTime = currentTime;
+            _lastTtftMs = firstTokenTime - startTime;
+          }
+
+          final elapsedTimeSec = (currentTime - startTime) / 1000.0;
+          if (elapsedTimeSec > 0) {
+            _lastTokensPerSec = tokenCount / elapsedTimeSec;
+          }
+
+          if (onTelemetryUpdate != null) {
+            onTelemetryUpdate(TriageTelemetry(
+              ttftMs: _lastTtftMs,
+              tokensPerSec: _lastTokensPerSec,
+              ramUsageMb: getEstimatedRamUsageMB(),
+            ));
+          }
+
+          yield event.text;
         }
-
-        final elapsedTimeSec = (currentTime - startTime) / 1000.0;
-        if (elapsedTimeSec > 0) {
-          _lastTokensPerSec = tokenCount / elapsedTimeSec;
-        }
-
-        if (onTelemetryUpdate != null) {
-          onTelemetryUpdate(TriageTelemetry(
-            ttftMs: _lastTtftMs,
-            tokensPerSec: _lastTokensPerSec,
-            ramUsageMb: getEstimatedRamUsageMB(),
-          ));
-        }
-
-        yield event.text;
       }
+    } finally {
+      try {
+        await session.clear();
+      } catch (_) {}
+      await session.dispose();
     }
-    await session.dispose();
   }
 
   /// Returns estimated RAM usage in MBs for telemetry monitoring.

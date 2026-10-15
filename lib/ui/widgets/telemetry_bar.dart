@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
-import 'glass_card.dart';
 
 class TelemetryBar extends StatelessWidget {
   final int ttftMs;

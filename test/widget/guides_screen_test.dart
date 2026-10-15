@@ -1,0 +1,51 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:carepulse/core/theme/app_theme.dart';
+import 'package:carepulse/services/protocol_repository.dart';
+import 'package:carepulse/state/triage_controller.dart';
+import 'package:carepulse/ui/screens/guides_screen.dart';
+
+void main() {
+  testWidgets('GuidesScreen displays searchable list and opens protocol details', (WidgetTester tester) async {
+    final file = File('assets/protocols/protocols.json');
+    final jsonStr = await file.readAsString();
+    final repo = ProtocolRepository();
+    repo.loadFromJsonString(jsonStr);
+
+    final controller = TriageController(protocolRepository: repo);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<TriageController>.value(
+        value: controller,
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const GuidesScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify initial list shows items
+    expect(find.text('First-Aid Guides'), findsOneWidget);
+    expect(find.text('Severe Bleeding'), findsOneWidget);
+
+    // Search filter for snake
+    await tester.enterText(find.byType(TextField), 'snake');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Snakebite'), findsOneWidget);
+    expect(find.text('Severe Bleeding'), findsNothing);
+
+    // Tap to open detail screen
+    await tester.tap(find.text('Snakebite'));
+    await tester.pumpAndSettle();
+
+    // Verify 3 steps rendered
+    expect(find.text('IMMEDIATE ACTION'), findsOneWidget);
+    expect(find.text('CRITICAL PRECAUTION'), findsOneWidget);
+    expect(find.text('MONITOR & STABILIZE'), findsOneWidget);
+    expect(find.text('DO NOT'), findsOneWidget);
+  });
+}

@@ -1,12 +1,112 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/tts_service.dart';
+import '../../services/voice_input_service.dart';
 import '../../state/triage_controller.dart';
+import '../widgets/emergency_chips.dart';
 import '../widgets/glass_card.dart';
+import '../widgets/streaming_response_card.dart';
 
-class ModelSetupScreen extends StatelessWidget {
+class ModelSetupScreen extends StatefulWidget {
   const ModelSetupScreen({super.key});
+
+  @override
+  State<ModelSetupScreen> createState() => _ModelSetupScreenState();
+}
+
+class _ModelSetupScreenState extends State<ModelSetupScreen> {
+  final TextEditingController _textController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  final VoiceInputService _voiceService = VoiceInputService();
+  final TtsService _tts = TtsService();
+
+  bool _isListening = false;
+  bool _isSpeaking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tts.isSpeakingNotifier.addListener(_onTtsChange);
+  }
+
+  void _onTtsChange() {
+    if (mounted) {
+      setState(() => _isSpeaking = _tts.isSpeaking);
+    }
+  }
+
+  @override
+  void dispose() {
+    _tts.isSpeakingNotifier.removeListener(_onTtsChange);
+    _tts.stop();
+    _voiceService.stopListening();
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _callEmergency() async {
+    final uri = Uri(scheme: 'tel', path: emergencyNumber);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to open dialer. Please dial 112 manually.')),
+        );
+      }
+    }
+  }
+
+  void _submitQuery(TriageController controller, [String? presetText]) {
+    final queryText = presetText ?? _textController.text;
+    if (queryText.trim().isEmpty) return;
+
+    if (presetText != null) {
+      _textController.text = presetText;
+    }
+
+    _focusNode.unfocus();
+    _voiceService.stopListening();
+    setState(() => _isListening = false);
+
+    controller.submitEmergencyQuery(queryText);
+  }
+
+  void _toggleListening() async {
+    if (_isListening) {
+      setState(() => _isListening = false);
+      await _voiceService.stopListening();
+    } else {
+      final success = await _voiceService.startListening(
+        onResult: (text, isFinal) {
+          if (mounted) {
+            setState(() {
+              _textController.text = text;
+              if (isFinal) _isListening = false;
+            });
+          }
+        },
+        onError: (err) {
+          if (mounted) {
+            setState(() => _isListening = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Speech error: $err')),
+            );
+          }
+        },
+      );
+      if (mounted) {
+        setState(() => _isListening = success);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,227 +114,378 @@ class ModelSetupScreen extends StatelessWidget {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          AppConstants.appName,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: glass.textPrimary,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: SizedBox(
+              height: 48,
+              child: TextButton.icon(
+                onPressed: _callEmergency,
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xFFE05A4F).withValues(alpha: 0.18),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: const BorderSide(color: Color(0xFFE05A4F), width: 1),
+                  ),
+                ),
+                icon: const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
+                label: const Text(
+                  '112',
+                  style: TextStyle(
+                    color: Color(0xFFE05A4F),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: GradientBackground(
         child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                padding: const EdgeInsets.all(24.0),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight - 48.0,
-                  ),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Spacer(),
-
-                        // CarePulse App Logo Icon
-                        Center(
-                          child: GlassCard(
-                            borderRadius: 50,
-                            padding: const EdgeInsets.all(24),
-                            tint: glass.accentMint,
-                            child: Icon(
-                              Icons.medical_services_rounded,
-                              size: 52,
-                              color: glass.accentMint,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Prominent Call 112 Banner when red flag is triggered
+                if (controller.callEmergencyNow) ...[
+                  InkWell(
+                    onTap: _callEmergency,
+                    borderRadius: BorderRadius.circular(24),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: glass.emergencyGradient,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFE05A4F).withValues(alpha: 0.5),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.warning_rounded, color: Colors.white, size: 28),
+                          SizedBox(width: 10),
+                          Flexible(
+                            child: Text(
+                              'CRITICAL RED FLAG · CALL 112 NOW',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
-                        // Title & Subtitle
-                        Text(
-                          AppConstants.appName,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            color: glass.textPrimary,
-                            letterSpacing: 1.0,
+                // Urgent First-Aid Query Input Box (Instant Red-Flag Path)
+                GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  borderRadius: 22,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.flash_on_rounded, color: glass.accentMint, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Instant Red-Flag Emergency Triage',
+                            style: TextStyle(
+                              color: glass.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          AppConstants.tagLine,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: glass.accentMint,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Main Status Card
-                        GlassCard(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            children: [
-                              Text(
-                                'One-time setup. Download the offline AI model (~808 MB) while you have Wi-Fi. After this, CarePulse works with no internet.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: glass.textPrimary,
-                                  height: 1.4,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-
-                              // Progress Bar & Stats
-                              if (controller.isDownloading || controller.isLoadingEngine) ...[
-                                Container(
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.white.withOpacity(0.3)),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: LinearProgressIndicator(
-                                      value: controller.isLoadingEngine
-                                          ? null
-                                          : controller.downloadProgress,
-                                      backgroundColor: Colors.transparent,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        glass.accentMint,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 14),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      EmergencyChips(
+                        isDisabled: false,
+                        onPresetSelected: (preset) => _submitQuery(controller, preset.query),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _textController,
+                              focusNode: _focusNode,
+                              style: TextStyle(color: glass.textPrimary, fontSize: 13),
+                              decoration: InputDecoration(
+                                hintText: 'Describe urgent injury or symptom...',
+                                hintStyle: TextStyle(color: glass.textSecondary, fontSize: 12),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                suffixIcon: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      controller.isLoadingEngine
-                                          ? 'Initializing AI engine...'
-                                          : '${(controller.downloadProgress * 100).toStringAsFixed(1)}%',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: glass.accentMint,
+                                    if (_textController.text.isNotEmpty)
+                                      IconButton(
+                                        icon: const Icon(Icons.clear_rounded, size: 16),
+                                        onPressed: () {
+                                          _textController.clear();
+                                          setState(() {});
+                                        },
                                       ),
-                                    ),
-                                    Text(
-                                      '${controller.downloadedMB.toStringAsFixed(1)} MB / ${controller.totalMB.toStringAsFixed(1)} MB',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: glass.textSecondary,
-                                      ),
+                                    IconButton(
+                                      icon: Icon(_isListening ? Icons.mic : Icons.mic_none, size: 20),
+                                      color: _isListening ? const Color(0xFFE05A4F) : glass.accentMint,
+                                      onPressed: _toggleListening,
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
+                              onSubmitted: (_) => _submitQuery(controller),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                backgroundColor: glass.accentMint,
+                                foregroundColor: Colors.black87,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                              onPressed: () => _submitQuery(controller),
+                              child: const Icon(Icons.send_rounded, size: 18),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-                              // Error Banner
-                              if (controller.hasError && controller.errorMessage != null) ...[
-                                GlassCard(
-                                  padding: const EdgeInsets.all(14),
-                                  borderRadius: 16,
-                                  tint: const Color(0xFFE05A4F),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.error_outline_rounded,
-                                          color: Colors.white, size: 20),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          controller.errorMessage!,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                // Response Card if query was submitted
+                if (controller.streamedResponse.isNotEmpty || controller.currentQuery.isNotEmpty) ...[
+                  StreamingResponseCard(
+                    query: controller.currentQuery,
+                    responseText: controller.streamedResponse,
+                    isGenerating: false,
+                    sourceLabel: controller.answerSource?.label,
+                    onSpeak: () {
+                      if (_isSpeaking) {
+                        _tts.stop();
+                      } else {
+                        _tts.speak(controller.streamedResponse);
+                      }
+                    },
+                    isSpeaking: _isSpeaking,
+                    onStopSpeaking: () => _tts.stop(),
+                    onClear: () {
+                      _textController.clear();
+                      _tts.stop();
+                      controller.clearResponse();
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // AI Model Download Section
+                GlassCard(
+                  padding: const EdgeInsets.all(20.0),
+                  borderRadius: 24,
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: glass.accentMint.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.cloud_download_rounded,
+                          size: 36,
+                          color: glass.accentMint,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Offline AI Model Setup',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: glass.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Download the offline AI model (~808 MB) once while you have Wi-Fi. After this, CarePulse delivers personalized AI first-aid triage with zero internet.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: glass.textSecondary,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Progress Bar & Stats
+                      if (controller.isDownloading || controller.isLoadingEngine) ...[
+                        Container(
+                          height: 10,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: controller.isLoadingEngine ? null : controller.downloadProgress,
+                              backgroundColor: Colors.transparent,
+                              valueColor: AlwaysStoppedAnimation<Color>(glass.accentMint),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              controller.isLoadingEngine
+                                  ? 'Initializing AI engine...'
+                                  : '${(controller.downloadProgress * 100).toStringAsFixed(1)}%',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: glass.accentMint,
+                              ),
+                            ),
+                            Text(
+                              '${controller.downloadedMB.toStringAsFixed(1)} MB / ${controller.totalMB.toStringAsFixed(1)} MB',
+                              style: TextStyle(fontSize: 12, color: glass.textSecondary),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Error Banner
+                      if (controller.hasError && controller.errorMessage != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE05A4F).withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: const Color(0xFFE05A4F)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline_rounded, color: Color(0xFFE05A4F), size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  controller.errorMessage!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFFE05A4F),
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(height: 16),
-                              ],
+                              ),
                             ],
                           ),
                         ),
-
-                        const Spacer(),
-
-                        // Action Buttons
-                        if (controller.isDownloadRequired || controller.hasError)
-                          InkWell(
-                            onTap: () => controller.startModelDownload(),
-                            borderRadius: BorderRadius.circular(24),
-                            child: Container(
-                              height: 56,
-                              decoration: BoxDecoration(
-                                gradient: glass.primaryActionGradient,
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(Icons.download_rounded, color: Colors.white),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Download Emergency AI Model',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          )
-                        else if (controller.isDownloading)
-                          InkWell(
-                            onTap: () => controller.cancelDownload(),
-                            borderRadius: BorderRadius.circular(24),
-                            child: Container(
-                              height: 56,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: glass.glassBorderColor, width: 1),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.cancel_outlined, color: glass.textPrimary),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Cancel Download',
-                                    style: TextStyle(
-                                      color: glass.textPrimary,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          )
-                        else if (controller.isLoadingEngine || controller.isChecking)
-                          Center(
-                            child: CircularProgressIndicator(color: glass.accentMint),
-                          ),
-
                         const SizedBox(height: 16),
                       ],
-                    ),
+
+                      // Download / Cancel Buttons (>= 48 tap target)
+                      if (controller.isDownloadRequired || controller.hasError)
+                        InkWell(
+                          onTap: () => controller.startModelDownload(),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            height: 52,
+                            decoration: BoxDecoration(
+                              gradient: glass.primaryActionGradient,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.download_rounded, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Download Emergency AI Model',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        )
+                      else if (controller.isDownloading)
+                        InkWell(
+                          onTap: () => controller.cancelDownload(),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            height: 52,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: glass.glassBorderColor),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.cancel_outlined, color: glass.textPrimary),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Cancel Download',
+                                  style: TextStyle(
+                                    color: glass.textPrimary,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        )
+                      else if (controller.isLoadingEngine || controller.isChecking)
+                        Center(
+                          child: CircularProgressIndicator(color: glass.accentMint),
+                        ),
+                    ],
                   ),
                 ),
-              );
-            },
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),

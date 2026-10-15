@@ -23,11 +23,19 @@ class AppConstants {
       'If the user asks a general question (like "who are you", "what can you do"), answer conversationally and concisely in 1-2 sentences without the 3 steps. '
       'Do not include disclaimers.';
 
-  static String formatEmergencyPrompt(String query) {
+  static String formatEmergencyPrompt(String query, {String? context}) {
+    String queryWithContext = query;
+    if (context != null && context.trim().isNotEmpty) {
+      final cappedContext =
+          context.length > 1200 ? context.substring(0, 1200) : context;
+      queryWithContext =
+          '$query\n\nREFERENCE PROTOCOL (follow it, do not contradict it):\n$cappedContext';
+    }
+
     return '<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n'
         '$systemPrompt<|eot_id|>'
         '<|start_header_id|>user<|end_header_id|>\n\n'
-        '$query<|eot_id|>'
+        '$queryWithContext<|eot_id|>'
         '<|start_header_id|>assistant<|end_header_id|>\n\n';
   }
 }

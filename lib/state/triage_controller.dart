@@ -2,10 +2,13 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../core/constants/app_constants.dart';
-import '../services/model_download_service.dart';
-import '../services/triage_engine_service.dart';
-import '../services/profile_service.dart';
 import '../services/document_service.dart';
+import '../services/model_download_service.dart';
+import '../services/profile_service.dart';
+import '../services/protocol_repository.dart';
+import '../services/protocol_retriever.dart';
+import '../services/red_flag_engine.dart';
+import '../services/triage_engine_service.dart';
 
 enum AppSetupStage {
   checking,
@@ -17,9 +20,33 @@ enum AppSetupStage {
   error,
 }
 
+enum AnswerSource {
+  verifiedProtocol,
+  aiGuidedByProtocol,
+  aiGenerated,
+}
+
+extension AnswerSourceExtension on AnswerSource {
+  String get label {
+    switch (this) {
+      case AnswerSource.verifiedProtocol:
+        return 'Verified protocol';
+      case AnswerSource.aiGuidedByProtocol:
+        return 'AI, guided by verified protocol';
+      case AnswerSource.aiGenerated:
+        return 'AI-generated. Use judgment, call help if serious.';
+    }
+  }
+}
+
 class TriageController extends ChangeNotifier {
-  final ModelDownloadService _downloadService = ModelDownloadService();
-  final TriageEngineService _engineService = TriageEngineService();
+  final ModelDownloadService _downloadService;
+  final TriageEngineService _engineService;
+  final ProfileService _profileService;
+  final DocumentService _documentService;
+  final ProtocolRepository _protocolRepository;
+  final ProtocolRetriever _protocolRetriever;
+  final RedFlagEngine _redFlagEngine;
 
   AppSetupStage _stage = AppSetupStage.checking;
   CancelToken? _cancelToken;
@@ -37,9 +64,10 @@ class TriageController extends ChangeNotifier {
   double _ramUsageMb = 0.0;
   String? _errorMessage;
 
+  AnswerSource? _answerSource;
+  bool _callEmergencyNow = false;
+
   UserProfile? _userProfile;
-  final ProfileService _profileService = ProfileService();
-  final DocumentService _documentService = DocumentService();
   UploadedDocument? _uploadedDocument;
 
   StreamSubscription<String>? _generationSubscription;
@@ -66,12 +94,42 @@ class TriageController extends ChangeNotifier {
   double get ramUsageMb => _ramUsageMb;
   String? get errorMessage => _errorMessage;
 
+  AnswerSource? get answerSource => _answerSource;
+  bool get callEmergencyNow => _callEmergencyNow;
+
+  ProtocolRepository get protocolRepository => _protocolRepository;
+  ProtocolRetriever get protocolRetriever => _protocolRetriever;
+  RedFlagEngine get redFlagEngine => _redFlagEngine;
+
   UploadedDocument? get uploadedDocument => _uploadedDocument;
 
   bool get isOffline => true; // Always 100% offline after model exists
 
-  TriageController() {
+  TriageController({
+    ModelDownloadService? downloadService,
+    TriageEngineService? engineService,
+    ProfileService? profileService,
+    DocumentService? documentService,
+    ProtocolRepository? protocolRepository,
+    ProtocolRetriever? protocolRetriever,
+    RedFlagEngine? redFlagEngine,
+  })  : _downloadService = downloadService ?? ModelDownloadService(),
+        _engineService = engineService ?? TriageEngineService(),
+        _profileService = profileService ?? ProfileService(),
+        _documentService = documentService ?? DocumentService(),
+        _protocolRepository = protocolRepository ?? ProtocolRepository(),
+        _protocolRetriever = protocolRetriever ??
+            ProtocolRetriever(protocolRepository ?? ProtocolRepository()),
+        _redFlagEngine = redFlagEngine ?? RedFlagEngine() {
     checkModelStatus();
+  }
+
+  Future<void> _ensureProtocolsLoaded() async {
+    if (!_protocolRepository.isLoaded) {
+      try {
+        await _protocolRepository.loadProtocols();
+      } catch (_) {}
+    }
   }
 
   Future<void> pickDocument() async {
@@ -135,7 +193,7 @@ class TriageController extends ChangeNotifier {
       notifyListeners();
       await loadEngine();
     } catch (e) {
-      if (CancelToken.isCancel(e as DioException)) {
+      if (e is DioException && CancelToken.isCancel(e)) {
         _errorMessage = 'Download cancelled by user.';
       } else {
         _errorMessage = 'Model download failed: ${e.toString()}';
@@ -175,9 +233,44 @@ class TriageController extends ChangeNotifier {
 
   /// Submits an emergency query and streams triage advice in real time.
   Future<void> submitEmergencyQuery(String query) async {
-    if (query.trim().isEmpty || _isGenerating || !isReady) return;
+    final trimmed = query.trim();
+    if (trimmed.isEmpty || _isGenerating) return;
 
-    _currentQuery = query.trim();
+    _callEmergencyNow = false;
+    _errorMessage = null;
+
+    // Feature 1: Red-flag check BEFORE the !isReady guard
+    final redFlag = _redFlagEngine.evaluate(trimmed);
+    if (redFlag != null) {
+      _currentQuery = trimmed;
+      _isGenerating = false;
+      _answerSource = AnswerSource.verifiedProtocol;
+      _callEmergencyNow = true;
+
+      await _ensureProtocolsLoaded();
+      final protocol = _protocolRepository.getById(redFlag.protocolId);
+      if (protocol != null) {
+        _streamedResponse = protocol.toFormattedSteps();
+      } else {
+        _streamedResponse =
+            '1. IMMEDIATE ACTION: Call 112 immediately. Seek emergency assistance.\n2. CRITICAL PRECAUTION: Keep the person still and calm. Do not leave them unattended.\n3. MONITOR & STABILIZE: Continuously monitor breathing and pulse until emergency medical services arrive.';
+      }
+      notifyListeners();
+      return;
+    }
+
+    // If no red flag matched and model is not ready, show friendly message pointing to Guides & download
+    if (!isReady) {
+      _currentQuery = trimmed;
+      _isGenerating = false;
+      _answerSource = null;
+      _streamedResponse =
+          'The offline AI model is not downloaded yet. Please explore the Guides tab for verified first-aid procedures, or download the model below to enable offline AI triage.';
+      notifyListeners();
+      return;
+    }
+
+    _currentQuery = trimmed;
     _streamedResponse = '';
     _isGenerating = true;
     _ttftMs = 0;
@@ -187,14 +280,27 @@ class TriageController extends ChangeNotifier {
 
     try {
       _userProfile = await _profileService.loadProfile();
-      
+      await _ensureProtocolsLoaded();
+
+      // Feature 2: Protocol retrieval for context
+      final matches = _protocolRetriever.topMatches(trimmed, k: 1);
+      String? protocolContext;
+      if (matches.isNotEmpty) {
+        _answerSource = AnswerSource.aiGuidedByProtocol;
+        protocolContext = matches.first.toCompactContext(maxChars: 1200);
+      } else {
+        _answerSource = AnswerSource.aiGenerated;
+      }
+
       String fullQuery = _currentQuery;
       if (_uploadedDocument != null) {
-        fullQuery += '\n\n[USER UPLOADED MEDICAL RECORD]:\n${_uploadedDocument!.content}';
+        fullQuery +=
+            '\n\n[USER UPLOADED MEDICAL RECORD]:\n${_uploadedDocument!.content}';
       }
 
       final stream = _engineService.generateTriage(
         fullQuery,
+        context: protocolContext,
         profile: _userProfile,
         onTelemetryUpdate: (telemetry) {
           _ttftMs = telemetry.ttftMs;
@@ -222,6 +328,8 @@ class TriageController extends ChangeNotifier {
     _streamedResponse = '';
     _currentQuery = '';
     _errorMessage = null;
+    _answerSource = null;
+    _callEmergencyNow = false;
     notifyListeners();
   }
 

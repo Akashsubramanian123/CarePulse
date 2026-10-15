@@ -4,6 +4,7 @@ import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'state/triage_controller.dart';
 import 'ui/screens/emergency_home_screen.dart';
+import 'ui/screens/main_shell.dart';
 import 'ui/screens/model_setup_screen.dart';
 
 void main() {
@@ -24,7 +25,7 @@ class CarePulseApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
-        home: const RootScreenRouter(),
+        home: const MainShell(),
       ),
     );
   }

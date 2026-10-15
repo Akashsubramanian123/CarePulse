@@ -24,8 +24,8 @@ class DocumentService {
           content: content,
         );
       }
-    } catch (e) {
-      print('Error parsing document: $e');
+    } catch (_) {
+      // Document could not be parsed
     }
     return null;
   }

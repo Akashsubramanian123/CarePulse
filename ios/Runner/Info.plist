@@ -8,6 +8,13 @@
 	<string>This app requires speech recognition to transcribe emergency queries.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires microphone access to record emergency queries.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>CarePulse requires location access to attach GPS coordinates to emergency SOS alerts.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>sms</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

@@ -79,7 +79,7 @@ class EmergencyChips extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: glass.iconTintGradient,
-                        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
                       ),
                       child: Icon(
                         _getPresetIcon(preset.iconName),

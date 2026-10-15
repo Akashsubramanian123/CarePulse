@@ -1,0 +1,443 @@
+[
+  {
+    "id": "bleeding",
+    "title": "Severe Bleeding",
+    "keywords": ["bleeding", "blood", "spurting", "wound", "artery", "hemorrhage", "gash", "laceration", "cut"],
+    "synonyms": ["heavy bleeding", "spurting blood", "profuse bleeding", "arterial bleed", "deep cut"],
+    "immediate": "Apply firm, direct pressure over the wound using a clean cloth, sterile dressing, or hands. Keep pressing without lifting to check.",
+    "precaution": "If blood soaks through, do not remove the first cloth; place another cloth on top and maintain constant pressure. If bleeding is uncontrolled on a limb, apply an approved tourniquet 5-7 cm above the wound.",
+    "monitor": "Keep the person lying down, cover them to keep warm, and monitor alertness and breathing until emergency responders arrive.",
+    "doNot": [
+      "Do not remove embedded objects from the wound; pack dressings around them to stabilize",
+      "Do not lift dressings to inspect if bleeding has stopped",
+      "Do not apply a tourniquet directly over a joint (elbow or knee)",
+      "Do not attempt wound cleaning or exploration while bleeding heavily"
+    ],
+    "callEmergency": true,
+    "sources": ["Red Cross", "American Heart Association", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "water_drop"
+  },
+  {
+    "id": "burns",
+    "title": "Burns and Scalds",
+    "keywords": ["burn", "scald", "heat", "hot liquid", "fire", "thermal", "boiling water", "steam", "blister"],
+    "synonyms": ["skin burn", "hot oil burn", "thermal burn", "scald injury", "boiling burn"],
+    "immediate": "Cool the burn immediately under gentle, cool running tap water for a full 20 minutes. Remove jewelry or loose clothing near the burn before swelling starts.",
+    "precaution": "Do not pop blisters or remove clothing stuck to the burn. Cover loosely with clean, non-adherent sterile dressing or clean plastic wrap.",
+    "monitor": "Keep the person warm to prevent hypothermia. Seek medical attention if the burn covers a large area, affects face, hands, or genitals, or forms blisters.",
+    "doNot": [
+      "Do not apply ice, iced water, butter, oil, grease, or toothpaste to a burn",
+      "Do not pop or break blisters",
+      "Do not peel off clothing that is stuck to burned skin",
+      "Do not use fluffy cotton wool dressings directly on the burn"
+    ],
+    "callEmergency": false,
+    "sources": ["Red Cross", "WHO", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "local_fire_department"
+  },
+  {
+    "id": "choking",
+    "title": "Choking (Adult)",
+    "keywords": ["choking", "choke", "airway", "unable to breathe", "cannot cough", "gagging", "throat obstructed"],
+    "synonyms": ["adult choking", "airway obstruction", "blocked windpipe", "strangling on food", "silent choking"],
+    "immediate": "If the person cannot speak or cough, stand behind them, support their chest, and deliver 5 firm back blows between shoulder blades. If still choked, perform 5 abdominal thrusts (Heimlich maneuver).",
+    "precaution": "Alternate 5 back blows and 5 abdominal thrusts until the object is expelled or the person becomes unresponsive.",
+    "monitor": "If the person becomes unconscious, lower them safely to the floor, call 112 immediately, and begin CPR starting with chest compressions. Check the mouth for the object before rescue breaths only if clearly visible.",
+    "doNot": [
+      "Do not perform blind finger sweeps in the mouth or throat",
+      "Do not give water or liquids to drink while choking",
+      "Do not slap the back if the person is coughing forcefully (encourage them to keep coughing)",
+      "Do not squeeze the ribs or xiphoid process during abdominal thrusts"
+    ],
+    "callEmergency": true,
+    "sources": ["American Heart Association", "Red Cross", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "air"
+  },
+  {
+    "id": "choking_child",
+    "title": "Choking (Child over 1 year)",
+    "keywords": ["child choking", "kid choking", "toddler choking", "child airway blocked"],
+    "synonyms": ["pediatric choking", "child blocked airway", "young child choke"],
+    "immediate": "Kneel behind the child. Deliver 5 firm back blows between shoulder blades with the heel of your hand. If unsuccessful, perform 5 subdiaphragmatic abdominal thrusts with adjusted force.",
+    "precaution": "Use gentler force proportional to the child's size. Continue alternating 5 back blows and 5 abdominal thrusts until clear.",
+    "monitor": "If the child becomes unresponsive, lay them on a flat, firm surface, shout for help, call 112, and start CPR.",
+    "doNot": [
+      "Do not perform blind finger sweeps",
+      "Do not shake the child violently",
+      "Do not give food or drink",
+      "Do not use excessive adult force that could injure internal organs"
+    ],
+    "callEmergency": true,
+    "sources": ["American Heart Association", "Red Cross", "WHO"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "escalator_warning"
+  },
+  {
+    "id": "choking_infant",
+    "title": "Choking (Infant under 1 year)",
+    "keywords": ["infant choking", "baby choking", "newborn choking", "baby cannot breathe"],
+    "synonyms": ["baby choking", "infant airway obstruction", "nursing choking"],
+    "immediate": "Lay the infant face down along your forearm with head lower than chest, supporting the jaw. Deliver up to 5 gentle back slaps between shoulder blades with the heel of your hand.",
+    "precaution": "If the object is not dislodged, turn infant face up onto your other forearm, head still low, and give up to 5 chest thrusts with 2 fingers on the center of the breastbone.",
+    "monitor": "Repeat 5 back slaps and 5 chest thrusts. If the infant becomes unresponsive, immediately call 112 and begin infant CPR.",
+    "doNot": [
+      "Do not perform abdominal thrusts (Heimlich) on an infant under 1 year",
+      "Do not perform blind finger sweeps",
+      "Do not compress or pinch the soft tissues of the infant's neck or throat",
+      "Do not invert the infant by their ankles"
+    ],
+    "callEmergency": true,
+    "sources": ["American Heart Association", "Red Cross", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "child_care"
+  },
+  {
+    "id": "heatstroke",
+    "title": "Heatstroke",
+    "keywords": ["heatstroke", "heat stroke", "hyperthermia", "hot weather", "high temperature", "confusion", "sunstroke"],
+    "synonyms": ["heat collapse", "severe overheating", "heat emergency", "sun stroke"],
+    "immediate": "Call 112 immediately. Move the person to a cooler or shaded area, remove excess clothing, and rapidly cool their body with cold water, wet towels, or ice packs placed on the neck, armpits, and groin.",
+    "precaution": "Fan vigorously while spraying or sponging with cool water. Heatstroke is a life-threatening medical emergency.",
+    "monitor": "Continuously monitor consciousness and airway. Stop active cold application if shivering begins.",
+    "doNot": [
+      "Do not give fluids or drinks if the person is confused, drowsy, or unconscious",
+      "Do not give aspirin, paracetamol, or fever medication (they are ineffective for environmental heatstroke)",
+      "Do not leave the person unattended",
+      "Do not delay calling emergency services"
+    ],
+    "callEmergency": true,
+    "sources": ["WHO", "Red Cross", "American Heart Association"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "wb_sunny"
+  },
+  {
+    "id": "snakebite",
+    "title": "Snakebite",
+    "keywords": ["snakebite", "snake bite", "venom", "fang marks", "viper", "cobra", "serpent bite"],
+    "synonyms": ["venomous bite", "reptile bite", "envenomation", "snake attack"],
+    "immediate": "Keep the person completely still and calm to slow venom circulation. Call 112 immediately. Immobilize the bitten limb with a splint at or slightly below heart level.",
+    "precaution": "Apply a broad firm pressure immobilization bandage over the bite site and up the entire limb if local protocol recommends (e.g. neurotoxic/elapid bites), or keep limb immobilized. Note snake appearance if safely possible without chasing it.",
+    "monitor": "Monitor breathing, pulse, and mental status. Be prepared to position in recovery position or start CPR if breathing ceases.",
+    "doNot": [
+      "Do not cut or suck the bite wound",
+      "Do not apply a tight arterial tourniquet",
+      "Do not apply ice, alcohol, or electric shocks",
+      "Do not try to capture, handle, or kill the snake",
+      "Do not wash the bite site (residual venom can identify snake species at the hospital)"
+    ],
+    "callEmergency": true,
+    "sources": ["WHO", "Red Cross", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "warning_amber"
+  },
+  {
+    "id": "seizure",
+    "title": "Seizure",
+    "keywords": ["seizure", "convulsion", "epilepsy", "fit", "shaking", "foaming", "jerking", "tremor"],
+    "synonyms": ["epileptic fit", "convulsive episode", "grand mal", "tonic clonic"],
+    "immediate": "Clear the area around the person of hard, sharp, or dangerous objects. Protect their head by placing something soft (like a folded jacket) underneath.",
+    "precaution": "Gently guide them away from hazards. Note the time the seizure began. Loosen tight neckwear.",
+    "monitor": "Once the shaking stops, place the person into the recovery position (on their side). Call 112 if the seizure lasts over 5 minutes, repeats without waking, occurs in water, or is their first seizure.",
+    "doNot": [
+      "Do not hold the person down or restrain their movements",
+      "Do not put anything in the person's mouth (including fingers, spoons, or bite blocks)",
+      "Do not give food, water, or medication until fully alert and oriented",
+      "Do not leave the person alone until recovered"
+    ],
+    "callEmergency": false,
+    "sources": ["Red Cross", "WHO", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "cyclone"
+  },
+  {
+    "id": "unconscious_breathing",
+    "title": "Unconscious but Breathing",
+    "keywords": ["unconscious", "unresponsive", "passed out", "blacked out", "breathing normally", "recovery position"],
+    "synonyms": ["unresponsive breathing", "comatose breathing", "stupor", "sleeping unable to wake"],
+    "immediate": "Gently shake shoulders and shout to check responsiveness. Open the airway with head-tilt chin-lift and verify normal breathing for up to 10 seconds. Place the person into the recovery position (on their side).",
+    "precaution": "Ensure the airway remains open and clear with head tilted slightly back and chin supported so saliva or vomit drains freely.",
+    "monitor": "Call 112 immediately. Regularly check breathing and pulse every minute until ambulance arrives.",
+    "doNot": [
+      "Do not leave the person flat on their back if they are breathing normally",
+      "Do not give any food, liquids, or oral medications",
+      "Do not slap, splash with cold water, or shake violently",
+      "Do not place a pillow under the head if it flexes the airway closed"
+    ],
+    "callEmergency": true,
+    "sources": ["Red Cross", "American Heart Association", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "hotel"
+  },
+  {
+    "id": "cardiac_arrest",
+    "title": "Cardiac Arrest and CPR",
+    "keywords": ["cardiac arrest", "not breathing", "no pulse", "heart attack collapse", "cpr", "chest compressions", "unresponsive"],
+    "synonyms": ["no heartbeat", "respiratory arrest", "sudden collapse", "stopped breathing", "agonal gasps"],
+    "immediate": "Call 112 immediately and shout for an Automated External Defibrillator (AED). Place hands in the center of the person's chest and deliver firm, rapid chest compressions at 100-120 beats per minute.",
+    "precaution": "Push down at least 5 to 6 cm deep (for adults) and allow complete chest recoil between each push. Minimize interruptions in compressions.",
+    "monitor": "If trained and willing, perform cycles of 30 chest compressions followed by 2 rescue breaths. Otherwise, provide continuous hands-only CPR until emergency personnel take over or an AED arrives.",
+    "doNot": [
+      "Do not delay starting compressions to check for a pulse if untrained",
+      "Do not treat agonal gasping/snorting as normal breathing",
+      "Do not stop compressions for more than 10 seconds",
+      "Do not touch the patient while the AED is analyzing or delivering a shock"
+    ],
+    "callEmergency": true,
+    "sources": ["American Heart Association", "Red Cross", "WHO"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "favorite"
+  },
+  {
+    "id": "chest_pain",
+    "title": "Chest Pain (Suspected Heart Attack)",
+    "keywords": ["chest pain", "heart attack", "angina", "chest pressure", "arm pain", "sweating", "jaw pain", "shortness of breath"],
+    "synonyms": ["coronary emergency", "myocardial infarction", "tightness in chest", "crushing chest pain"],
+    "immediate": "Call 112 immediately. Help the person sit down in a comfortable, semi-reclined position (knees bent, back supported) to ease strain on the heart.",
+    "precaution": "Loosen tight clothing around the neck and waist. Keep the person calm and still. If they have prescribed nitroglycerin, assist them to take it.",
+    "monitor": "Stay with the person constantly. Monitor breathing and alertness. Be prepared to start CPR immediately if they become unresponsive and stop breathing.",
+    "doNot": [
+      "Do not allow the person to walk, drive, or exert themselves physically",
+      "Do not wait to see if the symptoms pass before calling emergency services",
+      "Do not give food or caffeinated drinks",
+      "Do not give aspirin if they are allergic or have bleeding disorders"
+    ],
+    "callEmergency": true,
+    "sources": ["American Heart Association", "Red Cross", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "healing"
+  },
+  {
+    "id": "stroke",
+    "title": "Suspected Stroke",
+    "keywords": ["stroke", "face drooping", "arm weakness", "slurred speech", "fast", "facial numbness", "loss of speech"],
+    "synonyms": ["cerebrovascular accident", "cva", "brain attack", "mini stroke", "transient ischemic attack"],
+    "immediate": "Perform the FAST check: Face drooping on one side, Arm weakness (cannot hold both arms up), Speech slurred or strange, Time to call 112 immediately. Note the exact time symptoms started.",
+    "precaution": "Keep the person comfortable and calm, lying slightly elevated on their side if vomiting or saliva occurs. Reassure them even if they cannot speak.",
+    "monitor": "Check breathing constantly. Do not give any medication, food, or drink because swallowing reflex may be impaired.",
+    "doNot": [
+      "Do not give aspirin or other blood thinners (stroke may be hemorrhagic)",
+      "Do not give any food, water, or pills to swallow",
+      "Do not allow the person to sleep or drive to the hospital",
+      "Do not wait to see if neurological symptoms resolve"
+    ],
+    "callEmergency": true,
+    "sources": ["American Heart Association", "WHO", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "psychology"
+  },
+  {
+    "id": "fracture",
+    "title": "Fractures and Bone Injuries",
+    "keywords": ["fracture", "broken bone", "deformity", "broken leg", "broken arm", "dislocation", "bone snap"],
+    "synonyms": ["compound fracture", "broken limb", "bone break", "cracked bone"],
+    "immediate": "Support the injured area in the position found. Prevent any movement of the injured bone or adjacent joints.",
+    "precaution": "If an open fracture (bone pierced skin), cover the wound with a clean sterile dressing without pressing directly on the bone. Apply an ice pack wrapped in a cloth to reduce swelling.",
+    "monitor": "Check circulation beyond the injury (warmth, sensation, color in fingers or toes) every 15 minutes. Call 112 for femur, pelvis, spinal injuries, or open fractures.",
+    "doNot": [
+      "Do not attempt to realign, straighten, or push back a broken bone or joint",
+      "Do not move the person if spinal or neck injury is suspected unless immediate danger",
+      "Do not apply ice directly to bare skin",
+      "Do not give food or drink in case emergency surgery is needed"
+    ],
+    "callEmergency": false,
+    "sources": ["Red Cross", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "accessibility"
+  },
+  {
+    "id": "drowning",
+    "title": "Drowning and Water Rescue",
+    "keywords": ["drowning", "submersion", "water accident", "swallowed water", "inhalation of water"],
+    "synonyms": ["near drowning", "water asphyxiation", "submerged in pool"],
+    "immediate": "Call 112 immediately. Safely remove the person from water without endangering yourself. Check responsiveness and breathing immediately.",
+    "precaution": "If not breathing normally, start CPR immediately. Give 5 initial rescue breaths followed by 30 chest compressions, then continue 30:2 CPR.",
+    "monitor": "Remove wet clothing once on dry land and cover with dry blankets to prevent hypothermia. Every drowning victim needs emergency hospital evaluation due to delayed pulmonary complications.",
+    "doNot": [
+      "Do not attempt abdominal thrusts (Heimlich) to clear water from lungs",
+      "Do not enter water yourself if you are not trained or if dangerous currents exist",
+      "Do not leave the victim even if they feel fully recovered immediately",
+      "Do not delay CPR to clear water"
+    ],
+    "callEmergency": true,
+    "sources": ["American Heart Association", "Red Cross", "WHO"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "pool"
+  },
+  {
+    "id": "electric_shock",
+    "title": "Electric Shock",
+    "keywords": ["electric shock", "electrocution", "power line", "wire", "voltage", "current", "electrical burn"],
+    "synonyms": ["electrocuted", "high voltage shock", "light socket shock", "lightning strike"],
+    "immediate": "Do not touch the victim until the electrical power source is turned off or disconnected. Call 112 immediately. If outdoors near high voltage, stay at least 10 meters away.",
+    "precaution": "Once safe, assess breathing and pulse. Begin CPR immediately if unresponsive and not breathing.",
+    "monitor": "Check for entry and exit burn wounds and treat burns with cool running water. Watch for shock, arrhythmias, and cardiac collapse.",
+    "doNot": [
+      "Do not touch the person while they are still in contact with the electrical source",
+      "Do not use metal or wet objects to push the power source away",
+      "Do not approach downed power lines",
+      "Do not ignore electric shock even if external injuries look minor"
+    ],
+    "callEmergency": true,
+    "sources": ["Red Cross", "St John Ambulance", "WHO"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "bolt"
+  },
+  {
+    "id": "poisoning",
+    "title": "Poisoning and Chemical Ingestion",
+    "keywords": ["poisoning", "poison", "toxic", "swallowed chemical", "bleach", "overdose", "detergent", "pills"],
+    "synonyms": ["ingested poison", "accidental ingestion", "drug overdose", "swallowed toxin"],
+    "immediate": "Call 112 or your national poison control center immediately. Keep the substance container or packaging nearby for identification.",
+    "precaution": "If the substance was inhaled, move the person to fresh air. If splashed on skin or eyes, irrigate with abundant clean water for 15-20 minutes.",
+    "monitor": "Keep the person comfortable. If they become drowsy or unconscious, place them in the recovery position and monitor their airway.",
+    "doNot": [
+      "Do not induce vomiting unless specifically directed by medical professionals",
+      "Do not give ipecac syrup or activated charcoal without medical authorization",
+      "Do not give milk, vinegar, or citrus to 'neutralize' corrosive chemicals",
+      "Do not give anything to eat or drink if drowsy or unconscious"
+    ],
+    "callEmergency": true,
+    "sources": ["WHO", "Red Cross", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "science"
+  },
+  {
+    "id": "anaphylaxis",
+    "title": "Severe Allergic Reaction (Anaphylaxis)",
+    "keywords": ["anaphylaxis", "allergic reaction", "epipen", "swelling throat", "swelling face", "bee sting", "peanut allergy", "wheezing"],
+    "synonyms": ["severe allergy", "allergic shock", "angioedema", "throat swelling"],
+    "immediate": "Call 112 immediately. If the person carries an epinephrine auto-injector (EpiPen), assist them to inject it into the outer middle thigh immediately.",
+    "precaution": "Have the person lie flat with legs elevated unless breathing is difficult, in which case allow them to sit up slightly. Do not have them stand up suddenly.",
+    "monitor": "Monitor breathing and alertness closely. A second dose of epinephrine may be given after 5 to 15 minutes if symptoms persist and help has not arrived.",
+    "doNot": [
+      "Do not hesitate or delay administering epinephrine",
+      "Do not make the person suddenly stand up or walk",
+      "Do not give oral antihistamines as a replacement for emergency epinephrine",
+      "Do not leave the person alone"
+    ],
+    "callEmergency": true,
+    "sources": ["WHO", "American Heart Association", "Red Cross"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "coronavirus"
+  },
+  {
+    "id": "nosebleed",
+    "title": "Nosebleed (Epistaxis)",
+    "keywords": ["nosebleed", "nose bleed", "epistaxis", "bleeding nose", "nasal hemorrhage"],
+    "synonyms": ["bloody nose", "nasal bleeding"],
+    "immediate": "Sit upright and lean slightly forward (do not tilt head back). Pinch the soft part of the nose firmly with thumb and index finger for 10 to 15 minutes without releasing.",
+    "precaution": "Breathe through the mouth and spit out any blood that flows into the throat to avoid nausea and vomiting. Apply a cold compress to the bridge of the nose.",
+    "monitor": "Release pressure gently after 10-15 minutes. If bleeding continues for more than 20 minutes, is very heavy, or followed a head blow, seek emergency care.",
+    "doNot": [
+      "Do not tilt the head backward (swallowing blood can cause vomiting and airway obstruction)",
+      "Do not pack the nostrils with dry tissues, cloths, or cotton wool",
+      "Do not lie flat",
+      "Do not blow, pick, or rub the nose for several hours after bleeding stops"
+    ],
+    "callEmergency": false,
+    "sources": ["Red Cross", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "masks"
+  },
+  {
+    "id": "fainting",
+    "title": "Fainting (Syncope)",
+    "keywords": ["fainting", "faint", "syncope", "passed out briefly", "dizzy collapse", "lightheaded"],
+    "synonyms": ["vasovagal", "brief unconsciousness", "swooning"],
+    "immediate": "Lay the person flat on their back and elevate their legs approximately 30 cm (12 inches) to restore blood flow to the brain.",
+    "precaution": "Loosen tight collars, belts, or waistbands. Ensure plenty of fresh air. If recovery does not happen within 1 minute, evaluate for other causes.",
+    "monitor": "Check that the person is breathing normally. Keep them lying down for at least 10 to 15 minutes after regaining consciousness; have them sit up slowly.",
+    "doNot": [
+      "Do not allow the person to get up or stand immediately",
+      "Do not give food, water, or medication until fully alert",
+      "Do not splash cold water on their face or slap them",
+      "Do not place a pillow under the head while they are unconscious"
+    ],
+    "callEmergency": false,
+    "sources": ["Red Cross", "American Heart Association"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "airline_seat_flat"
+  },
+  {
+    "id": "eye_injury",
+    "title": "Eye Injury",
+    "keywords": ["eye injury", "chemical in eye", "object in eye", "corneal scratch", "eye trauma", "cut eye"],
+    "synonyms": ["foreign body eye", "punctured eye", "chemical splash eye"],
+    "immediate": "For chemical splashes, flush the eye immediately with clean lukewarm water or saline for at least 15 to 20 minutes, holding the eyelid open.",
+    "precaution": "For embedded objects or cuts, place a protective shield (like a paper cup) over the injured eye without touching the eye itself, and tape it in place.",
+    "monitor": "Cover both eyes loosely if tolerated to prevent sympathetic movement of the injured eye. Seek immediate emergency ophthalmic care.",
+    "doNot": [
+      "Do not rub or press on the injured eye",
+      "Do not attempt to remove an object embedded in the eyeball",
+      "Do not apply medication, ointments, or eye drops without doctor advice",
+      "Do not let the person drive themselves to the hospital"
+    ],
+    "callEmergency": false,
+    "sources": ["Red Cross", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "visibility"
+  },
+  {
+    "id": "hypothermia",
+    "title": "Hypothermia",
+    "keywords": ["hypothermia", "freezing", "cold exposure", "shivering", "low body temperature", "frostbite"],
+    "synonyms": ["extreme cold", "accidental hypothermia", "severe chills"],
+    "immediate": "Move the person gently into a warm, dry shelter. Remove wet clothing immediately and wrap them in dry blankets, covering head and torso.",
+    "precaution": "Warm the core first (chest, neck, groin) using blankets and skin-to-skin contact. Handle gently as rough movements can trigger fatal cardiac arrhythmias.",
+    "monitor": "If the person is conscious and can swallow easily, offer warm, sweet non-caffeinated drinks. Call 112 if confused, drowsy, or shivering stops while still cold.",
+    "doNot": [
+      "Do not apply direct heat sources like boiling water, heating lamps, or fire directly to the skin",
+      "Do not rub or massage cold extremities (especially if frostbite is suspected)",
+      "Do not give alcohol or caffeinated beverages",
+      "Do not immerse in a hot bath rapidly"
+    ],
+    "callEmergency": false,
+    "sources": ["WHO", "Red Cross", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "ac_unit"
+  },
+  {
+    "id": "bites_and_stings",
+    "title": "Insect Bites and Stings",
+    "keywords": ["bee sting", "wasp sting", "insect bite", "bug bite", "spider bite", "scorpion sting", "mosquito bite"],
+    "synonyms": ["hymenoptera sting", "arthropod bite", "wasp venom"],
+    "immediate": "For a bee sting, scrape the stinger away immediately using the edge of a credit card or fingernail. Wash the area with mild soap and water.",
+    "precaution": "Apply a cold pack wrapped in a clean towel to the sting site for 10 minutes at a time to reduce pain and localized swelling.",
+    "monitor": "Watch closely for signs of severe allergic reaction (anaphylaxis) including difficulty breathing, facial or throat swelling, dizziness, or widespread hives. Call 112 immediately if these occur.",
+    "doNot": [
+      "Do not squeeze the venom sac with tweezers or fingers (this injects more venom)",
+      "Do not scratch the bite site (prevents secondary bacterial infection)",
+      "Do not apply tourniquets or cut the bite site",
+      "Do not ignore symptoms of systemic reaction"
+    ],
+    "callEmergency": false,
+    "sources": ["Red Cross", "WHO", "St John Ambulance"],
+    "lastReviewed": null,
+    "reviewedBy": null,
+    "iconName": "pest_control"
+  }
+]
