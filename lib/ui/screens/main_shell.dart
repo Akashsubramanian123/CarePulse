@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/tts_service.dart';
+import '../../state/theme_controller.dart';
 import '../../state/triage_controller.dart';
 import 'cpr_screen.dart';
 import 'emergency_home_screen.dart';
@@ -37,12 +40,105 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
+  Future<void> _callEmergency() async {
+    final uri = Uri(scheme: 'tel', path: emergencyNumber);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Failed to open dialer. Please dial $emergencyNumber manually.'),
+          ),
+        );
+      }
+    }
+  }
+
+  IconData _getThemeIcon(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return Icons.light_mode_rounded;
+      case ThemeMode.dark:
+        return Icons.dark_mode_rounded;
+      case ThemeMode.system:
+        return Icons.brightness_auto_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
+    ThemeController? themeCtrl;
+    try {
+      themeCtrl = context.watch<ThemeController>();
+    } catch (_) {
+      themeCtrl = null;
+    }
+
+    final currentMode = themeCtrl?.themeMode ?? ThemeMode.system;
+
     return Scaffold(
       extendBody: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          // Quick theme toggle button (sun/moon) cycling light -> dark -> system
+          SizedBox(
+            width: 48,
+            height: 48,
+            child: IconButton(
+              key: const ValueKey('quick_theme_toggle_button'),
+              tooltip: 'Cycle theme: light -> dark -> system',
+              icon: Icon(
+                _getThemeIcon(currentMode),
+                color: glass.accentMint,
+                size: 22,
+              ),
+              onPressed: () {
+                themeCtrl?.cycleTheme();
+              },
+            ),
+          ),
+          const SizedBox(width: 4),
+          // Small reachable Call 112 action button
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: SizedBox(
+              height: 48,
+              child: TextButton.icon(
+                key: const ValueKey('main_shell_call_112_button'),
+                onPressed: _callEmergency,
+                style: TextButton.styleFrom(
+                  backgroundColor:
+                      const Color(0xFFE05A4F).withValues(alpha: 0.18),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: const BorderSide(color: Color(0xFFE05A4F), width: 1),
+                  ),
+                ),
+                icon:
+                    const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
+                label: const Text(
+                  '112',
+                  style: TextStyle(
+                    color: Color(0xFFE05A4F),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: IndexedStack(
         index: _currentIndex,
         children: const [

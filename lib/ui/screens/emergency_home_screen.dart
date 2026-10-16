@@ -7,6 +7,7 @@ import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/tts_service.dart';
 import '../../services/voice_input_service.dart';
+import '../../state/theme_controller.dart';
 import '../../state/triage_controller.dart';
 import '../widgets/emergency_chips.dart';
 import '../widgets/glass_card.dart';
@@ -162,82 +163,165 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
             final isDark = Theme.of(ctx).brightness == Brightness.dark;
-            return Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1B242D) : Colors.white,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ThemeController? themeController;
+            try {
+              themeController = ctx.watch<ThemeController>();
+            } catch (_) {
+              try {
+                themeController = Provider.of<ThemeController>(context);
+              } catch (_) {
+                themeController = null;
+              }
+            }
+
+            return Material(
+              color: isDark ? const Color(0xFF1B242D) : Colors.white,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(28)),
+              clipBehavior: Clip.antiAlias,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                child: SafeArea(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Settings & About',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: glass.textPrimary,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close_rounded),
+                              onPressed: () => Navigator.pop(ctx),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
                         Text(
-                          'Settings & About',
+                          'Theme',
                           style: TextStyle(
-                            fontSize: 18,
+                            color: glass.textPrimary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        if (themeController != null)
+                          SegmentedButton<ThemeMode>(
+                            key: const ValueKey(
+                                'settings_theme_segmented_button'),
+                            segments: const [
+                              ButtonSegment<ThemeMode>(
+                                value: ThemeMode.system,
+                                icon: Icon(Icons.brightness_auto_rounded,
+                                    size: 18),
+                                label: Text('System'),
+                              ),
+                              ButtonSegment<ThemeMode>(
+                                value: ThemeMode.light,
+                                icon: Icon(Icons.light_mode_rounded, size: 18),
+                                label: Text('Light'),
+                              ),
+                              ButtonSegment<ThemeMode>(
+                                value: ThemeMode.dark,
+                                icon: Icon(Icons.dark_mode_rounded, size: 18),
+                                label: Text('Dark'),
+                              ),
+                            ],
+                            selected: {themeController.themeMode},
+                            onSelectionChanged: (Set<ThemeMode> newSelection) {
+                              if (newSelection.isNotEmpty) {
+                                themeController!
+                                    .setThemeMode(newSelection.first);
+                                setSheetState(() {});
+                              }
+                            },
+                            style: ButtonStyle(
+                              minimumSize:
+                                  WidgetStateProperty.all(const Size(0, 48)),
+                              visualDensity: VisualDensity.standard,
+                              tapTargetSize: MaterialTapTargetSize.padded,
+                              backgroundColor:
+                                  WidgetStateProperty.resolveWith((states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return glass.accentMint
+                                      .withValues(alpha: 0.22);
+                                }
+                                return Colors.transparent;
+                              }),
+                              foregroundColor:
+                                  WidgetStateProperty.resolveWith((states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return glass.accentMint;
+                                }
+                                return glass.textPrimary;
+                              }),
+                              side: WidgetStateProperty.all(
+                                BorderSide(
+                                    color: glass.glassBorderColor, width: 1.0),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 14),
+                        const Divider(height: 1),
+                        const SizedBox(height: 8),
+                        SwitchListTile(
+                          title: Text(
+                            'Read answers aloud automatically',
+                            style: TextStyle(
+                              color: glass.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Speaks out emergency steps as soon as generated',
+                            style: TextStyle(
+                                color: glass.textSecondary, fontSize: 12),
+                          ),
+                          value: _autoReadAloud,
+                          activeThumbColor: glass.accentMint,
+                          contentPadding: EdgeInsets.zero,
+                          onChanged: (val) {
+                            setSheetState(() => _autoReadAloud = val);
+                            _saveAutoReadAloud(val);
+                          },
+                        ),
+                        const Divider(height: 24),
+                        Text(
+                          'About CarePulse',
+                          style: TextStyle(
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: glass.textPrimary,
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.close_rounded),
-                          onPressed: () => Navigator.pop(ctx),
+                        const SizedBox(height: 8),
+                        Text(
+                          'CarePulse provides first-aid guidance only and is not a substitute for professional medical care. In a serious emergency, call your local emergency number ($emergencyNumber).',
+                          style: TextStyle(
+                            color: glass.textSecondary,
+                            fontSize: 13,
+                            height: 1.5,
+                          ),
                         ),
+                        const SizedBox(height: 16),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    SwitchListTile(
-                      title: Text(
-                        'Read answers aloud automatically',
-                        style: TextStyle(
-                          color: glass.textPrimary,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Speaks out emergency steps as soon as generated',
-                        style:
-                            TextStyle(color: glass.textSecondary, fontSize: 12),
-                      ),
-                      value: _autoReadAloud,
-                      activeThumbColor: glass.accentMint,
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: (val) {
-                        setSheetState(() => _autoReadAloud = val);
-                        _saveAutoReadAloud(val);
-                      },
-                    ),
-                    const Divider(height: 24),
-                    Text(
-                      'About CarePulse',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: glass.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'CarePulse provides first-aid guidance only and is not a substitute for professional medical care. In a serious emergency, call your local emergency number ($emergencyNumber).',
-                      style: TextStyle(
-                        color: glass.textSecondary,
-                        fontSize: 13,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                  ),
                 ),
               ),
             );
