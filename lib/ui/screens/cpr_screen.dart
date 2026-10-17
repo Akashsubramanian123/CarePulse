@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
+import '../../state/app_settings_controller.dart';
 import '../../state/cpr_controller.dart';
 import '../widgets/glass_card.dart';
 
@@ -65,8 +67,12 @@ class _CprScreenState extends State<CprScreen>
     super.dispose();
   }
 
-  Future<void> _callEmergency() async {
-    final uri = Uri(scheme: 'tel', path: emergencyNumber);
+  Future<void> _callEmergency([String? targetNumber]) async {
+    final settings =
+        context.mounted ? context.read<AppSettingsController?>() : null;
+    final numToCall =
+        targetNumber ?? settings?.emergencyNumber ?? emergencyNumber;
+    final uri = Uri(scheme: 'tel', path: numToCall);
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
@@ -74,8 +80,9 @@ class _CprScreenState extends State<CprScreen>
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to open dialer. Please dial 112 manually.'),
+          SnackBar(
+            content:
+                Text('Failed to open dialer. Please dial $numToCall manually.'),
           ),
         );
       }
@@ -91,6 +98,8 @@ class _CprScreenState extends State<CprScreen>
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
+    final settings = context.watch<AppSettingsController?>();
+    final emergencyNum = settings?.emergencyNumber ?? emergencyNumber;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -107,13 +116,13 @@ class _CprScreenState extends State<CprScreen>
           ),
         ),
         actions: [
-          // Small reachable Call 112 button
+          // Small reachable Call button
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: SizedBox(
               height: 48,
               child: TextButton.icon(
-                onPressed: _callEmergency,
+                onPressed: () => _callEmergency(emergencyNum),
                 style: TextButton.styleFrom(
                   backgroundColor:
                       const Color(0xFFE05A4F).withValues(alpha: 0.18),
@@ -126,9 +135,9 @@ class _CprScreenState extends State<CprScreen>
                 ),
                 icon:
                     const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
-                label: const Text(
-                  '112',
-                  style: TextStyle(
+                label: Text(
+                  'Call $emergencyNum',
+                  style: const TextStyle(
                     color: Color(0xFFE05A4F),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -153,7 +162,7 @@ class _CprScreenState extends State<CprScreen>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // 1. Safety Checklist Banner
-                    _buildSafetyChecklist(glass),
+                    _buildSafetyChecklist(glass, emergencyNum),
                     const SizedBox(height: 16),
 
                     // 2. Metronome Card with Pulsing Circle
@@ -175,7 +184,7 @@ class _CprScreenState extends State<CprScreen>
     );
   }
 
-  Widget _buildSafetyChecklist(CarePulseGlass glass) {
+  Widget _buildSafetyChecklist(CarePulseGlass glass, String emergencyNum) {
     return GlassCard(
       padding: const EdgeInsets.all(16),
       borderRadius: 22,
@@ -204,12 +213,12 @@ class _CprScreenState extends State<CprScreen>
           _buildChecklistItem(
               '3. Look for normal breathing (max 10 seconds)', glass),
           _buildChecklistItem(
-              '4. Shout for help and call 112 immediately', glass),
+              '4. Shout for help and call $emergencyNum immediately', glass),
           const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: _callEmergency,
+              onPressed: () => _callEmergency(emergencyNum),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFFE05A4F),
                 side: const BorderSide(color: Color(0xFFE05A4F)),
@@ -218,8 +227,8 @@ class _CprScreenState extends State<CprScreen>
                 minimumSize: const Size(double.infinity, 48),
               ),
               icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
-              label: const Text('Call 112 Now',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              label: Text('Call $emergencyNum Now',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],

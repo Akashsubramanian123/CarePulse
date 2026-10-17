@@ -7,12 +7,16 @@ import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/tts_service.dart';
 import '../../services/voice_input_service.dart';
+import '../../models/triage_question.dart';
+import '../../state/app_settings_controller.dart';
 import '../../state/theme_controller.dart';
 import '../../state/triage_controller.dart';
 import '../widgets/emergency_chips.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/streaming_response_card.dart';
 import '../widgets/telemetry_bar.dart';
+import 'benchmark_screen.dart';
+import 'history_screen.dart';
 import 'profile_screen.dart';
 
 class EmergencyHomeScreen extends StatefulWidget {
@@ -140,8 +144,11 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     }
   }
 
-  Future<void> _callEmergency() async {
-    final uri = Uri(scheme: 'tel', path: emergencyNumber);
+  Future<void> _callEmergency([String? targetNumber]) async {
+    final settings =
+        Provider.of<AppSettingsController?>(context, listen: false);
+    final number = targetNumber ?? settings?.emergencyNumber ?? emergencyNumber;
+    final uri = Uri(scheme: 'tel', path: number);
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
@@ -151,8 +158,9 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to open dialer. Please dial 112 manually.'),
+          SnackBar(
+            content:
+                Text('Failed to open dialer. Please dial $number manually.'),
           ),
         );
       }
@@ -168,16 +176,29 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
             final isDark = Theme.of(ctx).brightness == Brightness.dark;
-            ThemeController? themeController;
+            AppSettingsController? settingsController;
             try {
-              themeController = ctx.watch<ThemeController>();
-            } catch (_) {
+              settingsController = ctx.watch<AppSettingsController?>();
+            } catch (_) {}
+            if (settingsController == null) {
               try {
-                themeController = Provider.of<ThemeController>(context);
-              } catch (_) {
-                themeController = null;
-              }
+                settingsController =
+                    Provider.of<AppSettingsController?>(context);
+              } catch (_) {}
             }
+            if (settingsController == null) {
+              try {
+                settingsController = ctx.watch<ThemeController?>();
+              } catch (_) {}
+            }
+            if (settingsController == null) {
+              try {
+                settingsController = Provider.of<ThemeController?>(context);
+              } catch (_) {}
+            }
+
+            final currentSettings =
+                settingsController ?? AppSettingsController();
 
             return Material(
               color: isDark ? const Color(0xFF1B242D) : Colors.white,
@@ -219,65 +240,162 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (themeController != null)
-                          SegmentedButton<ThemeMode>(
-                            key: const ValueKey(
-                                'settings_theme_segmented_button'),
-                            segments: const [
-                              ButtonSegment<ThemeMode>(
-                                value: ThemeMode.system,
-                                icon: Icon(Icons.brightness_auto_rounded,
-                                    size: 18),
-                                label: Text('System'),
-                              ),
-                              ButtonSegment<ThemeMode>(
-                                value: ThemeMode.light,
-                                icon: Icon(Icons.light_mode_rounded, size: 18),
-                                label: Text('Light'),
-                              ),
-                              ButtonSegment<ThemeMode>(
-                                value: ThemeMode.dark,
-                                icon: Icon(Icons.dark_mode_rounded, size: 18),
-                                label: Text('Dark'),
-                              ),
-                            ],
-                            selected: {themeController.themeMode},
-                            onSelectionChanged: (Set<ThemeMode> newSelection) {
-                              if (newSelection.isNotEmpty) {
-                                themeController!
-                                    .setThemeMode(newSelection.first);
-                                setSheetState(() {});
+                        SegmentedButton<ThemeMode>(
+                          key:
+                              const ValueKey('settings_theme_segmented_button'),
+                          segments: const [
+                            ButtonSegment<ThemeMode>(
+                              value: ThemeMode.system,
+                              icon:
+                                  Icon(Icons.brightness_auto_rounded, size: 18),
+                              label: Text('System'),
+                            ),
+                            ButtonSegment<ThemeMode>(
+                              value: ThemeMode.light,
+                              icon: Icon(Icons.light_mode_rounded, size: 18),
+                              label: Text('Light'),
+                            ),
+                            ButtonSegment<ThemeMode>(
+                              value: ThemeMode.dark,
+                              icon: Icon(Icons.dark_mode_rounded, size: 18),
+                              label: Text('Dark'),
+                            ),
+                          ],
+                          selected: {currentSettings.themeMode},
+                          onSelectionChanged: (Set<ThemeMode> newSelection) {
+                            if (newSelection.isNotEmpty) {
+                              settingsController
+                                  ?.setThemeMode(newSelection.first);
+                              setSheetState(() {});
+                            }
+                          },
+                          style: ButtonStyle(
+                            minimumSize:
+                                WidgetStateProperty.all(const Size(0, 48)),
+                            visualDensity: VisualDensity.standard,
+                            tapTargetSize: MaterialTapTargetSize.padded,
+                            backgroundColor:
+                                WidgetStateProperty.resolveWith((states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return glass.accentMint.withValues(alpha: 0.22);
                               }
-                            },
-                            style: ButtonStyle(
-                              minimumSize:
-                                  WidgetStateProperty.all(const Size(0, 48)),
-                              visualDensity: VisualDensity.standard,
-                              tapTargetSize: MaterialTapTargetSize.padded,
-                              backgroundColor:
-                                  WidgetStateProperty.resolveWith((states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return glass.accentMint
-                                      .withValues(alpha: 0.22);
-                                }
-                                return Colors.transparent;
-                              }),
-                              foregroundColor:
-                                  WidgetStateProperty.resolveWith((states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return glass.accentMint;
-                                }
-                                return glass.textPrimary;
-                              }),
-                              side: WidgetStateProperty.all(
-                                BorderSide(
-                                    color: glass.glassBorderColor, width: 1.0),
-                              ),
+                              return Colors.transparent;
+                            }),
+                            foregroundColor:
+                                WidgetStateProperty.resolveWith((states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return glass.accentMint;
+                              }
+                              return glass.textPrimary;
+                            }),
+                            side: WidgetStateProperty.all(
+                              BorderSide(
+                                  color: glass.glassBorderColor, width: 1.0),
                             ),
                           ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Emergency Number',
+                          style: TextStyle(
+                            color: glass.textPrimary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          initialValue: currentSettings.selectedCountry,
+                          decoration: InputDecoration(
+                            labelText: 'Region / Country',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                          ),
+                          items: [
+                            ...emergencyCountries.map(
+                              (c) => DropdownMenuItem(
+                                value: c.name,
+                                child: Text('${c.name} (${c.number})'),
+                              ),
+                            ),
+                            const DropdownMenuItem(
+                              value: customCountryName,
+                              child: Text('Other / custom'),
+                            ),
+                          ],
+                          onChanged: (newCountry) {
+                            if (newCountry != null) {
+                              settingsController?.setCountry(newCountry);
+                              setSheetState(() {});
+                            }
+                          },
+                        ),
+                        if (currentSettings.selectedCountry ==
+                            customCountryName) ...[
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            initialValue: currentSettings.emergencyNumber,
+                            decoration: InputDecoration(
+                              labelText: 'Custom Emergency Number',
+                              hintText: 'e.g. 911 or 112',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            validator: (val) {
+                              if (val == null ||
+                                  !isValidCustomEmergencyNumber(val)) {
+                                return 'Digits only (2 to 6 digits)';
+                              }
+                              return null;
+                            },
+                            onChanged: (val) {
+                              if (isValidCustomEmergencyNumber(val)) {
+                                settingsController?.setEmergencyNumber(val,
+                                    country: customCountryName);
+                              }
+                            },
+                          ),
+                        ],
                         const SizedBox(height: 14),
                         const Divider(height: 1),
                         const SizedBox(height: 8),
+                        SwitchListTile(
+                          title: Text(
+                            'Save query history',
+                            style: TextStyle(
+                              color: glass.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Keep first-aid queries on this device',
+                            style: TextStyle(
+                              color: glass.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          value: currentSettings.saveHistory,
+                          activeThumbColor: glass.accentMint,
+                          contentPadding: EdgeInsets.zero,
+                          onChanged: (val) {
+                            settingsController?.setSaveHistory(val);
+                            setSheetState(() {});
+                          },
+                        ),
                         SwitchListTile(
                           title: Text(
                             'Read answers aloud automatically',
@@ -290,7 +408,9 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                           subtitle: Text(
                             'Speaks out emergency steps as soon as generated',
                             style: TextStyle(
-                                color: glass.textSecondary, fontSize: 12),
+                              color: glass.textSecondary,
+                              fontSize: 12,
+                            ),
                           ),
                           value: _autoReadAloud,
                           activeThumbColor: glass.accentMint,
@@ -298,6 +418,67 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                           onChanged: (val) {
                             setSheetState(() => _autoReadAloud = val);
                             _saveAutoReadAloud(val);
+                          },
+                        ),
+                        const Divider(height: 24),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.history_rounded,
+                              color: glass.accentMint),
+                          title: Text(
+                            'Query History',
+                            style: TextStyle(
+                              color: glass.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Review past consultations',
+                            style: TextStyle(
+                              color: glass.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: Icon(Icons.chevron_right_rounded,
+                              color: glass.textSecondary),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const HistoryScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(Icons.assessment_outlined,
+                              color: glass.accentMint),
+                          title: Text(
+                            'Benchmark & Evaluation',
+                            style: TextStyle(
+                              color: glass.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Evaluate models & protocol accuracy',
+                            style: TextStyle(
+                              color: glass.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: Icon(Icons.chevron_right_rounded,
+                              color: glass.textSecondary),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const BenchmarkScreen(),
+                              ),
+                            );
                           },
                         ),
                         const Divider(height: 24),
@@ -311,7 +492,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'CarePulse provides first-aid guidance only and is not a substitute for professional medical care. In a serious emergency, call your local emergency number ($emergencyNumber).',
+                          'CarePulse provides first-aid guidance only and is not a substitute for professional medical care. In a serious emergency, call your local emergency number (${currentSettings.emergencyNumber}).',
                           style: TextStyle(
                             color: glass.textSecondary,
                             fontSize: 13,
@@ -335,6 +516,11 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<TriageController>();
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
+    AppSettingsController? settingsController;
+    try {
+      settingsController = context.watch<AppSettingsController>();
+    } catch (_) {}
+    final settings = settingsController ?? AppSettingsController();
 
     // Auto-read aloud trigger when generation completes
     if (_autoReadAloud &&
@@ -458,14 +644,14 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.warning_rounded,
+                              children: [
+                                const Icon(Icons.warning_rounded,
                                     color: Colors.white, size: 28),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 10),
                                 Flexible(
                                   child: Text(
-                                    'CRITICAL RED FLAG · CALL 112 NOW',
-                                    style: TextStyle(
+                                    'CRITICAL RED FLAG · CALL ${settings.emergencyNumber} NOW',
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 17,
                                       fontWeight: FontWeight.w900,
@@ -481,7 +667,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                       ] else ...[
                         // Standard Emergency Call Button
                         InkWell(
-                          onTap: _callEmergency,
+                          onTap: () => _callEmergency(settings.emergencyNumber),
                           borderRadius: BorderRadius.circular(24),
                           child: Container(
                             height: 64,
@@ -491,13 +677,13 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.phone,
+                              children: [
+                                const Icon(Icons.phone,
                                     color: Colors.white, size: 26),
-                                SizedBox(width: 12),
+                                const SizedBox(width: 12),
                                 Text(
-                                  'Call emergency · 112',
-                                  style: TextStyle(
+                                  'Call emergency · ${settings.emergencyNumber}',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -588,6 +774,8 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                         query: controller.currentQuery,
                         responseText: controller.streamedResponse,
                         isGenerating: controller.isGenerating,
+                        wasStopped: controller.wasStopped,
+                        clarificationNote: controller.clarificationNote,
                         sourceLabel: controller.answerSource?.label,
                         onSpeak: () =>
                             _toggleSpeak(controller.streamedResponse),
@@ -644,6 +832,142 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                     'Voice may need internet on this device',
                     style: TextStyle(color: glass.accentMint, fontSize: 12),
                     textAlign: TextAlign.center,
+                  ),
+                ),
+
+              // Clarifying Question Card (Feature 4)
+              if (controller.pendingQuestion != null)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: GlassCard(
+                    key: const Key('triage_clarification_card'),
+                    padding: const EdgeInsets.all(16),
+                    borderRadius: 20,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.help_outline_rounded,
+                                color: glass.accentMint, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                controller.pendingQuestion!.text,
+                                style: TextStyle(
+                                  color: glass.textPrimary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 48,
+                                child: ElevatedButton(
+                                  key: const ValueKey('triage_answer_yes'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: glass.accentMint,
+                                    foregroundColor: Colors.black87,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    minimumSize: const Size(0, 48),
+                                  ),
+                                  onPressed: () =>
+                                      controller.answerClarifyingQuestion(
+                                          TriageAnswer.yes),
+                                  child: const Text('Yes',
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: SizedBox(
+                                height: 48,
+                                child: ElevatedButton(
+                                  key: const ValueKey('triage_answer_no'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFE05A4F),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    minimumSize: const Size(0, 48),
+                                  ),
+                                  onPressed: () =>
+                                      controller.answerClarifyingQuestion(
+                                          TriageAnswer.no),
+                                  child: const Text('No',
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: SizedBox(
+                                height: 48,
+                                child: ElevatedButton(
+                                  key: const ValueKey('triage_answer_not_sure'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: glass.glassBorderColor
+                                        .withValues(alpha: 0.2),
+                                    foregroundColor: glass.textPrimary,
+                                    side: BorderSide(
+                                        color: glass.glassBorderColor),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    minimumSize: const Size(0, 48),
+                                  ),
+                                  onPressed: () =>
+                                      controller.answerClarifyingQuestion(
+                                          TriageAnswer.notSure),
+                                  child: const Text('Not sure',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Center(
+                          child: SizedBox(
+                            height: 48,
+                            child: TextButton(
+                              key: const ValueKey('triage_answer_skip'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: glass.textSecondary,
+                                minimumSize: const Size(48, 48),
+                              ),
+                              onPressed: () => controller
+                                  .answerClarifyingQuestion(TriageAnswer.skip),
+                              child: const Text(
+                                'Skip',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -753,26 +1077,24 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
+                          key: const ValueKey('emergency_submit_button'),
                           borderRadius: BorderRadius.circular(24),
                           onTap: controller.isGenerating
-                              ? null
+                              ? () => controller.stopGeneration()
                               : () => _submitQuery(controller),
-                          child: controller.isGenerating
-                              ? const Center(
-                                  child: SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : const Icon(
-                                  Icons.send_rounded,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
+                          child: Semantics(
+                            label: controller.isGenerating ? 'Stop' : 'Send',
+                            button: true,
+                            child: Center(
+                              child: Icon(
+                                controller.isGenerating
+                                    ? Icons.stop_rounded
+                                    : Icons.send_rounded,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:carepulse/services/profile_service.dart';
@@ -6,6 +7,7 @@ import 'package:carepulse/services/protocol_repository.dart';
 import 'package:carepulse/services/protocol_retriever.dart';
 import 'package:carepulse/services/red_flag_engine.dart';
 import 'package:carepulse/services/triage_engine_service.dart';
+import 'package:carepulse/models/triage_question.dart';
 import 'package:carepulse/state/triage_controller.dart';
 
 class FakeModelDownloadService extends ModelDownloadService {
@@ -22,6 +24,8 @@ class FakeModelDownloadService extends ModelDownloadService {
 class FakeTriageEngineService extends TriageEngineService {
   String? lastPassedQuery;
   String? lastPassedContext;
+  bool stopCalled = false;
+  Duration delayBetweenTokens = Duration.zero;
 
   @override
   bool get isInitialized => true;
@@ -30,15 +34,41 @@ class FakeTriageEngineService extends TriageEngineService {
   Future<void> initializeEngine(String modelPath) async {}
 
   @override
+  Future<void> stopGeneration() async {
+    stopCalled = true;
+    await super.stopGeneration();
+  }
+
+  @override
   Stream<String> generateTriage(
     String query, {
     void Function(TriageTelemetry telemetry)? onTelemetryUpdate,
     UserProfile? profile,
     String? context,
-  }) async* {
+  }) {
     lastPassedQuery = query;
     lastPassedContext = context;
-    yield '1. IMMEDIATE ACTION: Simulated advice.';
+    if (delayBetweenTokens > Duration.zero) {
+      late StreamController<String> sc;
+      Timer? timer;
+      sc = StreamController<String>(
+        onListen: () {
+          sc.add('1. IMMEDIATE ACTION: ');
+          timer = Timer(delayBetweenTokens, () {
+            if (!sc.isClosed) {
+              sc.add('Simulated advice.');
+              sc.close();
+            }
+          });
+        },
+        onCancel: () {
+          timer?.cancel();
+        },
+      );
+      return sc.stream;
+    } else {
+      return Stream.value('1. IMMEDIATE ACTION: Simulated advice.');
+    }
   }
 }
 
@@ -101,6 +131,9 @@ void main() {
       expect(controller.isReady, isFalse);
 
       await controller.submitEmergencyQuery('how to treat a mild headache');
+      if (controller.pendingQuestion != null) {
+        await controller.answerClarifyingQuestion(TriageAnswer.skip);
+      }
 
       expect(controller.streamedResponse,
           contains('offline AI model is not downloaded yet'));
@@ -133,6 +166,60 @@ void main() {
       expect(fakeEngine.lastPassedContext, isNotNull);
       expect(fakeEngine.lastPassedContext, contains('Burns and Scalds'));
       expect(controller.streamedResponse, contains('Simulated advice'));
+    });
+
+    test(
+        'Stop mid-stream keeps partial text, sets isGenerating=false, next query succeeds, stop when idle is a no-op',
+        () async {
+      final fakeEngine = FakeTriageEngineService();
+      fakeEngine.delayBetweenTokens = const Duration(milliseconds: 200);
+      final fakeDownload = FakeModelDownloadService(ready: true);
+
+      final controller = TriageController(
+        downloadService: fakeDownload,
+        engineService: fakeEngine,
+        protocolRepository: protocolRepo,
+        protocolRetriever: protocolRetriever,
+        redFlagEngine: redFlagEngine,
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(controller.isReady, isTrue);
+
+      // Stop with nothing running is a no-op
+      expect(controller.isGenerating, isFalse);
+      expect(controller.wasStopped, isFalse);
+      await controller.stopGeneration();
+      expect(controller.isGenerating, isFalse);
+      expect(controller.wasStopped, isFalse);
+
+      // Start generation
+      final queryFuture =
+          controller.submitEmergencyQuery('boiling water spilled on my arm');
+
+      // Wait until first token arrives
+      await Future<void>.delayed(const Duration(milliseconds: 25));
+      expect(controller.isGenerating, isTrue);
+      expect(controller.streamedResponse, equals('1. IMMEDIATE ACTION: '));
+
+      // Stop mid-stream
+      await controller.stopGeneration();
+      await queryFuture;
+
+      expect(controller.isGenerating, isFalse);
+      expect(controller.wasStopped, isTrue);
+      // Keeps partial text
+      expect(controller.streamedResponse, equals('1. IMMEDIATE ACTION: '));
+      expect(fakeEngine.stopCalled, isTrue);
+
+      // Next query succeeds
+      fakeEngine.delayBetweenTokens = Duration.zero;
+      await controller.submitEmergencyQuery('boiling water spilled on my arm');
+
+      expect(controller.wasStopped, isFalse);
+      expect(controller.isGenerating, isFalse);
+      expect(controller.streamedResponse,
+          equals('1. IMMEDIATE ACTION: Simulated advice.'));
     });
   });
 }

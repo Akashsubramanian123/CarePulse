@@ -16,11 +16,40 @@ class TriageTelemetry {
   });
 }
 
+/// Simple asynchronous FIFO mutex ensuring sequential generation.
+class AsyncMutex {
+  final _queue = <Completer<void>>[];
+
+  Future<void> acquire() {
+    final completer = Completer<void>();
+    if (_queue.isEmpty) {
+      _queue.add(completer);
+      return Future.value();
+    }
+    _queue.add(completer);
+    return completer.future;
+  }
+
+  void release() {
+    if (_queue.isNotEmpty) {
+      _queue.removeAt(0);
+      if (_queue.isNotEmpty) {
+        _queue.first.complete();
+      }
+    }
+  }
+}
+
 class TriageEngineService {
   LlamaEngine? _engine;
   bool _isInitialized = false;
   int _lastTtftMs = 0;
   double _lastTokensPerSec = 0.0;
+
+  final AsyncMutex _mutex = AsyncMutex();
+  EngineSession? _currentSession;
+  StreamSubscription<GenerationEvent>? _currentSessionSub;
+  Completer<void>? _currentCompleter;
 
   bool get isInitialized => _isInitialized;
   int get lastTtftMs => _lastTtftMs;
@@ -44,67 +73,149 @@ class TriageEngineService {
     _isInitialized = true;
   }
 
+  /// Cancels any in-flight generation, cleans up the session, and releases the mutex.
+  Future<void> stopGeneration() async {
+    final sub = _currentSessionSub;
+    _currentSessionSub = null;
+    if (sub != null) {
+      await sub.cancel();
+    }
+
+    final session = _currentSession;
+    _currentSession = null;
+    if (session != null) {
+      try {
+        await session.clear();
+      } catch (_) {}
+      try {
+        await session.dispose();
+      } catch (_) {}
+    }
+
+    if (_currentCompleter != null && !_currentCompleter!.isCompleted) {
+      _currentCompleter!.complete();
+    }
+  }
+
   /// Generates first-aid triage advice as a token stream.
   Stream<String> generateTriage(
     String query, {
     void Function(TriageTelemetry telemetry)? onTelemetryUpdate,
     UserProfile? profile,
     String? context,
-  }) async* {
+  }) {
     if (!_isInitialized || _engine == null) {
       throw StateError('Triage engine is not initialized');
     }
 
-    String profileText = profile?.promptContext ?? '';
-    String contextPrompt = profileText.isNotEmpty ? '$profileText\n\n' : '';
+    final controller = StreamController<String>();
 
-    final formattedPrompt =
-        '$contextPrompt${AppConstants.formatEmergencyPrompt(query, context: context)}';
+    Future<void> run() async {
+      await _mutex.acquire();
+      EngineSession? session;
+      StreamSubscription<GenerationEvent>? sub;
 
-    final startTime = DateTime.now().millisecondsSinceEpoch;
-    int? firstTokenTime;
-    int tokenCount = 0;
+      try {
+        String profileText = profile?.promptContext ?? '';
+        String contextPrompt = profileText.isNotEmpty ? '$profileText\n\n' : '';
 
-    final session = await _engine!.createSession();
+        final formattedPrompt =
+            '$contextPrompt${AppConstants.formatEmergencyPrompt(query, context: context)}';
 
-    try {
-      await session.clear();
-      await for (final event in session.generate(
-        prompt: formattedPrompt,
-        addSpecial: true,
-        maxTokens: 512,
-      )) {
-        if (event is TokenEvent) {
-          tokenCount++;
-          final currentTime = DateTime.now().millisecondsSinceEpoch;
+        final startTime = DateTime.now().millisecondsSinceEpoch;
+        int? firstTokenTime;
+        int tokenCount = 0;
 
-          if (firstTokenTime == null) {
-            firstTokenTime = currentTime;
-            _lastTtftMs = firstTokenTime - startTime;
-          }
+        session = await _engine!.createSession();
+        _currentSession = session;
+        await session.clear();
 
-          final elapsedTimeSec = (currentTime - startTime) / 1000.0;
-          if (elapsedTimeSec > 0) {
-            _lastTokensPerSec = tokenCount / elapsedTimeSec;
-          }
+        final genStream = session.generate(
+          prompt: formattedPrompt,
+          addSpecial: true,
+          maxTokens: 512,
+        );
 
-          if (onTelemetryUpdate != null) {
-            onTelemetryUpdate(TriageTelemetry(
-              ttftMs: _lastTtftMs,
-              tokensPerSec: _lastTokensPerSec,
-              ramUsageMb: getEstimatedRamUsageMB(),
-            ));
-          }
+        final completer = Completer<void>();
+        _currentCompleter = completer;
 
-          yield event.text;
+        sub = genStream.listen(
+          (event) {
+            if (event is TokenEvent) {
+              tokenCount++;
+              final currentTime = DateTime.now().millisecondsSinceEpoch;
+
+              if (firstTokenTime == null) {
+                firstTokenTime = currentTime;
+                _lastTtftMs = currentTime - startTime;
+              }
+
+              final elapsedTimeSec = (currentTime - startTime) / 1000.0;
+              if (elapsedTimeSec > 0) {
+                _lastTokensPerSec = tokenCount / elapsedTimeSec;
+              }
+
+              if (onTelemetryUpdate != null) {
+                onTelemetryUpdate(TriageTelemetry(
+                  ttftMs: _lastTtftMs,
+                  tokensPerSec: _lastTokensPerSec,
+                  ramUsageMb: getEstimatedRamUsageMB(),
+                ));
+              }
+
+              if (!controller.isClosed) {
+                controller.add(event.text);
+              }
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (!controller.isClosed) {
+              controller.addError(error, stackTrace);
+            }
+            if (!completer.isCompleted) completer.complete();
+          },
+          onDone: () {
+            if (!completer.isCompleted) completer.complete();
+          },
+          cancelOnError: true,
+        );
+        _currentSessionSub = sub;
+
+        await completer.future;
+      } catch (e, st) {
+        if (!controller.isClosed) {
+          controller.addError(e, st);
+        }
+      } finally {
+        _currentSessionSub = null;
+        if (sub != null) {
+          try {
+            await sub.cancel();
+          } catch (_) {}
+        }
+        if (session != null) {
+          try {
+            await session.clear();
+          } catch (_) {}
+          try {
+            await session.dispose();
+          } catch (_) {}
+        }
+        _currentSession = null;
+        _mutex.release();
+        if (!controller.isClosed) {
+          await controller.close();
         }
       }
-    } finally {
-      try {
-        await session.clear();
-      } catch (_) {}
-      await session.dispose();
     }
+
+    controller.onCancel = () async {
+      await stopGeneration();
+    };
+
+    run();
+
+    return controller.stream;
   }
 
   /// Returns estimated RAM usage in MBs for telemetry monitoring.
@@ -119,6 +230,7 @@ class TriageEngineService {
 
   /// Cleanly releases memory mapping and engine resources.
   void dispose() {
+    stopGeneration();
     if (_engine != null) {
       try {
         _engine!.dispose();

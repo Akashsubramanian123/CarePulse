@@ -12,6 +12,9 @@ class AppConstants {
   // Model size (~808 MB = 847,249,408 bytes, threshold 700 MB)
   static const int minModelSizeBytes = 700 * 1024 * 1024;
   static const double estimatedModelSizeMb = 808.0;
+  static const String modelSha256 =
+      '6f85a640a97cf2bf5b8e764087b1e83da0fdb51d7c9fab7d0fece9385611df83';
+  static const int modelSizeBytes = 807694464;
 
   // Inference Settings
   static const int defaultNCtx = 2048;
