@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/medical_id.dart';
 import '../../services/medical_id_store.dart';
 import '../../services/sos_service.dart';
-import '../../state/app_settings_controller.dart';
 import '../widgets/glass_card.dart';
 import 'medical_id_screen.dart';
 
@@ -46,12 +44,8 @@ class _SosScreenState extends State<SosScreen> {
     }
   }
 
-  Future<void> _callEmergency([String? targetNumber]) async {
-    final settings =
-        context.mounted ? context.read<AppSettingsController?>() : null;
-    final numToCall =
-        targetNumber ?? settings?.emergencyNumber ?? emergencyNumber;
-    final uri = Uri(scheme: 'tel', path: numToCall);
+  Future<void> _callEmergency() async {
+    final uri = Uri(scheme: 'tel', path: emergencyNumber);
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
@@ -59,9 +53,9 @@ class _SosScreenState extends State<SosScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
               content: Text(
-                  'Failed to open dialer. Please dial $numToCall manually.')),
+                  'Failed to open dialer. Please dial $emergencyNumber manually.')),
         );
       }
     }
@@ -271,8 +265,6 @@ class _SosScreenState extends State<SosScreen> {
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
-    final settings = context.watch<AppSettingsController?>();
-    final emergencyNum = settings?.emergencyNumber ?? emergencyNumber;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -393,9 +385,9 @@ class _SosScreenState extends State<SosScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // Direct Call Emergency Banner
+                      // Direct Call 112 Banner
                       InkWell(
-                        onTap: () => _callEmergency(emergencyNum),
+                        onTap: _callEmergency,
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -412,7 +404,7 @@ class _SosScreenState extends State<SosScreen> {
                                   color: glass.accentMint, size: 22),
                               const SizedBox(width: 10),
                               Text(
-                                'Call $emergencyNum',
+                                'Call Emergency · $emergencyNumber',
                                 style: TextStyle(
                                   color: glass.textPrimary,
                                   fontSize: 17,

@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/tts_service.dart';
-import '../../state/app_settings_controller.dart';
 import '../../state/theme_controller.dart';
 import '../../state/triage_controller.dart';
 import 'cpr_screen.dart';
@@ -41,11 +40,8 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
-  Future<void> _callEmergency([String? targetNumber]) async {
-    final settings =
-        Provider.of<AppSettingsController?>(context, listen: false);
-    final number = targetNumber ?? settings?.emergencyNumber ?? emergencyNumber;
-    final uri = Uri(scheme: 'tel', path: number);
+  Future<void> _callEmergency() async {
+    final uri = Uri(scheme: 'tel', path: emergencyNumber);
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
@@ -53,9 +49,9 @@ class _MainShellState extends State<MainShell> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('Failed to open dialer. Please dial $number manually.'),
+          const SnackBar(
+            content: Text(
+                'Failed to open dialer. Please dial $emergencyNumber manually.'),
           ),
         );
       }
@@ -77,13 +73,6 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
-    AppSettingsController? settingsCtrl;
-    try {
-      settingsCtrl = context.watch<AppSettingsController>();
-    } catch (_) {
-      settingsCtrl = null;
-    }
-
     ThemeController? themeCtrl;
     try {
       themeCtrl = context.watch<ThemeController>();
@@ -91,9 +80,7 @@ class _MainShellState extends State<MainShell> {
       themeCtrl = null;
     }
 
-    final currentMode =
-        settingsCtrl?.themeMode ?? themeCtrl?.themeMode ?? ThemeMode.system;
-    final emergencyNum = settingsCtrl?.emergencyNumber ?? emergencyNumber;
+    final currentMode = themeCtrl?.themeMode ?? ThemeMode.system;
 
     return Scaffold(
       extendBody: true,
@@ -114,23 +101,19 @@ class _MainShellState extends State<MainShell> {
                 size: 22,
               ),
               onPressed: () {
-                if (settingsCtrl != null) {
-                  settingsCtrl.cycleTheme();
-                } else {
-                  themeCtrl?.cycleTheme();
-                }
+                themeCtrl?.cycleTheme();
               },
             ),
           ),
           const SizedBox(width: 4),
-          // Small reachable Call action button
+          // Small reachable Call 112 action button
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
             child: SizedBox(
               height: 48,
               child: TextButton.icon(
                 key: const ValueKey('main_shell_call_112_button'),
-                onPressed: () => _callEmergency(emergencyNum),
+                onPressed: _callEmergency,
                 style: TextButton.styleFrom(
                   backgroundColor:
                       const Color(0xFFE05A4F).withValues(alpha: 0.18),
@@ -143,9 +126,9 @@ class _MainShellState extends State<MainShell> {
                 ),
                 icon:
                     const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
-                label: Text(
-                  'Call $emergencyNum',
-                  style: const TextStyle(
+                label: const Text(
+                  '112',
+                  style: TextStyle(
                     color: Color(0xFFE05A4F),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,

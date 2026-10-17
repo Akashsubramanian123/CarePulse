@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/protocol.dart';
-import '../../state/app_settings_controller.dart';
 import '../../state/triage_controller.dart';
 import '../widgets/glass_card.dart';
 import 'protocol_detail_screen.dart';
@@ -69,12 +68,8 @@ class _GuidesScreenState extends State<GuidesScreen> {
     super.dispose();
   }
 
-  Future<void> _callEmergency([String? targetNumber]) async {
-    final settings =
-        context.mounted ? context.read<AppSettingsController?>() : null;
-    final numToCall =
-        targetNumber ?? settings?.emergencyNumber ?? emergencyNumber;
-    final uri = Uri(scheme: 'tel', path: numToCall);
+  Future<void> _callEmergency() async {
+    final uri = Uri(scheme: 'tel', path: emergencyNumber);
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
@@ -82,9 +77,9 @@ class _GuidesScreenState extends State<GuidesScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
               content: Text(
-                  'Failed to open dialer. Please dial $numToCall manually.')),
+                  'Failed to open dialer. Please dial $emergencyNumber manually.')),
         );
       }
     }
@@ -142,8 +137,6 @@ class _GuidesScreenState extends State<GuidesScreen> {
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
-    final settings = context.watch<AppSettingsController?>();
-    final emergencyNum = settings?.emergencyNumber ?? emergencyNumber;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -160,13 +153,13 @@ class _GuidesScreenState extends State<GuidesScreen> {
           ),
         ),
         actions: [
-          // Small reachable Call action on every tab
+          // Small reachable Call 112 action on every tab
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
             child: SizedBox(
               height: 48,
               child: TextButton.icon(
-                onPressed: () => _callEmergency(emergencyNum),
+                onPressed: _callEmergency,
                 style: TextButton.styleFrom(
                   backgroundColor:
                       const Color(0xFFE05A4F).withValues(alpha: 0.18),
@@ -179,9 +172,9 @@ class _GuidesScreenState extends State<GuidesScreen> {
                 ),
                 icon:
                     const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
-                label: Text(
-                  'Call $emergencyNum',
-                  style: const TextStyle(
+                label: const Text(
+                  '112',
+                  style: TextStyle(
                     color: Color(0xFFE05A4F),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -334,9 +327,9 @@ class _GuidesScreenState extends State<GuidesScreen> {
                                                             0xFFE05A4F),
                                                         width: 0.8),
                                                   ),
-                                                  child: Text(
-                                                    'CALL $emergencyNum',
-                                                    style: const TextStyle(
+                                                  child: const Text(
+                                                    'CALL 112',
+                                                    style: TextStyle(
                                                       color: Color(0xFFE05A4F),
                                                       fontSize: 9,
                                                       fontWeight:

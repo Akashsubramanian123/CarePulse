@@ -6,7 +6,6 @@ import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/tts_service.dart';
 import '../../services/voice_input_service.dart';
-import '../../state/app_settings_controller.dart';
 import '../../state/triage_controller.dart';
 import '../widgets/emergency_chips.dart';
 import '../widgets/glass_card.dart';
@@ -50,11 +49,8 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
     super.dispose();
   }
 
-  Future<void> _callEmergency([String? targetNumber]) async {
-    final settings =
-        Provider.of<AppSettingsController?>(context, listen: false);
-    final number = targetNumber ?? settings?.emergencyNumber ?? emergencyNumber;
-    final uri = Uri(scheme: 'tel', path: number);
+  Future<void> _callEmergency() async {
+    final uri = Uri(scheme: 'tel', path: emergencyNumber);
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
@@ -62,10 +58,9 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('Failed to open dialer. Please dial $number manually.'),
-          ),
+          const SnackBar(
+              content:
+                  Text('Failed to open dialer. Please dial 112 manually.')),
         );
       }
     }
@@ -115,43 +110,10 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
     }
   }
 
-  void _showDeletePartialDialog(
-      BuildContext context, TriageController controller) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete partial download?'),
-        content: const Text(
-            'This will delete the partially downloaded file and reset progress.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              controller.deletePartialDownload();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFE05A4F),
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<TriageController>();
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
-    AppSettingsController? settingsController;
-    try {
-      settingsController = context.watch<AppSettingsController>();
-    } catch (_) {}
-    final settings = settingsController ?? AppSettingsController();
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -173,7 +135,7 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
             child: SizedBox(
               height: 48,
               child: TextButton.icon(
-                onPressed: () => _callEmergency(settings.emergencyNumber),
+                onPressed: _callEmergency,
                 style: TextButton.styleFrom(
                   backgroundColor:
                       const Color(0xFFE05A4F).withValues(alpha: 0.18),
@@ -186,9 +148,9 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                 ),
                 icon:
                     const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
-                label: Text(
-                  'Call ${settings.emergencyNumber}',
-                  style: const TextStyle(
+                label: const Text(
+                  '112',
+                  style: TextStyle(
                     color: Color(0xFFE05A4F),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -208,10 +170,10 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Prominent Call Emergency Banner when red flag is triggered
+                // Prominent Call 112 Banner when red flag is triggered
                 if (controller.callEmergencyNow) ...[
                   InkWell(
-                    onTap: () => _callEmergency(settings.emergencyNumber),
+                    onTap: _callEmergency,
                     borderRadius: BorderRadius.circular(24),
                     child: Container(
                       padding: const EdgeInsets.all(16),
@@ -229,14 +191,14 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.warning_rounded,
+                        children: const [
+                          Icon(Icons.warning_rounded,
                               color: Colors.white, size: 28),
-                          const SizedBox(width: 10),
+                          SizedBox(width: 10),
                           Flexible(
                             child: Text(
-                              'CRITICAL RED FLAG · CALL ${settings.emergencyNumber} NOW',
-                              style: const TextStyle(
+                              'CRITICAL RED FLAG · CALL 112 NOW',
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w900,
@@ -404,7 +366,7 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Download the offline AI model (${formatMb(AppConstants.modelSizeBytes)}) once while you have Wi-Fi. After this, CarePulse delivers personalized AI first-aid triage with zero internet.',
+                        'Download the offline AI model (~808 MB) once while you have Wi-Fi. After this, CarePulse delivers personalized AI first-aid triage with zero internet.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
@@ -416,10 +378,7 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
 
                       // Progress Bar & Stats
                       if (controller.isDownloading ||
-                          controller.isVerifying ||
-                          controller.isLoadingEngine ||
-                          (controller.isDownloadRequired &&
-                              controller.partialBytes > 0)) ...[
+                          controller.isLoadingEngine) ...[
                         Container(
                           height: 10,
                           decoration: BoxDecoration(
@@ -430,8 +389,7 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: LinearProgressIndicator(
-                              value: (controller.isLoadingEngine ||
-                                      controller.isVerifying)
+                              value: controller.isLoadingEngine
                                   ? null
                                   : controller.downloadProgress,
                               backgroundColor: Colors.transparent,
@@ -445,13 +403,9 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              controller.isVerifying
-                                  ? 'Verifying download...'
-                                  : (controller.isLoadingEngine
-                                      ? 'Initializing AI engine...'
-                                      : (controller.isDownloading
-                                          ? '${(controller.downloadProgress * 100).toStringAsFixed(1)}%'
-                                          : 'Paused (${(controller.downloadProgress * 100).toStringAsFixed(1)}%)')),
+                              controller.isLoadingEngine
+                                  ? 'Initializing AI engine...'
+                                  : '${(controller.downloadProgress * 100).toStringAsFixed(1)}%',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -459,7 +413,7 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                               ),
                             ),
                             Text(
-                              '${formatMb(controller.downloadedBytes)} / ${formatMb(controller.totalBytes)}',
+                              '${controller.downloadedMB.toStringAsFixed(1)} MB / ${controller.totalMB.toStringAsFixed(1)} MB',
                               style: TextStyle(
                                   fontSize: 12, color: glass.textSecondary),
                             ),
@@ -500,38 +454,9 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                         const SizedBox(height: 16),
                       ],
 
-                      // Verifying Stage Indeterminate UI
-                      if (controller.isVerifying)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: glass.accentMint,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Verifying download checksum...',
-                                style: TextStyle(
-                                  color: glass.accentMint,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      // Download / Pause / Resume / Delete Buttons (>= 48 tap target)
-                      else if (controller.isDownloadRequired ||
-                          controller.hasError) ...[
+                      // Download / Cancel Buttons (>= 48 tap target)
+                      if (controller.isDownloadRequired || controller.hasError)
                         InkWell(
-                          key: const ValueKey('model_download_primary_button'),
                           onTap: () => controller.startModelDownload(),
                           borderRadius: BorderRadius.circular(20),
                           child: Container(
@@ -542,51 +467,25 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  controller.partialBytes > 0
-                                      ? Icons.play_arrow_rounded
-                                      : Icons.download_rounded,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(width: 8),
+                              children: const [
+                                Icon(Icons.download_rounded,
+                                    color: Colors.white),
+                                SizedBox(width: 8),
                                 Text(
-                                  controller.partialBytes > 0
-                                      ? 'Resume download (${formatMb(controller.partialBytes)})'
-                                      : 'Download Emergency AI Model',
-                                  style: const TextStyle(
+                                  'Download Emergency AI Model',
+                                  style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                ),
+                                )
                               ],
                             ),
                           ),
-                        ),
-                        if (controller.partialBytes > 0) ...[
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            height: 48,
-                            child: TextButton.icon(
-                              key: const ValueKey(
-                                  'delete_partial_download_button'),
-                              onPressed: () =>
-                                  _showDeletePartialDialog(context, controller),
-                              style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFFE05A4F),
-                                minimumSize: const Size(48, 48),
-                              ),
-                              icon: const Icon(Icons.delete_outline_rounded,
-                                  size: 18),
-                              label: const Text('Delete partial download'),
-                            ),
-                          ),
-                        ],
-                      ] else if (controller.isDownloading)
+                        )
+                      else if (controller.isDownloading)
                         InkWell(
-                          key: const ValueKey('model_download_pause_button'),
-                          onTap: () => controller.pauseModelDownload(),
+                          onTap: () => controller.cancelDownload(),
                           borderRadius: BorderRadius.circular(20),
                           child: Container(
                             height: 52,
@@ -597,17 +496,17 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.pause_circle_outline_rounded,
+                                Icon(Icons.cancel_outlined,
                                     color: glass.textPrimary),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Pause Download',
+                                  'Cancel Download',
                                   style: TextStyle(
                                     color: glass.textPrimary,
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                ),
+                                )
                               ],
                             ),
                           ),

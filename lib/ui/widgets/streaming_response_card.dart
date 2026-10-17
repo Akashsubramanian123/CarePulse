@@ -7,26 +7,22 @@ class StreamingResponseCard extends StatelessWidget {
   final String query;
   final String responseText;
   final bool isGenerating;
-  final VoidCallback? onClear;
+  final VoidCallback onClear;
   final String? sourceLabel;
   final VoidCallback? onSpeak;
   final bool isSpeaking;
   final VoidCallback? onStopSpeaking;
-  final bool wasStopped;
-  final String? clarificationNote;
 
   const StreamingResponseCard({
     super.key,
     required this.query,
     required this.responseText,
     required this.isGenerating,
-    this.onClear,
+    required this.onClear,
     this.sourceLabel,
     this.onSpeak,
     this.isSpeaking = false,
     this.onStopSpeaking,
-    this.wasStopped = false,
-    this.clarificationNote,
   });
 
   List<String>? _parseSteps(String text) {
@@ -202,17 +198,16 @@ class StreamingResponseCard extends StatelessWidget {
                         },
                       ),
                     ),
-                  if (onClear != null)
-                    SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 18),
-                        color: glass.textSecondary,
-                        tooltip: 'Clear',
-                        onPressed: onClear,
-                      ),
+                  SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: IconButton(
+                      icon: const Icon(Icons.close_rounded, size: 18),
+                      color: glass.textSecondary,
+                      tooltip: 'Clear',
+                      onPressed: onClear,
                     ),
+                  ),
                 ],
               ),
             ],
@@ -249,71 +244,6 @@ class StreamingResponseCard extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: glass.accentMint,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          // Quiet Stopped Indicator Note
-          if (wasStopped) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                    color: glass.textSecondary.withValues(alpha: 0.25)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.stop_rounded,
-                    size: 13,
-                    color: glass.textSecondary,
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    'Stopped',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: glass.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          // Clarification emergency escalation note
-          if (clarificationNote != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE05A4F).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: const Color(0xFFE05A4F).withValues(alpha: 0.35),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline_rounded,
-                      size: 14, color: Color(0xFFE05A4F)),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      clarificationNote!,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFE05A4F),
                       ),
                     ),
                   ),

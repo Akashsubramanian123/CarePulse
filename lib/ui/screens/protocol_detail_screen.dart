@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/protocol.dart';
 import '../../services/tts_service.dart';
-import '../../state/app_settings_controller.dart';
 import '../widgets/glass_card.dart';
 
 class ProtocolDetailScreen extends StatefulWidget {
@@ -42,12 +40,8 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
     super.dispose();
   }
 
-  Future<void> _callEmergency([String? targetNumber]) async {
-    final settings =
-        context.mounted ? context.read<AppSettingsController?>() : null;
-    final numToCall =
-        targetNumber ?? settings?.emergencyNumber ?? emergencyNumber;
-    final uri = Uri(scheme: 'tel', path: numToCall);
+  Future<void> _callEmergency() async {
+    final uri = Uri(scheme: 'tel', path: emergencyNumber);
     try {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
@@ -55,9 +49,9 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
               content: Text(
-                  'Failed to open dialer. Please dial $numToCall manually.')),
+                  'Failed to open dialer. Please dial $emergencyNumber manually.')),
         );
       }
     }
@@ -80,8 +74,6 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
     final p = widget.protocol;
-    final settings = context.watch<AppSettingsController?>();
-    final emergencyNum = settings?.emergencyNumber ?? emergencyNumber;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -139,9 +131,9 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Call Action Banner
+                // Call 112 Action Banner
                 InkWell(
-                  onTap: () => _callEmergency(emergencyNum),
+                  onTap: _callEmergency,
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -171,8 +163,8 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
                         Flexible(
                           child: Text(
                             p.callEmergency
-                                ? 'Call $emergencyNum Now'
-                                : 'Call $emergencyNum',
+                                ? 'Call Emergency · $emergencyNumber Now'
+                                : 'Call Help · $emergencyNumber',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,

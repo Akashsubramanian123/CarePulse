@@ -43,17 +43,17 @@ class RedFlagEngine {
     if (normalized.isEmpty) return null;
 
     // Check each red flag rule in clinical priority order
-    return _checkChoking(normalized, text) ??
-        _checkDrowning(normalized, text) ??
-        _checkPoisoning(normalized, text) ??
-        _checkAnaphylaxis(normalized, text) ??
-        _checkCardiacArrest(normalized, text) ??
+    return _checkCardiacArrest(normalized, text) ??
         _checkUnresponsive(normalized, text) ??
         _checkSevereBleeding(normalized, text) ??
+        _checkChoking(normalized, text) ??
         _checkSeizure(normalized, text) ??
         _checkStroke(normalized, text) ??
+        _checkAnaphylaxis(normalized, text) ??
         _checkChestPain(normalized, text) ??
+        _checkDrowning(normalized, text) ??
         _checkElectricShock(normalized, text) ??
+        _checkPoisoning(normalized, text) ??
         _checkHeatstroke(normalized, text) ??
         _checkSnakebite(normalized, text);
   }
@@ -92,24 +92,6 @@ class RedFlagEngine {
       return null;
     }
 
-    // If choking on an object or food, defer to choking protocol
-    if (norm.contains('choking') ||
-        norm.contains('choke') ||
-        norm.contains('chokng') ||
-        norm.contains('clutching throat') ||
-        norm.contains('toy') ||
-        norm.contains('grape')) {
-      return null;
-    }
-
-    // If submersion / pool drowning, defer to drowning protocol
-    if (norm.contains('pool') ||
-        norm.contains('drown') ||
-        norm.contains('submerged') ||
-        (norm.contains('water') && norm.contains('pulled'))) {
-      return null;
-    }
-
     final positiveTriggers = [
       'not breathing',
       'stopped breathing',
@@ -121,15 +103,9 @@ class RedFlagEngine {
       'heart stopped',
       'cardiac arrest',
       'pulseless',
-      'agonal',
       'agonal gasps',
       'gasping for air stopped',
       'respiratory arrest',
-      'gasping snorting',
-      'snorting sounds',
-      'gasping sounds',
-      'weird gasping',
-      'gasping every',
     ];
 
     for (final trigger in positiveTriggers) {
@@ -157,15 +133,6 @@ class RedFlagEngine {
         norm.contains('not unconscious') ||
         norm.contains('not unresponsive')) {
       return null;
-    }
-
-    // If gasping / snorting sounds present, it is agonal breathing (cardiac arrest)
-    if (norm.contains('gasping') || norm.contains('snorting')) {
-      return RedFlagResult(
-        protocolId: 'cardiac_arrest',
-        matchedReason: 'Agonal breathing detected in unresponsive person',
-        triggerPhrase: 'agonal gasping',
-      );
     }
 
     final triggers = [
@@ -221,12 +188,6 @@ class RedFlagEngine {
       'gushing blood',
       'uncontrolled bleeding',
       'soaked in blood',
-      'blood everywhere',
-      'soaked two towels',
-      'soaked towel',
-      'soaked towels',
-      'soaked through',
-      'soaking through',
     ];
 
     for (final trigger in triggers) {
@@ -254,17 +215,10 @@ class RedFlagEngine {
     final triggers = [
       'choking',
       'choke',
-      'chokng',
       'cannot cough',
       'cant cough',
       "can't cough",
       'unable to cough',
-      'cannot speak or cough',
-      'cant speak or cough',
-      'cannot speak',
-      'cant speak',
-      'clutching throat',
-      'turning blue',
       'unable to breathe or cough',
       'food lodged in throat',
       'airway obstructed',
@@ -275,8 +229,7 @@ class RedFlagEngine {
         // Map pediatric vs adult if mentioned
         final isChild = norm.contains('child') ||
             norm.contains('kid') ||
-            norm.contains('toddler') ||
-            norm.contains('chld');
+            norm.contains('toddler');
         final isInfant = norm.contains('infant') ||
             norm.contains('baby') ||
             norm.contains('newborn');
@@ -299,22 +252,6 @@ class RedFlagEngine {
     if (norm.contains('not seizing') ||
         norm.contains('no seizure') ||
         norm.contains('shaking hands with')) {
-      return null;
-    }
-
-    // Historical seizure exclusion: resolved in past, patient is alert/talking normally
-    if ((norm.contains('an hour ago') ||
-            norm.contains('hours ago') ||
-            norm.contains('yesterday') ||
-            norm.contains('earlier today') ||
-            norm.contains('minutes ago') ||
-            norm.contains('past seizure')) &&
-        (norm.contains('alert') ||
-            norm.contains('awake') ||
-            norm.contains('talking normally') ||
-            norm.contains('sitting') ||
-            norm.contains('fine now') ||
-            norm.contains('recovered'))) {
       return null;
     }
 
@@ -350,26 +287,13 @@ class RedFlagEngine {
       return null;
     }
 
-    // If ingestion / poisoning / overdose occurred, defer to poisoning
-    if (norm.contains('swallowed') ||
-        norm.contains('pills') ||
-        norm.contains('overdose') ||
-        norm.contains('drank') ||
-        norm.contains('bleach')) {
-      return null;
-    }
-
     final triggers = [
       'stroke',
       'face drooping',
-      'face is drooping',
       'facial drooping',
       'face droop',
       'arm weakness',
-      'arm is weak',
-      'arm weak',
       'slurred speech',
-      'speech is slurred',
       'slurring words',
       'cannot move one side of face',
       'loss of speech sudden',
@@ -401,14 +325,10 @@ class RedFlagEngine {
       'swelling of face or throat',
       'swelling throat',
       'throat swelling',
-      'throat closing',
       'swollen tongue',
-      'tongue swelling',
-      'lip and tongue swelling',
       'swelling after sting',
-      'epipen',
+      'epipen needed',
       'severe allergic reaction',
-      'allergic reaction',
     ];
 
     for (final trigger in triggers) {
@@ -434,15 +354,12 @@ class RedFlagEngine {
 
     final triggers = [
       'chest pain',
-      'cheest pain',
       'heart attack',
       'crushing chest',
       'pain radiating down arm',
       'chest pressure and sweating',
       'chest pain and sweating',
-      'chest preasure',
       'tightness in chest',
-      'cant catch breath',
     ];
 
     for (final trigger in triggers) {
@@ -461,18 +378,6 @@ class RedFlagEngine {
   RedFlagResult? _checkDrowning(String norm, String raw) {
     if (norm.contains('not drowning') || norm.contains('swimming normally')) {
       return null;
-    }
-
-    if ((norm.contains('pool') || norm.contains('drown')) &&
-        (norm.contains('unresponsive') ||
-            norm.contains('breathing') ||
-            norm.contains('pulled') ||
-            norm.contains('water'))) {
-      return const RedFlagResult(
-        protocolId: 'drowning',
-        matchedReason: 'Drowning or submersion emergency detected',
-        triggerPhrase: 'pool submersion',
-      );
     }
 
     final triggers = [
@@ -531,23 +436,6 @@ class RedFlagEngine {
       return null;
     }
 
-    if ((norm.contains('swallowed') ||
-            norm.contains('drank') ||
-            norm.contains('ingested')) &&
-        (norm.contains('pills') ||
-            norm.contains('cleaner') ||
-            norm.contains('bottle') ||
-            norm.contains('chemical') ||
-            norm.contains('toxic') ||
-            norm.contains('bleach') ||
-            norm.contains('overdose'))) {
-      return const RedFlagResult(
-        protocolId: 'poisoning',
-        matchedReason: 'Poisoning or toxic ingestion detected',
-        triggerPhrase: 'toxic ingestion',
-      );
-    }
-
     final triggers = [
       'poisoning',
       'poison',
@@ -558,11 +446,6 @@ class RedFlagEngine {
       'drug overdose',
       'swallowed pills overdose',
       'swallowed toxic',
-      'drain cleaner',
-      'bleach',
-      'swallowed entire bottle',
-      'sleeping pills',
-      'drank drain cleaner',
     ];
 
     for (final trigger in triggers) {
@@ -583,19 +466,6 @@ class RedFlagEngine {
       return null;
     }
 
-    if ((norm.contains('heat') || norm.contains('sun')) &&
-        (norm.contains('collapsed') ||
-            norm.contains('delirious') ||
-            norm.contains('confused') ||
-            norm.contains('hot dry') ||
-            norm.contains('43c'))) {
-      return const RedFlagResult(
-        protocolId: 'heatstroke',
-        matchedReason: 'Heatstroke emergency detected',
-        triggerPhrase: 'heat collapse confusion',
-      );
-    }
-
     final triggers = [
       'heatstroke',
       'heat stroke',
@@ -603,8 +473,6 @@ class RedFlagEngine {
       'collapsed in hot sun',
       'high body temperature and confusion',
       'sunstroke',
-      'skin hot dry',
-      'hot dry',
     ];
 
     for (final trigger in triggers) {
@@ -631,8 +499,6 @@ class RedFlagEngine {
       'snakebite',
       'snake bite',
       'snake bit',
-      'snak bite',
-      'snak bit',
       'bitten by a snake',
       'viper bite',
       'cobra bite',

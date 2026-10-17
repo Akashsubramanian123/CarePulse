@@ -12,15 +12,6 @@ import 'package:carepulse/ui/screens/main_shell.dart';
 class FakeModelDownloadService extends ModelDownloadService {
   @override
   Future<bool> isModelReady() async => false;
-
-  @override
-  Future<bool> hasUnverifiedModel() async => false;
-
-  @override
-  Future<int> getPartialBytes() async => 0;
-
-  @override
-  Future<bool> hasPartialDownload() async => false;
 }
 
 void main() {
