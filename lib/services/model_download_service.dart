@@ -481,9 +481,9 @@ class ModelDownloadService {
         final double progress = totalBytes > 0
             ? (currentTotalReceived / totalBytes).clamp(0.0, 1.0)
             : 0.0;
-        final double downloadedMB = currentTotalReceived / (1024 * 1024);
+        final double downloadedMB = currentTotalReceived / 1000000.0;
         final double totalMB = totalBytes > 0
-            ? (totalBytes / (1024 * 1024))
+            ? (totalBytes / 1000000.0)
             : AppConstants.estimatedModelSizeMb;
 
         onProgress(progress, downloadedMB, totalMB);

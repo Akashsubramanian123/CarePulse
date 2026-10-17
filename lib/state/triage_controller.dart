@@ -101,6 +101,10 @@ class TriageController extends ChangeNotifier {
   bool get hasError => _stage == AppSetupStage.error;
 
   int get partialBytes => _partialBytes;
+  int get downloadedBytes => _partialBytes;
+  int get totalBytes => AppConstants.modelSizeBytes > 0
+      ? AppConstants.modelSizeBytes
+      : (AppConstants.estimatedModelSizeMb * 1000000).round();
   double get downloadProgress => _downloadProgress;
   double get downloadedMB => _downloadedMB;
   double get totalMB => _totalMB;
@@ -217,10 +221,10 @@ class TriageController extends ChangeNotifier {
       if (_partialBytes > 0) {
         final total = AppConstants.modelSizeBytes > 0
             ? AppConstants.modelSizeBytes
-            : (AppConstants.estimatedModelSizeMb * 1024 * 1024).round();
+            : (AppConstants.estimatedModelSizeMb * 1000000).round();
         _downloadProgress = (_partialBytes / total).clamp(0.0, 1.0);
-        _downloadedMB = _partialBytes / (1024 * 1024);
-        _totalMB = total / (1024 * 1024);
+        _downloadedMB = _partialBytes / 1000000.0;
+        _totalMB = total / 1000000.0;
       }
       _stage = AppSetupStage.downloadRequired;
       notifyListeners();
@@ -254,7 +258,7 @@ class TriageController extends ChangeNotifier {
           _downloadProgress = progress;
           _downloadedMB = downloaded;
           _totalMB = total;
-          _partialBytes = (downloaded * 1024 * 1024).round();
+          _partialBytes = (downloaded * 1000000).round();
           notifyListeners();
         },
         onVerifyingStart: () {

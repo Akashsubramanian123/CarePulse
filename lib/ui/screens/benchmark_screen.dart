@@ -285,8 +285,7 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
   }
 
   Widget _buildDeviceAndModelCard(CarePulseGlass glass, bool isModelReady) {
-    final sizeMb =
-        (AppConstants.modelSizeBytes / (1024 * 1024)).toStringAsFixed(0);
+    final sizeMb = formatMb(AppConstants.modelSizeBytes);
 
     return GlassCard(
       child: Column(
@@ -311,7 +310,7 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
           _buildInfoRow('Operating System', _osVersion, glass),
           _buildInfoRow('Model File', AppConstants.modelFileName, glass),
           _buildInfoRow('Model Size',
-              '$sizeMb MB (${AppConstants.modelSizeBytes} bytes)', glass),
+              '$sizeMb (${AppConstants.modelSizeBytes} bytes)', glass),
           _buildInfoRow('Quantization', 'Q4_K_M (4-bit Medium)', glass),
           _buildInfoRow(
               'Context / GPU Layers', 'nCtx: 2048 | nGpuLayers: 0', glass),

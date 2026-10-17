@@ -9,12 +9,24 @@ class AppConstants {
   static const String tempModelFileName =
       'Llama-3.2-1B-Instruct-Q4_K_M.gguf.tmp';
 
-  // Model size (~808 MB = 847,249,408 bytes, threshold 700 MB)
-  static const int minModelSizeBytes = 700 * 1024 * 1024;
-  static const double estimatedModelSizeMb = 808.0;
+  // Model is 807,694,464 bytes (about 808 MB decimal).
+  static const int modelSizeBytes = 807694464;
+  static const double estimatedModelSizeMb = modelSizeBytes / 1000000;
+  static const int minModelSizeBytes = 700 * 1000 * 1000;
   static const String modelSha256 =
       '6f85a640a97cf2bf5b8e764087b1e83da0fdb51d7c9fab7d0fece9385611df83';
-  static const int modelSizeBytes = 807694464;
+
+  /// Formats byte count into a decimal MB string with "MB" unit.
+  /// Values >= 100 MB are formatted without decimals (e.g., "808 MB").
+  /// Values < 100 MB are formatted with one decimal place (e.g., "1.5 MB").
+  static String formatMb(int bytes) {
+    if (bytes <= 0) return '0.0 MB';
+    final mb = bytes / 1000000.0;
+    if (mb >= 100) {
+      return '${mb.round()} MB';
+    }
+    return '${mb.toStringAsFixed(1)} MB';
+  }
 
   // Inference Settings
   static const int defaultNCtx = 2048;
@@ -43,6 +55,11 @@ class AppConstants {
         '<|start_header_id|>assistant<|end_header_id|>\n\n';
   }
 }
+
+/// Formats byte count into a decimal MB string with "MB" unit.
+/// Values >= 100 MB are formatted without decimals (e.g., "808 MB").
+/// Values < 100 MB are formatted with one decimal place (e.g., "1.5 MB").
+String formatMb(int bytes) => AppConstants.formatMb(bytes);
 
 class EmergencyPreset {
   final String id;

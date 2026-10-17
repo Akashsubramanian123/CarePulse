@@ -404,7 +404,7 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Download the offline AI model (~808 MB) once while you have Wi-Fi. After this, CarePulse delivers personalized AI first-aid triage with zero internet.',
+                        'Download the offline AI model (${formatMb(AppConstants.modelSizeBytes)}) once while you have Wi-Fi. After this, CarePulse delivers personalized AI first-aid triage with zero internet.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
@@ -459,7 +459,7 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                               ),
                             ),
                             Text(
-                              '${controller.downloadedMB.toStringAsFixed(1)} MB / ${controller.totalMB.toStringAsFixed(1)} MB',
+                              '${formatMb(controller.downloadedBytes)} / ${formatMb(controller.totalBytes)}',
                               style: TextStyle(
                                   fontSize: 12, color: glass.textSecondary),
                             ),
@@ -552,7 +552,7 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   controller.partialBytes > 0
-                                      ? 'Resume download (${(controller.downloadProgress * 100).toStringAsFixed(0)}%)'
+                                      ? 'Resume download (${formatMb(controller.partialBytes)})'
                                       : 'Download Emergency AI Model',
                                   style: const TextStyle(
                                     color: Colors.white,
