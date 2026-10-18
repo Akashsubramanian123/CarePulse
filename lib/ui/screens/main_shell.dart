@@ -7,6 +7,8 @@ import '../../services/tts_service.dart';
 import '../../state/app_settings_controller.dart';
 import '../../state/theme_controller.dart';
 import '../../state/triage_controller.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/settings_sheet.dart';
 import 'cpr_screen.dart';
 import 'emergency_home_screen.dart';
 import 'guides_screen.dart';
@@ -73,6 +75,21 @@ class _MainShellState extends State<MainShell> {
     }
   }
 
+  String _getScreenTitle(int index) {
+    switch (index) {
+      case 0:
+        return 'CarePulse';
+      case 1:
+        return 'First-Aid Guides';
+      case 2:
+        return 'CPR Metronome';
+      case 3:
+        return 'Emergency SOS';
+      default:
+        return 'CarePulse';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
@@ -95,80 +112,131 @@ class _MainShellState extends State<MainShell> {
         settingsCtrl?.themeMode ?? themeCtrl?.themeMode ?? ThemeMode.system;
     final emergencyNum = settingsCtrl?.emergencyNumber ?? emergencyNumber;
 
-    return Scaffold(
-      extendBody: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          // Quick theme toggle button (sun/moon) cycling light -> dark -> system
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: IconButton(
-              key: const ValueKey('quick_theme_toggle_button'),
-              tooltip: 'Cycle theme: light -> dark -> system',
-              icon: Icon(
-                _getThemeIcon(currentMode),
-                color: glass.accentMint,
-                size: 22,
-              ),
-              onPressed: () {
-                if (settingsCtrl != null) {
-                  settingsCtrl.cycleTheme();
-                } else {
-                  themeCtrl?.cycleTheme();
-                }
-              },
-            ),
-          ),
-          const SizedBox(width: 4),
-          // Small reachable Call action button
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: SizedBox(
-              height: 48,
-              child: TextButton.icon(
-                key: const ValueKey('main_shell_call_112_button'),
-                onPressed: () => _callEmergency(emergencyNum),
-                style: TextButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFFE05A4F).withValues(alpha: 0.18),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: const BorderSide(color: Color(0xFFE05A4F), width: 1),
+    return GlassScaffold(
+      body: Column(
+        children: [
+          // Shell Top Bar (~56px tall, transparent over gradient, SafeArea-aware)
+          Container(
+            height: 56,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              children: [
+                // Screen Title
+                Expanded(
+                  child: Text(
+                    _getScreenTitle(_currentIndex),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: glass.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                    ),
                   ),
                 ),
-                icon:
-                    const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
-                label: Text(
-                  'Call $emergencyNum',
-                  style: const TextStyle(
-                    color: Color(0xFFE05A4F),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                // Theme toggle IconButton (48x48)
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    key: const ValueKey('quick_theme_toggle_button'),
+                    tooltip: 'Cycle theme: light -> dark -> system',
+                    icon: Icon(
+                      _getThemeIcon(currentMode),
+                      color: glass.accentMint,
+                      size: 22,
+                    ),
+                    onPressed: () {
+                      if (settingsCtrl != null) {
+                        settingsCtrl.cycleTheme();
+                      } else {
+                        themeCtrl?.cycleTheme();
+                      }
+                    },
                   ),
                 ),
-              ),
+                // Settings gear IconButton (48x48)
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    key: const ValueKey('main_shell_settings_button'),
+                    tooltip: 'Settings',
+                    icon: Icon(
+                      Icons.settings_outlined,
+                      color: glass.accentMint,
+                      size: 22,
+                    ),
+                    onPressed: () => showCarePulseSettingsSheet(context),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                // Compact Call pill (height 40, tap area >= 48, emergency gradient, white bold text)
+                SizedBox(
+                  key: const ValueKey('main_shell_call_112_button'),
+                  height: 48,
+                  child: Center(
+                    child: InkWell(
+                      key: const Key('topbar_call'),
+                      onTap: () => _callEmergency(emergencyNum),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        height: 40,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          gradient: glass.emergencyGradient,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFC7382E)
+                                  .withValues(alpha: 0.35),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.phone,
+                                color: Colors.white, size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Call $emergencyNum',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [
-          AssistantTabRouter(),
-          GuidesScreen(),
-          CprScreen(),
-          SosScreen(),
+          // Content tabs
+          Expanded(
+            child: IndexedStack(
+              index: _currentIndex,
+              children: const [
+                AssistantTabRouter(),
+                GuidesScreen(),
+                CprScreen(),
+                SosScreen(),
+              ],
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF121A22).withValues(alpha: 0.85)
+              ? const Color(0xFF0F1E2A).withValues(alpha: 0.85)
               : Colors.white.withValues(alpha: 0.85),
           border: Border(
             top: BorderSide(
@@ -201,13 +269,13 @@ class _MainShellState extends State<MainShell> {
               icon: Icon(Icons.favorite_outline_rounded,
                   color: glass.textSecondary),
               selectedIcon:
-                  Icon(Icons.favorite_rounded, color: const Color(0xFFE05A4F)),
+                  Icon(Icons.favorite_rounded, color: const Color(0xFFC7382E)),
               label: 'CPR',
             ),
             NavigationDestination(
               icon: Icon(Icons.emergency_outlined, color: glass.textSecondary),
               selectedIcon:
-                  Icon(Icons.emergency_rounded, color: const Color(0xFFE05A4F)),
+                  Icon(Icons.emergency_rounded, color: const Color(0xFFC7382E)),
               label: 'SOS',
             ),
           ],

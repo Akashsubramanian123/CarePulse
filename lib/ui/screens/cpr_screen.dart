@@ -18,6 +18,8 @@ class CprScreen extends StatefulWidget {
 
 class _CprScreenState extends State<CprScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  static bool _checklistExpanded = true;
+
   late final CprController _cprController;
   late final AnimationController _pulseController;
   late final Animation<double> _scaleAnimation;
@@ -101,85 +103,70 @@ class _CprScreenState extends State<CprScreen>
     final settings = context.watch<AppSettingsController?>();
     final emergencyNum = settings?.emergencyNumber ?? emergencyNumber;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'CPR Metronome',
-          style: TextStyle(
-            color: glass.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        actions: [
-          // Small reachable Call button
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: SizedBox(
-              height: 48,
-              child: TextButton.icon(
-                onPressed: () => _callEmergency(emergencyNum),
-                style: TextButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFFE05A4F).withValues(alpha: 0.18),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: const BorderSide(color: Color(0xFFE05A4F), width: 1),
-                  ),
-                ),
-                icon:
-                    const Icon(Icons.phone, color: Color(0xFFE05A4F), size: 16),
-                label: Text(
-                  'Call $emergencyNum',
-                  style: const TextStyle(
-                    color: Color(0xFFE05A4F),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+    return GlassScaffold(
+      body: AnimatedBuilder(
+        animation: _cprController,
+        builder: (context, _) {
+          return Column(
+            children: [
+              Expanded(
+                child: ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFF000000),
+                        Color(0xFF000000),
+                        Color(0xFF000000),
+                        Colors.transparent,
+                      ],
+                      stops: [0.0, 0.88, 0.96, 1.0],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics()),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // 1. Collapsible Safety Checklist Banner
+                        _buildSafetyChecklist(glass, emergencyNum),
+                        const SizedBox(height: 16),
+
+                        // 2. Metronome Card with Pulsing Circle
+                        _buildMetronomeCard(glass),
+                        const SizedBox(height: 16),
+
+                        // 3. Category Info Cards (Adult, Child, Infant)
+                        _buildCategorySelector(glass),
+                        const SizedBox(height: 12),
+                        _buildCategoryInfoCard(glass),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-      body: GradientBackground(
-        child: SafeArea(
-          child: AnimatedBuilder(
-            animation: _cprController,
-            builder: (context, _) {
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                    parent: BouncingScrollPhysics()),
+
+              // Pinned Start / Pause / Stop bottom bar
+              Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // 1. Safety Checklist Banner
-                    _buildSafetyChecklist(glass, emergencyNum),
-                    const SizedBox(height: 16),
-
-                    // 2. Metronome Card with Pulsing Circle
-                    _buildMetronomeCard(glass),
-                    const SizedBox(height: 16),
-
-                    // 3. Category Info Cards (Adult, Child, Infant)
-                    _buildCategorySelector(glass),
-                    const SizedBox(height: 12),
-                    _buildCategoryInfoCard(glass),
-                    const SizedBox(height: 24),
-                  ],
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF0F171D).withValues(alpha: 0.85)
+                      : Colors.white.withValues(alpha: 0.85),
+                  border: Border(
+                    top: BorderSide(color: glass.glassBorderColor),
+                  ),
                 ),
-              );
-            },
-          ),
-        ),
+                child: _buildControls(glass),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -191,46 +178,66 @@ class _CprScreenState extends State<CprScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.checklist_rounded, color: glass.accentMint, size: 22),
-              const SizedBox(width: 8),
-              Text(
-                'Safety & Assessment Checklist',
-                style: TextStyle(
-                  color: glass.textPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
+          InkWell(
+            onTap: () {
+              setState(() {
+                _checklistExpanded = !_checklistExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Row(
+              children: [
+                Icon(Icons.checklist_rounded,
+                    color: glass.accentMint, size: 22),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Safety & Assessment Checklist',
+                    style: TextStyle(
+                      color: glass.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _buildChecklistItem(
-              '1. Check scene safety (hazards, traffic, electricity)', glass),
-          _buildChecklistItem(
-              '2. Tap shoulders firmly and shout loudly', glass),
-          _buildChecklistItem(
-              '3. Look for normal breathing (max 10 seconds)', glass),
-          _buildChecklistItem(
-              '4. Shout for help and call $emergencyNum immediately', glass),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _callEmergency(emergencyNum),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFE05A4F),
-                side: const BorderSide(color: Color(0xFFE05A4F)),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
-              label: Text('Call $emergencyNum Now',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                Icon(
+                  _checklistExpanded
+                      ? Icons.expand_less_rounded
+                      : Icons.expand_more_rounded,
+                  color: glass.textSecondary,
+                  size: 22,
+                ),
+              ],
             ),
           ),
+          if (_checklistExpanded) ...[
+            const SizedBox(height: 10),
+            _buildChecklistItem(
+                '1. Check scene safety (hazards, traffic, electricity)', glass),
+            _buildChecklistItem(
+                '2. Tap shoulders firmly and shout loudly', glass),
+            _buildChecklistItem(
+                '3. Look for normal breathing (max 10 seconds)', glass),
+            _buildChecklistItem(
+                '4. Shout for help and call $emergencyNum immediately', glass),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _callEmergency(emergencyNum),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFC7382E),
+                  side: const BorderSide(color: Color(0xFFC7382E)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+                icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
+                label: Text('Call $emergencyNum Now',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -251,8 +258,17 @@ class _CprScreenState extends State<CprScreen>
   }
 
   Widget _buildMetronomeCard(CarePulseGlass glass) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final idleGradient = isDark
+        ? const LinearGradient(
+            colors: [Color(0xFF164E59), Color(0xFF1E6774)],
+          )
+        : const LinearGradient(
+            colors: [Color(0xFF14545E), Color(0xFF1B6875)],
+          );
+
     return GlassCard(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       borderRadius: 28,
       child: Column(
         children: [
@@ -261,39 +277,46 @@ class _CprScreenState extends State<CprScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // BPM Adjustment
-              Row(
-                children: [
-                  SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: IconButton(
-                      icon: const Icon(Icons.remove_circle_outline_rounded),
-                      color: glass.accentMint,
-                      tooltip: 'Decrease BPM',
-                      onPressed: () =>
-                          _cprController.setBpm(_cprController.bpm - 2),
+              Expanded(
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: IconButton(
+                        icon: const Icon(Icons.remove_circle_outline_rounded),
+                        color: glass.accentMint,
+                        tooltip: 'Decrease BPM',
+                        onPressed: () =>
+                            _cprController.setBpm(_cprController.bpm - 2),
+                      ),
                     ),
-                  ),
-                  Text(
-                    '${_cprController.bpm} BPM',
-                    style: TextStyle(
-                      color: glass.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          '${_cprController.bpm} BPM',
+                          style: TextStyle(
+                            color: glass.textPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: IconButton(
-                      icon: const Icon(Icons.add_circle_outline_rounded),
-                      color: glass.accentMint,
-                      tooltip: 'Increase BPM',
-                      onPressed: () =>
-                          _cprController.setBpm(_cprController.bpm + 2),
+                    SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: IconButton(
+                        icon: const Icon(Icons.add_circle_outline_rounded),
+                        color: glass.accentMint,
+                        tooltip: 'Increase BPM',
+                        onPressed: () =>
+                            _cprController.setBpm(_cprController.bpm + 2),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
               // Sound/Voice Mute Toggle (>= 48x48)
@@ -306,7 +329,7 @@ class _CprScreenState extends State<CprScreen>
                         ? Icons.volume_off_rounded
                         : Icons.volume_up_rounded,
                     color: _cprController.isMuted
-                        ? const Color(0xFFE05A4F)
+                        ? const Color(0xFFC7382E)
                         : glass.accentMint,
                   ),
                   tooltip:
@@ -316,23 +339,23 @@ class _CprScreenState extends State<CprScreen>
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // Large Pulsing Compression Circle
           ScaleTransition(
             scale: _scaleAnimation,
             child: Container(
-              width: 170,
-              height: 170,
+              width: 160,
+              height: 160,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: _cprController.isRunning
                     ? glass.emergencyGradient
-                    : glass.iconTintGradient,
+                    : idleGradient,
                 boxShadow: [
                   BoxShadow(
                     color: (_cprController.isRunning
-                            ? const Color(0xFFE05A4F)
+                            ? const Color(0xFFC7382E)
                             : glass.accentMint)
                         .withValues(alpha: 0.35),
                     blurRadius: 36,
@@ -341,132 +364,34 @@ class _CprScreenState extends State<CprScreen>
                 ],
               ),
               child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.favorite_rounded,
-                      color: Colors.white,
-                      size: _cprController.isRunning ? 40 : 34,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '${_cprController.compressionCount}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 36,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    Text(
-                      'COMPRESSIONS',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Stats: Cycle and Elapsed Time
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  Text('CYCLE (30x)',
-                      style: TextStyle(
-                          color: glass.textSecondary,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Cycle ${_cprController.currentCycle}',
-                    style: TextStyle(
-                        color: glass.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              Container(width: 1, height: 32, color: glass.glassBorderColor),
-              Column(
-                children: [
-                  Text('ELAPSED',
-                      style: TextStyle(
-                          color: glass.textSecondary,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatDuration(_cprController.elapsedTime),
-                    style: TextStyle(
-                        color: glass.textPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Start / Pause / Stop Controls (>= 48 tap target)
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: InkWell(
-                  onTap: () {
-                    if (_cprController.isRunning) {
-                      _cprController.pause();
-                    } else {
-                      _cprController.start();
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    height: 56,
-                    decoration: BoxDecoration(
-                      gradient: _cprController.isRunning
-                          ? const LinearGradient(
-                              colors: [Color(0xFFE8B04B), Color(0xFFD48B30)])
-                          : glass.primaryActionGradient,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: (_cprController.isRunning
-                                  ? const Color(0xFFE8B04B)
-                                  : glass.accentMint)
-                              .withValues(alpha: 0.3),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          _cprController.isRunning
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
+                          Icons.favorite_rounded,
                           color: Colors.white,
-                          size: 28,
+                          size: _cprController.isRunning ? 38 : 32,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(height: 4),
                         Text(
-                          _cprController.isRunning ? 'Pause CPR' : 'Start CPR',
+                          '${_cprController.compressionCount}',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: 34,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        Text(
+                          'COMPRESSIONS',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ],
@@ -474,30 +399,152 @@ class _CprScreenState extends State<CprScreen>
                   ),
                 ),
               ),
-              if (_cprController.compressionCount > 0 ||
-                  _cprController.isRunning) ...[
-                const SizedBox(width: 12),
-                SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: OutlinedButton(
-                    onPressed: () => _cprController.stop(),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFE05A4F),
-                      side: const BorderSide(
-                          color: Color(0xFFE05A4F), width: 1.5),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      padding: EdgeInsets.zero,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Stats: Cycle and Elapsed Time
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('CYCLE (30x)',
+                          style: TextStyle(
+                              color: glass.textSecondary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold)),
                     ),
-                    child: const Icon(Icons.stop_rounded, size: 28),
-                  ),
+                    const SizedBox(height: 4),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Cycle ${_cprController.currentCycle}',
+                        style: TextStyle(
+                            color: glass.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+              Container(width: 1, height: 32, color: glass.glassBorderColor),
+              Expanded(
+                child: Column(
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('ELAPSED',
+                          style: TextStyle(
+                              color: glass.textSecondary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 4),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _formatDuration(_cprController.elapsedTime),
+                        style: TextStyle(
+                            color: glass.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildControls(CarePulseGlass glass) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: InkWell(
+            onTap: () {
+              if (_cprController.isRunning) {
+                _cprController.pause();
+              } else {
+                _cprController.start();
+              }
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: _cprController.isRunning
+                    ? const LinearGradient(
+                        colors: [Color(0xFFC7382E), Color(0xFFB52B4D)])
+                    : glass.primaryActionGradient,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: (_cprController.isRunning
+                            ? const Color(0xFFC7382E)
+                            : glass.accentMint)
+                        .withValues(alpha: 0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _cprController.isRunning
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      _cprController.isRunning ? 'Pause CPR' : 'Start CPR',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (_cprController.compressionCount > 0 ||
+            _cprController.isRunning) ...[
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 56,
+            height: 56,
+            child: OutlinedButton(
+              onPressed: () => _cprController.stop(),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFC7382E),
+                side: const BorderSide(color: Color(0xFFC7382E), width: 1.5),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                padding: EdgeInsets.zero,
+              ),
+              child: const Icon(Icons.stop_rounded, size: 28),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -510,10 +557,26 @@ class _CprScreenState extends State<CprScreen>
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(right: i < 2 ? 8.0 : 0.0),
-              child: SizedBox(
-                height: 48,
-                child: ChoiceChip(
-                  label: Center(
+              child: InkWell(
+                onTap: () => setState(() => _selectedAgeCategory = i),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: _selectedAgeCategory == i
+                        ? glass.accentMint
+                        : Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _selectedAgeCategory == i
+                          ? glass.accentMint
+                          : glass.glassBorderColor,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
                     child: Text(
                       categories[i],
                       style: TextStyle(
@@ -525,12 +588,6 @@ class _CprScreenState extends State<CprScreen>
                       ),
                     ),
                   ),
-                  selected: _selectedAgeCategory == i,
-                  selectedColor: glass.accentMint,
-                  backgroundColor: Colors.white.withValues(alpha: 0.08),
-                  onSelected: (val) {
-                    if (val) setState(() => _selectedAgeCategory = i);
-                  },
                 ),
               ),
             ),

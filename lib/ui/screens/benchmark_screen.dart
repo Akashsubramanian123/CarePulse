@@ -225,12 +225,18 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
     final triage = Provider.of<TriageController?>(context);
     final isModelReady = triage?.isReady ?? false;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
+    return GlassScaffold(
       appBar: AppBar(
-        title: const Text('Benchmark & Evaluation'),
+        title: Text(
+          'Benchmark & Evaluation',
+          style: TextStyle(
+            color: glass.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: glass.accentMint),
         actions: [
           if (_pastRuns.isNotEmpty)
             IconButton(
@@ -247,37 +253,46 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
             ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: glass.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_showPastRuns) ...[
-                  _buildPastRunsList(glass),
-                ] else ...[
-                  _buildDeviceAndModelCard(glass, isModelReady),
+      body: ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF000000),
+              Color(0xFF000000),
+              Color(0xFF000000),
+              Colors.transparent,
+            ],
+            stops: [0.0, 0.88, 0.96, 1.0],
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_showPastRuns) ...[
+                _buildPastRunsList(glass),
+              ] else ...[
+                _buildDeviceAndModelCard(glass, isModelReady),
+                const SizedBox(height: 14),
+                _buildControlsCard(glass, isModelReady, triage),
+                const SizedBox(height: 14),
+                if (_isRunning) _buildProgressCard(glass),
+                if (_currentRun != null && !_isRunning) ...[
+                  _buildSummaryCard(glass, _currentRun!),
                   const SizedBox(height: 14),
-                  _buildControlsCard(glass, isModelReady, triage),
+                  _buildVisualBarsCard(glass, _currentRun!),
                   const SizedBox(height: 14),
-                  if (_isRunning) _buildProgressCard(glass),
-                  if (_currentRun != null && !_isRunning) ...[
-                    _buildSummaryCard(glass, _currentRun!),
-                    const SizedBox(height: 14),
-                    _buildVisualBarsCard(glass, _currentRun!),
-                    const SizedBox(height: 14),
-                    _buildExportBar(glass),
-                    const SizedBox(height: 14),
-                    _buildDetailedResultsCard(glass, _currentRun!),
-                  ],
+                  _buildExportBar(glass),
+                  const SizedBox(height: 14),
+                  _buildDetailedResultsCard(glass, _currentRun!),
                 ],
-                const SizedBox(height: 32),
               ],
-            ),
+              const SizedBox(height: 32),
+            ],
           ),
         ),
       ),
@@ -295,12 +310,14 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
             children: [
               Icon(Icons.memory_rounded, color: glass.accentMint, size: 20),
               const SizedBox(width: 8),
-              Text(
-                'Device & Model Runtime',
-                style: TextStyle(
-                  color: glass.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'Device & Model Runtime',
+                  style: TextStyle(
+                    color: glass.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -340,16 +357,18 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
                   size: 16,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  isModelReady
-                      ? 'AI Model Ready on Device'
-                      : 'AI Model Not Loaded (Pipelines A & B work 100% offline)',
-                  style: TextStyle(
-                    color: isModelReady
-                        ? glass.accentMint
-                        : const Color(0xFFE05A4F),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    isModelReady
+                        ? 'AI Model Ready on Device'
+                        : 'AI Model Not Loaded (Pipelines A & B work 100% offline)',
+                    style: TextStyle(
+                      color: isModelReady
+                          ? glass.accentMint
+                          : const Color(0xFFE05A4F),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -401,12 +420,14 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
             children: [
               Icon(Icons.tune_rounded, color: glass.accentMint, size: 20),
               const SizedBox(width: 8),
-              Text(
-                'Evaluation Pipelines & Options',
-                style: TextStyle(
-                  color: glass.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'Evaluation Pipelines & Options',
+                  style: TextStyle(
+                    color: glass.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -578,13 +599,15 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
               ),
             )
           else
-            SizedBox(
-              height: 52,
+            Container(
+              constraints: const BoxConstraints(minHeight: 52),
               child: InkWell(
                 key: const ValueKey('start_benchmark_button'),
                 onTap: triage != null ? () => _startBenchmark(triage) : null,
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     gradient: glass.primaryActionGradient,
                     borderRadius: BorderRadius.circular(20),
@@ -595,12 +618,16 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
                       children: [
                         Icon(Icons.play_arrow_rounded, color: Colors.white),
                         SizedBox(width: 8),
-                        Text(
-                          'Start Benchmark',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: Text(
+                            'Start Benchmark',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

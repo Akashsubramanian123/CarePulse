@@ -10,7 +10,6 @@ import 'package:carepulse/services/protocol_repository.dart';
 import 'package:carepulse/services/triage_engine_service.dart';
 import 'package:carepulse/state/theme_controller.dart';
 import 'package:carepulse/state/triage_controller.dart';
-import 'package:carepulse/ui/screens/emergency_home_screen.dart';
 import 'package:carepulse/ui/screens/main_shell.dart';
 
 class ReadyModelDownloadService extends ModelDownloadService {
@@ -79,7 +78,7 @@ void main() {
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
               themeMode: theme.themeMode,
-              home: const EmergencyHomeScreen(),
+              home: const MainShell(),
             );
           },
         ),

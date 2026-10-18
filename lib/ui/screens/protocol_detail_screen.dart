@@ -83,9 +83,7 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
     final settings = context.watch<AppSettingsController?>();
     final emergencyNum = settings?.emergencyNumber ?? emergencyNumber;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
+    return GlassScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -121,7 +119,7 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
                 _isSpeaking
                     ? Icons.stop_circle_rounded
                     : Icons.volume_up_rounded,
-                color: _isSpeaking ? const Color(0xFFE05A4F) : glass.accentMint,
+                color: _isSpeaking ? const Color(0xFFC7382E) : glass.accentMint,
               ),
               tooltip: _isSpeaking ? 'Stop reading' : 'Read aloud',
               onPressed: _toggleSpeak,
@@ -130,167 +128,179 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: GradientBackground(
-        child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics()),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Call Action Banner
-                InkWell(
-                  onTap: () => _callEmergency(emergencyNum),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 14, horizontal: 16),
-                    decoration: BoxDecoration(
-                      gradient: p.callEmergency
-                          ? glass.emergencyGradient
-                          : glass.primaryActionGradient,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: (p.callEmergency
-                                  ? const Color(0xFFE05A4F)
-                                  : glass.accentMint)
-                              .withValues(alpha: 0.3),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.phone_in_talk_rounded,
-                            color: Colors.white, size: 24),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Text(
-                            p.callEmergency
-                                ? 'Call $emergencyNum Now'
-                                : 'Call $emergencyNum',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+      body: ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF000000),
+              Color(0xFF000000),
+              Color(0xFF000000),
+              Colors.transparent,
+            ],
+            stops: [0.0, 0.88, 0.96, 1.0],
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics()),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Call Action Banner
+              InkWell(
+                onTap: () => _callEmergency(emergencyNum),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  decoration: BoxDecoration(
+                    gradient: p.callEmergency
+                        ? glass.emergencyGradient
+                        : glass.primaryActionGradient,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (p.callEmergency
+                                ? const Color(0xFFE05A4F)
+                                : glass.accentMint)
+                            .withValues(alpha: 0.3),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 16),
-
-                // Clinical Sources & Meta Card
-                GlassCard(
-                  padding: const EdgeInsets.all(14),
-                  borderRadius: 18,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.verified_rounded,
-                          size: 20, color: glass.accentMint),
+                      const Icon(Icons.phone_in_talk_rounded,
+                          color: Colors.white, size: 24),
                       const SizedBox(width: 10),
-                      Expanded(
+                      Flexible(
                         child: Text(
-                          'Verified sources: ${p.sources.join(', ')}',
-                          style: TextStyle(
-                            color: glass.textSecondary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                          p.callEmergency
+                              ? 'Call $emergencyNum Now'
+                              : 'Call $emergencyNum',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
 
-                // 3 Standard Emergency Steps
-                _buildStepCard(
-                    context, glass, '1', 'IMMEDIATE ACTION', p.immediate),
-                const SizedBox(height: 12),
-                _buildStepCard(
-                    context, glass, '2', 'CRITICAL PRECAUTION', p.precaution),
-                const SizedBox(height: 12),
-                _buildStepCard(
-                    context, glass, '3', 'MONITOR & STABILIZE', p.monitor),
-                const SizedBox(height: 18),
-
-                // "Do Not" Contraindications
-                if (p.doNot.isNotEmpty) ...[
-                  GlassCard(
-                    padding: const EdgeInsets.all(16),
-                    borderRadius: 20,
-                    tint: const Color(0xFFE05A4F).withValues(alpha: 0.15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: const [
-                            Icon(Icons.block_rounded,
-                                color: Color(0xFFE05A4F), size: 22),
-                            SizedBox(width: 8),
-                            Text(
-                              'DO NOT',
-                              style: TextStyle(
-                                color: Color(0xFFE05A4F),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
+              // Clinical Sources & Meta Card
+              GlassCard(
+                padding: const EdgeInsets.all(14),
+                borderRadius: 18,
+                child: Row(
+                  children: [
+                    Icon(Icons.verified_rounded,
+                        size: 20, color: glass.accentMint),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Verified sources: ${p.sources.join(', ')}',
+                        style: TextStyle(
+                          color: glass.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
-                        const SizedBox(height: 12),
-                        for (final item in p.doNot)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('• ',
-                                    style: TextStyle(
-                                        color: Color(0xFFE05A4F),
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                                Expanded(
-                                  child: Text(
-                                    item,
-                                    style: TextStyle(
-                                      color: glass.textPrimary,
-                                      fontSize: 14,
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 3 Standard Emergency Steps
+              _buildStepCard(
+                  context, glass, '1', 'IMMEDIATE ACTION', p.immediate),
+              const SizedBox(height: 12),
+              _buildStepCard(
+                  context, glass, '2', 'CRITICAL PRECAUTION', p.precaution),
+              const SizedBox(height: 12),
+              _buildStepCard(
+                  context, glass, '3', 'MONITOR & STABILIZE', p.monitor),
+              const SizedBox(height: 18),
+
+              // "Do Not" Contraindications
+              if (p.doNot.isNotEmpty) ...[
+                GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  borderRadius: 20,
+                  tint: const Color(0xFFE05A4F).withValues(alpha: 0.15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.block_rounded,
+                              color: Color(0xFFE05A4F), size: 22),
+                          SizedBox(width: 8),
+                          Text(
+                            'DO NOT',
+                            style: TextStyle(
+                              color: Color(0xFFE05A4F),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
                             ),
                           ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                ],
-
-                // Disclaimer
-                Center(
-                  child: Text(
-                    'CarePulse first-aid guidance is conservative and informational.\nAlways consult professional medical emergency services.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: glass.textSecondary,
-                      fontSize: 11,
-                    ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      for (final item in p.doNot)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('• ',
+                                  style: TextStyle(
+                                      color: Color(0xFFE05A4F),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold)),
+                              Expanded(
+                                child: Text(
+                                  item,
+                                  style: TextStyle(
+                                    color: glass.textPrimary,
+                                    fontSize: 14,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
               ],
-            ),
+
+              // Disclaimer
+              Center(
+                child: Text(
+                  'CarePulse first-aid guidance is conservative and informational.\nAlways consult professional medical emergency services.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: glass.textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),

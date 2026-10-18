@@ -154,12 +154,11 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
+    return GlassScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: glass.accentMint),
         title: Text(
           'Medical ID',
           style: TextStyle(
@@ -202,22 +201,33 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
             ),
         ],
       ),
-      body: GradientBackground(
-        child: SafeArea(
-          child: _isLoading
-              ? Center(
-                  child: CircularProgressIndicator(color: glass.accentMint))
-              : SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics()),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: _isEditing
-                      ? _buildEditForm(glass)
-                      : _buildMedicalCardView(glass),
-                ),
-        ),
-      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator(color: glass.accentMint))
+          : ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF000000),
+                    Color(0xFF000000),
+                    Color(0xFF000000),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.88, 0.96, 1.0],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics()),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: _isEditing
+                    ? _buildEditForm(glass)
+                    : _buildMedicalCardView(glass),
+              ),
+            ),
     );
   }
 

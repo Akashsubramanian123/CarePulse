@@ -105,7 +105,7 @@ class CarePulseGlass extends ThemeExtension<CarePulseGlass> {
 
 class AppTheme {
   static final _emergencyGradient = const LinearGradient(
-    colors: [Color(0xFFE05A4F), Color(0xFFD4476A)],
+    colors: [Color(0xFFC7382E), Color(0xFFB52B4D)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -172,7 +172,7 @@ class AppTheme {
     shadowColor: const Color.fromRGBO(31, 41, 51, 0.10),
     textPrimary: const Color(0xFF1F2933),
     textSecondary: const Color(0xFF52606D),
-    accentMint: const Color(0xFF1F7480),
+    accentMint: const Color(0xFF16616B),
     iconTintGradient: const LinearGradient(
       colors: [
         Color.fromRGBO(47, 143, 157, 0.30),
@@ -184,7 +184,7 @@ class AppTheme {
     successDot: const Color(0xFF4FAE86),
     emergencyGradient: _emergencyGradient,
     primaryActionGradient: const LinearGradient(
-      colors: [Color(0xFF1F7480), Color(0xFF4F5FC9)],
+      colors: [Color(0xFF16616B), Color(0xFF4F5FC9)],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ),
@@ -196,13 +196,14 @@ class AppTheme {
       brightness: Brightness.dark,
       fontFamily: 'Nunito',
       scaffoldBackgroundColor:
-          Colors.transparent, // Background handled by GradientBackground
+          Colors.transparent, // Background handled by GlassScaffold
       colorScheme: ColorScheme.dark(
         primary: const Color(0xFF2FB5C4),
         onPrimary: Colors.white,
-        surface: Colors.transparent,
+        surface: const Color(0xFF1B242D),
         onSurface: _darkGlass.textPrimary,
-        error: const Color(0xFFE05A4F),
+        onSurfaceVariant: _darkGlass.textSecondary,
+        error: const Color(0xFFC7382E),
       ),
       extensions: [_darkGlass],
     );
@@ -215,11 +216,12 @@ class AppTheme {
       fontFamily: 'Nunito',
       scaffoldBackgroundColor: Colors.transparent,
       colorScheme: ColorScheme.light(
-        primary: const Color(0xFF1F7480),
+        primary: const Color(0xFF16616B),
         onPrimary: Colors.white,
-        surface: Colors.transparent,
+        surface: Colors.white,
         onSurface: _lightGlass.textPrimary,
-        error: const Color(0xFFE05A4F),
+        onSurfaceVariant: _lightGlass.textSecondary,
+        error: const Color(0xFFC7382E),
       ),
       extensions: [_lightGlass],
     );

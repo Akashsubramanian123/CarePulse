@@ -122,11 +122,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
+    return GlassScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: glass.accentMint),
         title: Text(
           'Query History',
           style: TextStyle(
@@ -144,7 +144,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 icon: const Icon(Icons.delete_sweep_rounded, size: 20),
                 label: const Text('Clear all'),
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFFE05A4F),
+                  foregroundColor: const Color(0xFFC7382E),
                   minimumSize: const Size(48, 48),
                 ),
                 onPressed: () => _confirmClearAll(glass),
@@ -153,50 +153,60 @@ class _HistoryScreenState extends State<HistoryScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(gradient: glass.backgroundGradient),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Reassurance privacy banner
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: GlassCard(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  borderRadius: 16,
-                  child: Row(
-                    children: [
-                      Icon(Icons.shield_outlined,
-                          size: 18, color: glass.accentMint),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'History stays on this device.',
-                          style: TextStyle(
-                            color: glass.textSecondary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+      body: Column(
+        children: [
+          // Reassurance privacy banner
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: GlassCard(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              borderRadius: 16,
+              child: Row(
+                children: [
+                  Icon(Icons.shield_outlined,
+                      size: 18, color: glass.accentMint),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'History stays on this device.',
+                      style: TextStyle(
+                        color: glass.textSecondary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-
-              // Content Area
-              Expanded(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _entries.isEmpty
-                        ? _buildEmptyState(glass)
-                        : _buildHistoryList(glass),
-              ),
-            ],
+            ),
           ),
-        ),
+
+          // Content Area
+          Expanded(
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(color: glass.accentMint))
+                : _entries.isEmpty
+                    ? _buildEmptyState(glass)
+                    : ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0xFF000000),
+                              Color(0xFF000000),
+                              Color(0xFF000000),
+                              Colors.transparent,
+                            ],
+                            stops: [0.0, 0.88, 0.96, 1.0],
+                          ).createShader(bounds);
+                        },
+                        blendMode: BlendMode.dstIn,
+                        child: _buildHistoryList(glass),
+                      ),
+          ),
+        ],
       ),
     );
   }

@@ -43,8 +43,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify initial list shows items
-    expect(find.text('First-Aid Guides'), findsOneWidget);
+    // Verify initial list shows items (AppBar was removed in favor of shell top bar)
+    expect(find.text('Search guides, symptoms, injuries...'), findsOneWidget);
     expect(find.text('Severe Bleeding'), findsOneWidget);
 
     // Search filter for snake

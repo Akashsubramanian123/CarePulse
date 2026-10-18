@@ -2,22 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../core/constants/app_constants.dart';
 import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/tts_service.dart';
 import '../../services/voice_input_service.dart';
 import '../../models/triage_question.dart';
 import '../../state/app_settings_controller.dart';
-import '../../state/theme_controller.dart';
 import '../../state/triage_controller.dart';
 import '../widgets/emergency_chips.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/streaming_response_card.dart';
 import '../widgets/telemetry_bar.dart';
-import 'benchmark_screen.dart';
-import 'history_screen.dart';
-import 'profile_screen.dart';
 
 class EmergencyHomeScreen extends StatefulWidget {
   const EmergencyHomeScreen({super.key});
@@ -52,16 +47,6 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     if (mounted) {
       setState(() {
         _autoReadAloud = prefs.getBool('carepulse_auto_read_aloud') ?? false;
-      });
-    }
-  }
-
-  Future<void> _saveAutoReadAloud(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('carepulse_auto_read_aloud', value);
-    if (mounted) {
-      setState(() {
-        _autoReadAloud = value;
       });
     }
   }
@@ -134,6 +119,7 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     setState(() => _isListening = false);
 
     controller.submitEmergencyQuery(queryText);
+    _scrollTo(_responseCardKey);
   }
 
   void _toggleSpeak(String text) {
@@ -167,350 +153,26 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     }
   }
 
-  void _openSettingsSheet(CarePulseGlass glass) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setSheetState) {
-            final isDark = Theme.of(ctx).brightness == Brightness.dark;
-            AppSettingsController? settingsController;
-            try {
-              settingsController = ctx.watch<AppSettingsController?>();
-            } catch (_) {}
-            if (settingsController == null) {
-              try {
-                settingsController =
-                    Provider.of<AppSettingsController?>(context);
-              } catch (_) {}
-            }
-            if (settingsController == null) {
-              try {
-                settingsController = ctx.watch<ThemeController?>();
-              } catch (_) {}
-            }
-            if (settingsController == null) {
-              try {
-                settingsController = Provider.of<ThemeController?>(context);
-              } catch (_) {}
-            }
-
-            final currentSettings =
-                settingsController ?? AppSettingsController();
-
-            return Material(
-              color: isDark ? const Color(0xFF1B242D) : Colors.white,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(28)),
-              clipBehavior: Clip.antiAlias,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                child: SafeArea(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Settings & About',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: glass.textPrimary,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close_rounded),
-                              onPressed: () => Navigator.pop(ctx),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Theme',
-                          style: TextStyle(
-                            color: glass.textPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        SegmentedButton<ThemeMode>(
-                          key:
-                              const ValueKey('settings_theme_segmented_button'),
-                          segments: const [
-                            ButtonSegment<ThemeMode>(
-                              value: ThemeMode.system,
-                              icon:
-                                  Icon(Icons.brightness_auto_rounded, size: 18),
-                              label: Text('System'),
-                            ),
-                            ButtonSegment<ThemeMode>(
-                              value: ThemeMode.light,
-                              icon: Icon(Icons.light_mode_rounded, size: 18),
-                              label: Text('Light'),
-                            ),
-                            ButtonSegment<ThemeMode>(
-                              value: ThemeMode.dark,
-                              icon: Icon(Icons.dark_mode_rounded, size: 18),
-                              label: Text('Dark'),
-                            ),
-                          ],
-                          selected: {currentSettings.themeMode},
-                          onSelectionChanged: (Set<ThemeMode> newSelection) {
-                            if (newSelection.isNotEmpty) {
-                              settingsController
-                                  ?.setThemeMode(newSelection.first);
-                              setSheetState(() {});
-                            }
-                          },
-                          style: ButtonStyle(
-                            minimumSize:
-                                WidgetStateProperty.all(const Size(0, 48)),
-                            visualDensity: VisualDensity.standard,
-                            tapTargetSize: MaterialTapTargetSize.padded,
-                            backgroundColor:
-                                WidgetStateProperty.resolveWith((states) {
-                              if (states.contains(WidgetState.selected)) {
-                                return glass.accentMint.withValues(alpha: 0.22);
-                              }
-                              return Colors.transparent;
-                            }),
-                            foregroundColor:
-                                WidgetStateProperty.resolveWith((states) {
-                              if (states.contains(WidgetState.selected)) {
-                                return glass.accentMint;
-                              }
-                              return glass.textPrimary;
-                            }),
-                            side: WidgetStateProperty.all(
-                              BorderSide(
-                                  color: glass.glassBorderColor, width: 1.0),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Emergency Number',
-                          style: TextStyle(
-                            color: glass.textPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          initialValue: currentSettings.selectedCountry,
-                          decoration: InputDecoration(
-                            labelText: 'Region / Country',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                          ),
-                          items: [
-                            ...emergencyCountries.map(
-                              (c) => DropdownMenuItem(
-                                value: c.name,
-                                child: Text('${c.name} (${c.number})'),
-                              ),
-                            ),
-                            const DropdownMenuItem(
-                              value: customCountryName,
-                              child: Text('Other / custom'),
-                            ),
-                          ],
-                          onChanged: (newCountry) {
-                            if (newCountry != null) {
-                              settingsController?.setCountry(newCountry);
-                              setSheetState(() {});
-                            }
-                          },
-                        ),
-                        if (currentSettings.selectedCountry ==
-                            customCountryName) ...[
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            initialValue: currentSettings.emergencyNumber,
-                            decoration: InputDecoration(
-                              labelText: 'Custom Emergency Number',
-                              hintText: 'e.g. 911 or 112',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 10,
-                              ),
-                            ),
-                            keyboardType: TextInputType.number,
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            validator: (val) {
-                              if (val == null ||
-                                  !isValidCustomEmergencyNumber(val)) {
-                                return 'Digits only (2 to 6 digits)';
-                              }
-                              return null;
-                            },
-                            onChanged: (val) {
-                              if (isValidCustomEmergencyNumber(val)) {
-                                settingsController?.setEmergencyNumber(val,
-                                    country: customCountryName);
-                              }
-                            },
-                          ),
-                        ],
-                        const SizedBox(height: 14),
-                        const Divider(height: 1),
-                        const SizedBox(height: 8),
-                        SwitchListTile(
-                          title: Text(
-                            'Save query history',
-                            style: TextStyle(
-                              color: glass.textPrimary,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'Keep first-aid queries on this device',
-                            style: TextStyle(
-                              color: glass.textSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
-                          value: currentSettings.saveHistory,
-                          activeThumbColor: glass.accentMint,
-                          contentPadding: EdgeInsets.zero,
-                          onChanged: (val) {
-                            settingsController?.setSaveHistory(val);
-                            setSheetState(() {});
-                          },
-                        ),
-                        SwitchListTile(
-                          title: Text(
-                            'Read answers aloud automatically',
-                            style: TextStyle(
-                              color: glass.textPrimary,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'Speaks out emergency steps as soon as generated',
-                            style: TextStyle(
-                              color: glass.textSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
-                          value: _autoReadAloud,
-                          activeThumbColor: glass.accentMint,
-                          contentPadding: EdgeInsets.zero,
-                          onChanged: (val) {
-                            setSheetState(() => _autoReadAloud = val);
-                            _saveAutoReadAloud(val);
-                          },
-                        ),
-                        const Divider(height: 24),
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: Icon(Icons.history_rounded,
-                              color: glass.accentMint),
-                          title: Text(
-                            'Query History',
-                            style: TextStyle(
-                              color: glass.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'Review past consultations',
-                            style: TextStyle(
-                              color: glass.textSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
-                          trailing: Icon(Icons.chevron_right_rounded,
-                              color: glass.textSecondary),
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const HistoryScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: Icon(Icons.assessment_outlined,
-                              color: glass.accentMint),
-                          title: Text(
-                            'Benchmark & Evaluation',
-                            style: TextStyle(
-                              color: glass.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'Evaluate models & protocol accuracy',
-                            style: TextStyle(
-                              color: glass.textSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
-                          trailing: Icon(Icons.chevron_right_rounded,
-                              color: glass.textSecondary),
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const BenchmarkScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                        const Divider(height: 24),
-                        Text(
-                          'About CarePulse',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: glass.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'CarePulse provides first-aid guidance only and is not a substitute for professional medical care. In a serious emergency, call your local emergency number (${currentSettings.emergencyNumber}).',
-                          style: TextStyle(
-                            color: glass.textSecondary,
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+  void _scrollTo(GlobalKey key) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final targetContext = key.currentContext;
+      if (targetContext != null) {
+        Scrollable.ensureVisible(
+          targetContext,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutQuad,
+          alignment: 0.05,
         );
-      },
-    );
+      }
+    });
   }
+
+  final GlobalKey _responseCardKey = GlobalKey();
+  final GlobalKey _clarificationCardKey = GlobalKey();
+  final ScrollController _scrollController = ScrollController();
+  String? _lastQuestionText;
+  bool _lastCallEmergencyNow = false;
 
   @override
   Widget build(BuildContext context) {
@@ -521,6 +183,16 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
       settingsController = context.watch<AppSettingsController>();
     } catch (_) {}
     final settings = settingsController ?? AppSettingsController();
+
+    // Auto-scroll when clarifying question appears or red-flag triggers
+    if (controller.pendingQuestion != null &&
+        controller.pendingQuestion?.text != _lastQuestionText) {
+      _lastQuestionText = controller.pendingQuestion?.text;
+      _scrollTo(_clarificationCardKey);
+    } else if (controller.callEmergencyNow && !_lastCallEmergencyNow) {
+      _lastCallEmergencyNow = true;
+      _scrollTo(_responseCardKey);
+    }
 
     // Auto-read aloud trigger when generation completes
     if (_autoReadAloud &&
@@ -533,244 +205,228 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
       });
     }
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: GlassCard(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          borderRadius: 24,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.medical_services_rounded,
-                  color: glass.accentMint, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                AppConstants.appName,
-                style: TextStyle(
-                  color: glass.textPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          // Settings Sheet Action (Feature 4)
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: IconButton(
-              icon: Icon(Icons.settings_outlined, color: glass.accentMint),
-              tooltip: 'Settings',
-              onPressed: () => _openSettingsSheet(glass),
-            ),
-          ),
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: IconButton(
-              icon: Icon(Icons.person, color: glass.accentMint),
-              tooltip: 'Profile',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
-              },
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            child: GlassCard(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              borderRadius: 20,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.circle, size: 8, color: glass.successDot),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Offline • AI Ready',
-                    style: TextStyle(
-                      color: glass.textPrimary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: GradientBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Scrollable Content Area
-              Expanded(
-                child: SingleChildScrollView(
+    return GlassScaffold(
+      body: Column(
+        children: [
+          // Slim status row under top bar: Offline · AI ready
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              children: [
+                GlassCard(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics()),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  borderRadius: 20,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Prominent Call 112 Banner when red flag triggers
-                      if (controller.callEmergencyNow) ...[
-                        InkWell(
-                          onTap: _callEmergency,
-                          borderRadius: BorderRadius.circular(24),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 16),
-                            decoration: BoxDecoration(
-                              gradient: glass.emergencyGradient,
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFFE05A4F)
-                                      .withValues(alpha: 0.5),
-                                  blurRadius: 22,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.warning_rounded,
-                                    color: Colors.white, size: 28),
-                                const SizedBox(width: 10),
-                                Flexible(
-                                  child: Text(
-                                    'CRITICAL RED FLAG · CALL ${settings.emergencyNumber} NOW',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 0.5,
-                                    ),
+                      Icon(Icons.circle, size: 8, color: glass.successDot),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Offline · AI ready',
+                        style: TextStyle(
+                          color: glass.textPrimary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Scrollable Content Area with soft fade at bottom edge
+          Expanded(
+            child: ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF000000),
+                    Color(0xFF000000),
+                    Color(0xFF000000),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.90, 0.96, 1.0],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 8,
+                  bottom: 24,
+                ),
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Prominent Call 112 Banner when red flag triggers
+                    if (controller.callEmergencyNow) ...[
+                      InkWell(
+                        onTap: _callEmergency,
+                        borderRadius: BorderRadius.circular(24),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
+                          decoration: BoxDecoration(
+                            gradient: glass.emergencyGradient,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFE05A4F)
+                                    .withValues(alpha: 0.5),
+                                blurRadius: 22,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.warning_rounded,
+                                  color: Colors.white, size: 28),
+                              const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  'CRITICAL RED FLAG · CALL ${settings.emergencyNumber} NOW',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                      ] else ...[
-                        // Standard Emergency Call Button
-                        InkWell(
-                          onTap: () => _callEmergency(settings.emergencyNumber),
-                          borderRadius: BorderRadius.circular(24),
-                          child: Container(
-                            height: 64,
-                            decoration: BoxDecoration(
-                              gradient: glass.emergencyGradient,
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.phone,
-                                    color: Colors.white, size: 26),
-                                const SizedBox(width: 12),
-                                Text(
+                      ),
+                      const SizedBox(height: 16),
+                    ] else ...[
+                      // Standard Emergency Call Button
+                      InkWell(
+                        onTap: () => _callEmergency(settings.emergencyNumber),
+                        borderRadius: BorderRadius.circular(24),
+                        child: Container(
+                          constraints: const BoxConstraints(minHeight: 56),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            gradient: glass.emergencyGradient,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.phone,
+                                  color: Colors.white, size: 24),
+                              const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
                                   'Call emergency · ${settings.emergencyNumber}',
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 22,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                      ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
 
-                      // Performance Chevron
-                      GlassCard(
-                        borderRadius: 24,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        onTap: () {
-                          setState(() {
-                            _telemetryExpanded = !_telemetryExpanded;
-                          });
-                        },
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Performance',
+                    // Performance Chevron
+                    GlassCard(
+                      borderRadius: 24,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      onTap: () {
+                        setState(() {
+                          _telemetryExpanded = !_telemetryExpanded;
+                        });
+                      },
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text('Performance',
                                     style: TextStyle(
                                         color: glass.textPrimary,
                                         fontWeight: FontWeight.bold)),
-                                Row(
-                                  children: [
-                                    Text('Tap to expand',
-                                        style: TextStyle(
-                                            color: glass.textSecondary,
-                                            fontSize: 12)),
-                                    Icon(
-                                      _telemetryExpanded
-                                          ? Icons.expand_less
-                                          : Icons.expand_more,
-                                      color: glass.textSecondary,
-                                      size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Tap to expand',
+                                      style: TextStyle(
+                                          color: glass.textSecondary,
+                                          fontSize: 12)),
+                                  Icon(
+                                    _telemetryExpanded
+                                        ? Icons.expand_less
+                                        : Icons.expand_more,
+                                    color: glass.textSecondary,
+                                    size: 16,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 300),
+                            child: _telemetryExpanded
+                                ? Padding(
+                                    padding: const EdgeInsets.only(top: 12.0),
+                                    child: TelemetryBar(
+                                      ttftMs: controller.ttftMs,
+                                      tokensPerSec: controller.tokensPerSec,
+                                      ramUsageMb: controller.ramUsageMb,
+                                      isOffline: controller.isOffline,
+                                      isGenerating: controller.isGenerating,
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            AnimatedSize(
-                              duration: const Duration(milliseconds: 300),
-                              child: _telemetryExpanded
-                                  ? Padding(
-                                      padding: const EdgeInsets.only(top: 12.0),
-                                      child: TelemetryBar(
-                                        ttftMs: controller.ttftMs,
-                                        tokensPerSec: controller.tokensPerSec,
-                                        ramUsageMb: controller.ramUsageMb,
-                                        isOffline: controller.isOffline,
-                                        isGenerating: controller.isGenerating,
-                                      ),
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
-                          ],
-                        ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
                       ),
+                    ),
 
-                      const SizedBox(height: 24),
-                      Text("What's happening?",
-                          style: TextStyle(
-                              color: glass.textPrimary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
+                    const SizedBox(height: 24),
+                    Text("What's happening?",
+                        style: TextStyle(
+                            color: glass.textPrimary,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
 
-                      // Quick-Trigger Emergency Chips
-                      EmergencyChips(
-                        isDisabled: controller.isGenerating,
-                        onPresetSelected: (preset) {
-                          _submitQuery(controller, preset.query);
-                        },
-                      ),
+                    // Quick-Trigger Emergency Chips
+                    EmergencyChips(
+                      isDisabled: controller.isGenerating,
+                      onPresetSelected: (preset) {
+                        _submitQuery(controller, preset.query);
+                      },
+                    ),
 
-                      const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                      // Streaming Response Card with Source Chip and TTS Read-aloud
-                      StreamingResponseCard(
+                    // Streaming Response Card with Source Chip and TTS Read-aloud
+                    KeyedSubtree(
+                      key: _responseCardKey,
+                      child: StreamingResponseCard(
                         query: controller.currentQuery,
                         responseText: controller.streamedResponse,
                         isGenerating: controller.isGenerating,
@@ -787,323 +443,317 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                           controller.clearResponse();
                         },
                       ),
+                    ),
 
-                      const SizedBox(height: 16),
-                      if (controller.uploadedDocument != null)
-                        GlassCard(
-                          padding: const EdgeInsets.all(12),
-                          borderRadius: 12,
-                          child: Row(
-                            children: [
-                              Icon(Icons.description,
-                                  color: glass.accentMint, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  controller.uploadedDocument!.fileName,
-                                  style: TextStyle(
-                                      color: glass.textPrimary, fontSize: 13),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.close,
-                                    size: 18, color: glass.textSecondary),
-                                onPressed: controller.clearDocument,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      if (controller.uploadedDocument != null)
-                        const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Subtle note if cloud fallback is used
-              if (_voiceCloudNote)
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Text(
-                    'Voice may need internet on this device',
-                    style: TextStyle(color: glass.accentMint, fontSize: 12),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-
-              // Clarifying Question Card (Feature 4)
-              if (controller.pendingQuestion != null)
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: GlassCard(
-                    key: const Key('triage_clarification_card'),
-                    padding: const EdgeInsets.all(16),
-                    borderRadius: 20,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
+                    const SizedBox(height: 16),
+                    if (controller.uploadedDocument != null)
+                      GlassCard(
+                        padding: const EdgeInsets.all(12),
+                        borderRadius: 12,
+                        child: Row(
                           children: [
-                            Icon(Icons.help_outline_rounded,
+                            Icon(Icons.description,
                                 color: glass.accentMint, size: 20),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                controller.pendingQuestion!.text,
+                                controller.uploadedDocument!.fileName,
                                 style: TextStyle(
-                                  color: glass.textPrimary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                    color: glass.textPrimary, fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
                               ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.close,
+                                  size: 18, color: glass.textSecondary),
+                              onPressed: controller.clearDocument,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: ElevatedButton(
-                                  key: const ValueKey('triage_answer_yes'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: glass.accentMint,
-                                    foregroundColor: Colors.black87,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    minimumSize: const Size(0, 48),
-                                  ),
-                                  onPressed: () =>
-                                      controller.answerClarifyingQuestion(
-                                          TriageAnswer.yes),
-                                  child: const Text('Yes',
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: ElevatedButton(
-                                  key: const ValueKey('triage_answer_no'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFE05A4F),
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    minimumSize: const Size(0, 48),
-                                  ),
-                                  onPressed: () =>
-                                      controller.answerClarifyingQuestion(
-                                          TriageAnswer.no),
-                                  child: const Text('No',
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: ElevatedButton(
-                                  key: const ValueKey('triage_answer_not_sure'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: glass.glassBorderColor
-                                        .withValues(alpha: 0.2),
-                                    foregroundColor: glass.textPrimary,
-                                    side: BorderSide(
-                                        color: glass.glassBorderColor),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    minimumSize: const Size(0, 48),
-                                  ),
-                                  onPressed: () =>
-                                      controller.answerClarifyingQuestion(
-                                          TriageAnswer.notSure),
-                                  child: const Text('Not sure',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Center(
-                          child: SizedBox(
-                            height: 48,
-                            child: TextButton(
-                              key: const ValueKey('triage_answer_skip'),
-                              style: TextButton.styleFrom(
-                                foregroundColor: glass.textSecondary,
-                                minimumSize: const Size(48, 48),
-                              ),
-                              onPressed: () => controller
-                                  .answerClarifyingQuestion(TriageAnswer.skip),
-                              child: const Text(
-                                'Skip',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-              // Bottom Input Bar
-              Container(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    // Text Field Input
-                    Expanded(
-                      child: GlassCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        borderRadius: 22,
-                        child: SizedBox(
-                          height: 58,
-                          child: TextField(
-                            controller: _textController,
-                            focusNode: _focusNode,
-                            enabled: !controller.isGenerating,
-                            style: TextStyle(
-                                color: glass.textPrimary, fontSize: 14),
-                            decoration: InputDecoration(
-                              hintText: 'Describe what happened...',
-                              hintStyle: TextStyle(
-                                  color: glass.textSecondary, fontSize: 13),
-                              filled: false,
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 16),
-                              prefixIcon: Icon(
-                                Icons.emergency_rounded,
-                                color: glass.accentMint,
-                                size: 20,
-                              ),
-                              suffixIcon: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (_textController.text.isNotEmpty &&
-                                      !controller.isGenerating)
-                                    SizedBox(
-                                      width: 48,
-                                      height: 48,
-                                      child: IconButton(
-                                        icon: const Icon(Icons.clear_rounded,
-                                            size: 18),
-                                        color: glass.textSecondary,
-                                        onPressed: () {
-                                          _textController.clear();
-                                          setState(() {});
-                                        },
-                                      ),
-                                    ),
-                                  // Mic Button with VoiceInputService
-                                  SizedBox(
-                                    width: 48,
-                                    height: 48,
-                                    child: IconButton(
-                                      icon: Icon(
-                                        _isListening
-                                            ? Icons.mic
-                                            : Icons.mic_none,
-                                        size: 22,
-                                      ),
-                                      color: _isListening
-                                          ? const Color(0xFFE05A4F)
-                                          : glass.accentMint,
-                                      tooltip: _isListening
-                                          ? 'Stop listening'
-                                          : 'Speak emergency scenario',
-                                      onPressed: _toggleListening,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 48,
-                                    height: 48,
-                                    child: IconButton(
-                                      icon: const Icon(Icons.attach_file,
-                                          size: 20),
-                                      color: glass.textSecondary,
-                                      tooltip: 'Attach record',
-                                      onPressed: () =>
-                                          controller.pickDocument(),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            onChanged: (_) => setState(() {}),
-                            onSubmitted: (_) => _submitQuery(controller),
-                          ),
-                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-
-                    // Emergency Submit Button (>= 48x48)
-                    Container(
-                      height: 58,
-                      width: 58,
-                      decoration: BoxDecoration(
-                        gradient: glass.primaryActionGradient,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.4),
-                            width: 1),
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          key: const ValueKey('emergency_submit_button'),
-                          borderRadius: BorderRadius.circular(24),
-                          onTap: controller.isGenerating
-                              ? () => controller.stopGeneration()
-                              : () => _submitQuery(controller),
-                          child: Semantics(
-                            label: controller.isGenerating ? 'Stop' : 'Send',
-                            button: true,
-                            child: Center(
-                              child: Icon(
-                                controller.isGenerating
-                                    ? Icons.stop_rounded
-                                    : Icons.send_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    if (controller.uploadedDocument != null)
+                      const SizedBox(height: 16),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+
+          // Subtle note if cloud fallback is used
+          if (_voiceCloudNote)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Text(
+                'Voice may need internet on this device',
+                style: TextStyle(color: glass.accentMint, fontSize: 12),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+          // Clarifying Question Card (Feature 4)
+          if (controller.pendingQuestion != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: KeyedSubtree(
+                key: _clarificationCardKey,
+                child: GlassCard(
+                  key: const Key('triage_clarification_card'),
+                  padding: const EdgeInsets.all(16),
+                  borderRadius: 20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.help_outline_rounded,
+                              color: glass.accentMint, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              controller.pendingQuestion!.text,
+                              style: TextStyle(
+                                color: glass.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 48,
+                              child: ElevatedButton(
+                                key: const ValueKey('triage_answer_yes'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: glass.accentMint,
+                                  foregroundColor: Colors.black87,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  minimumSize: const Size(0, 48),
+                                ),
+                                onPressed: () => controller
+                                    .answerClarifyingQuestion(TriageAnswer.yes),
+                                child: const Text('Yes',
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SizedBox(
+                              height: 48,
+                              child: ElevatedButton(
+                                key: const ValueKey('triage_answer_no'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFC7382E),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  minimumSize: const Size(0, 48),
+                                ),
+                                onPressed: () => controller
+                                    .answerClarifyingQuestion(TriageAnswer.no),
+                                child: const Text('No',
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SizedBox(
+                              height: 48,
+                              child: ElevatedButton(
+                                key: const ValueKey('triage_answer_not_sure'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: glass.glassBorderColor
+                                      .withValues(alpha: 0.2),
+                                  foregroundColor: glass.textPrimary,
+                                  side:
+                                      BorderSide(color: glass.glassBorderColor),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  minimumSize: const Size(0, 48),
+                                ),
+                                onPressed: () =>
+                                    controller.answerClarifyingQuestion(
+                                        TriageAnswer.notSure),
+                                child: const Text('Not sure',
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Center(
+                        child: SizedBox(
+                          height: 48,
+                          child: TextButton(
+                            key: const ValueKey('triage_answer_skip'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: glass.textSecondary,
+                              minimumSize: const Size(48, 48),
+                            ),
+                            onPressed: () => controller
+                                .answerClarifyingQuestion(TriageAnswer.skip),
+                            child: const Text(
+                              'Skip',
+                              style: TextStyle(
+                                fontSize: 13,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+          // Bottom Input Bar
+          Container(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                // Text Field Input
+                Expanded(
+                  child: GlassCard(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    borderRadius: 22,
+                    child: SizedBox(
+                      height: 58,
+                      child: TextField(
+                        controller: _textController,
+                        focusNode: _focusNode,
+                        maxLines: 1,
+                        enabled: !controller.isGenerating,
+                        style:
+                            TextStyle(color: glass.textPrimary, fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: 'What happened?',
+                          hintStyle: TextStyle(
+                            color: glass.textSecondary,
+                            fontSize: 13,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          filled: false,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
+                          suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (_textController.text.isNotEmpty &&
+                                  !controller.isGenerating)
+                                SizedBox(
+                                  width: 48,
+                                  height: 48,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.clear_rounded,
+                                        size: 18),
+                                    color: glass.textSecondary,
+                                    onPressed: () {
+                                      _textController.clear();
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                              // Mic Button with VoiceInputService (>= 48x48)
+                              SizedBox(
+                                width: 48,
+                                height: 48,
+                                child: IconButton(
+                                  icon: Icon(
+                                    _isListening ? Icons.mic : Icons.mic_none,
+                                    size: 22,
+                                  ),
+                                  color: _isListening
+                                      ? const Color(0xFFC7382E)
+                                      : glass.accentMint,
+                                  tooltip: _isListening
+                                      ? 'Stop listening'
+                                      : 'Speak emergency scenario',
+                                  onPressed: _toggleListening,
+                                ),
+                              ),
+                              // Attach Button (>= 48x48)
+                              SizedBox(
+                                width: 48,
+                                height: 48,
+                                child: IconButton(
+                                  icon: const Icon(Icons.attach_file, size: 20),
+                                  color: glass.textSecondary,
+                                  tooltip: 'Attach record',
+                                  onPressed: () => controller.pickDocument(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => _submitQuery(controller),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+
+                // Emergency Submit Button (>= 48x48)
+                Container(
+                  height: 58,
+                  width: 58,
+                  decoration: BoxDecoration(
+                    gradient: glass.primaryActionGradient,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.4), width: 1),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      key: const ValueKey('emergency_submit_button'),
+                      borderRadius: BorderRadius.circular(24),
+                      onTap: controller.isGenerating
+                          ? () => controller.stopGeneration()
+                          : () => _submitQuery(controller),
+                      child: Semantics(
+                        label: controller.isGenerating ? 'Stop' : 'Send',
+                        button: true,
+                        child: Center(
+                          child: Icon(
+                            controller.isGenerating
+                                ? Icons.stop_rounded
+                                : Icons.send_rounded,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

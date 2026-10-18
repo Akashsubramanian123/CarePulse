@@ -274,381 +274,374 @@ class _SosScreenState extends State<SosScreen> {
     final settings = context.watch<AppSettingsController?>();
     final emergencyNum = settings?.emergencyNumber ?? emergencyNumber;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Emergency SOS',
-          style: TextStyle(
-            color: glass.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: SizedBox(
-              height: 48,
-              child: TextButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => MedicalIdScreen(store: _store)),
-                  ).then((_) => _loadData());
-                },
-                icon: Icon(Icons.badge_rounded,
-                    color: glass.accentMint, size: 20),
-                label: Text(
-                  'Medical ID',
-                  style: TextStyle(
-                    color: glass.accentMint,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: GradientBackground(
-        child: SafeArea(
-          child: _isLoading
-              ? Center(
-                  child: CircularProgressIndicator(color: glass.accentMint))
-              : SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics()),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Large Send SOS Action Button
-                      InkWell(
-                        onTap: _isFetchingLocation ? null : _onSendSosPressed,
-                        borderRadius: BorderRadius.circular(28),
-                        child: Container(
-                          height: 84,
-                          decoration: BoxDecoration(
-                            gradient: glass.emergencyGradient,
-                            borderRadius: BorderRadius.circular(28),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFE05A4F)
-                                    .withValues(alpha: 0.4),
-                                blurRadius: 24,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: _isFetchingLocation
-                                ? Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          color: Colors.white,
-                                        ),
+    return GlassScaffold(
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator(color: glass.accentMint))
+          : ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF000000),
+                    Color(0xFF000000),
+                    Color(0xFF000000),
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.88, 0.96, 1.0],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics()),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Large Send SOS Action Button
+                    InkWell(
+                      onTap: _isFetchingLocation ? null : _onSendSosPressed,
+                      borderRadius: BorderRadius.circular(28),
+                      child: Container(
+                        height: 84,
+                        decoration: BoxDecoration(
+                          gradient: glass.emergencyGradient,
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFE05A4F)
+                                  .withValues(alpha: 0.4),
+                              blurRadius: 24,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: _isFetchingLocation
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
                                       ),
-                                      SizedBox(width: 14),
-                                      Text(
-                                        'Acquiring GPS fix...',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    ),
+                                    SizedBox(width: 14),
+                                    Text(
+                                      'Acquiring GPS fix...',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                    ],
-                                  )
-                                : Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      Icon(Icons.emergency_share_rounded,
-                                          color: Colors.white, size: 32),
-                                      SizedBox(width: 12),
-                                      Text(
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.emergency_share_rounded,
+                                        color: Colors.white, size: 28),
+                                    SizedBox(width: 10),
+                                    Flexible(
+                                      child: Text(
                                         'SEND SOS ALERT',
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 22,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.w900,
-                                          letterSpacing: 1.0,
+                                          letterSpacing: 0.8,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ],
-                                  ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-
-                      // Direct Call Emergency Banner
-                      InkWell(
-                        onTap: () => _callEmergency(emergencyNum),
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: glass.glassBorderColor),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.phone_rounded,
-                                  color: glass.accentMint, size: 22),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Call $emergencyNum',
-                                style: TextStyle(
-                                  color: glass.textPrimary,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                    ),
+                    const SizedBox(height: 14),
 
-                      // Emergency Contacts Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
+                    // Direct Call Emergency Banner
+                    InkWell(
+                      onTap: () => _callEmergency(emergencyNum),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: glass.glassBorderColor),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.phone_rounded,
+                                color: glass.accentMint, size: 22),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Call $emergencyNum',
+                              style: TextStyle(
+                                color: glass.textPrimary,
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Emergency Contacts Header
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
                             'Emergency Contacts',
                             style: TextStyle(
                               color: glass.textPrimary,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        MedicalIdScreen(store: _store)),
-                              ).then((_) => _loadData());
-                            },
-                            child: Text(
-                              _medicalId.contacts.isEmpty ? 'Add' : 'Manage',
-                              style: TextStyle(
-                                  color: glass.accentMint,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Contact Cards or Add Prompt
-                      if (_medicalId.contacts.isEmpty)
-                        GlassCard(
-                          padding: const EdgeInsets.all(16),
-                          borderRadius: 20,
-                          child: Column(
-                            children: [
-                              Icon(Icons.person_add_rounded,
-                                  size: 36, color: glass.accentMint),
-                              const SizedBox(height: 10),
-                              Text(
-                                'No Emergency Contacts Added',
-                                style: TextStyle(
-                                  color: glass.textPrimary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Add up to 3 contacts so CarePulse can notify them instantly via SMS with your GPS location and medical profile.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: glass.textSecondary, fontSize: 13),
-                              ),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: glass.accentMint,
-                                  foregroundColor: Colors.black87,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16)),
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) =>
-                                            MedicalIdScreen(store: _store)),
-                                  ).then((_) => _loadData());
-                                },
-                                child: const Text('Add Emergency Contacts',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ),
-                        )
-                      else
-                        for (final contact in _medicalId.contacts)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10.0),
-                            child: GlassCard(
-                              padding: const EdgeInsets.all(14),
-                              borderRadius: 18,
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor: glass.accentMint
-                                        .withValues(alpha: 0.15),
-                                    child: Icon(Icons.person_rounded,
-                                        color: glass.accentMint),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          contact.name,
-                                          style: TextStyle(
-                                            color: glass.textPrimary,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${contact.relation.isNotEmpty ? "${contact.relation} • " : ""}${contact.phone}',
-                                          style: TextStyle(
-                                              color: glass.textSecondary,
-                                              fontSize: 13),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Per-contact Call Button (>= 48x48 tap target)
-                                  SizedBox(
-                                    width: 48,
-                                    height: 48,
-                                    child: IconButton(
-                                      icon: const Icon(Icons.call_rounded,
-                                          size: 22),
-                                      color: const Color(0xFF6BAA8E),
-                                      tooltip: 'Call ${contact.name}',
-                                      onPressed: () =>
-                                          _callContact(contact.phone),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                      const SizedBox(height: 20),
-
-                      // Medical Card Summary for First Responders
-                      Text(
-                        'Medical Card (For First Responders)',
-                        style: TextStyle(
-                          color: glass.textPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
-                      const SizedBox(height: 10),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      MedicalIdScreen(store: _store)),
+                            ).then((_) => _loadData());
+                          },
+                          child: Text(
+                            _medicalId.contacts.isEmpty ? 'Add' : 'Manage',
+                            style: TextStyle(
+                                color: glass.accentMint,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
 
+                    // Contact Cards or Add Prompt
+                    if (_medicalId.contacts.isEmpty)
                       GlassCard(
-                        padding: const EdgeInsets.all(18),
-                        borderRadius: 22,
+                        padding: const EdgeInsets.all(16),
+                        borderRadius: 20,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    _medicalId.name.isEmpty
-                                        ? 'Name: Not provided'
-                                        : _medicalId.name,
-                                    style: TextStyle(
-                                      color: glass.textPrimary,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                if (_medicalId.bloodGroup.isNotEmpty)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFE05A4F)
-                                          .withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                          color: const Color(0xFFE05A4F),
-                                          width: 1),
-                                    ),
-                                    child: Text(
-                                      'Blood: ${_medicalId.bloodGroup}',
-                                      style: const TextStyle(
-                                        color: Color(0xFFE05A4F),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                            Icon(Icons.person_add_rounded,
+                                size: 36, color: glass.accentMint),
+                            const SizedBox(height: 10),
+                            Text(
+                              'No Emergency Contacts Added',
+                              style: TextStyle(
+                                color: glass.textPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Add up to 3 contacts so CarePulse can notify them instantly via SMS with your GPS location and medical profile.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: glass.textSecondary, fontSize: 13),
                             ),
                             const SizedBox(height: 12),
-                            _buildSummaryRow(
-                                'Allergies',
-                                _medicalId.allergies.isEmpty
-                                    ? 'None recorded'
-                                    : _medicalId.allergies,
-                                glass),
-                            _buildSummaryRow(
-                                'Conditions',
-                                _medicalId.conditions.isEmpty
-                                    ? 'None recorded'
-                                    : _medicalId.conditions,
-                                glass),
-                            _buildSummaryRow(
-                                'Medications',
-                                _medicalId.medications.isEmpty
-                                    ? 'None recorded'
-                                    : _medicalId.medications,
-                                glass),
-                            if (_medicalId.notes.isNotEmpty)
-                              _buildSummaryRow(
-                                  'Notes', _medicalId.notes, glass),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: glass.accentMint,
+                                foregroundColor: Colors.black87,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16)),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          MedicalIdScreen(store: _store)),
+                                ).then((_) => _loadData());
+                              },
+                              child: const Text('Add Emergency Contacts',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            ),
                           ],
                         ),
+                      )
+                    else
+                      for (final contact in _medicalId.contacts)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0),
+                          child: GlassCard(
+                            padding: const EdgeInsets.all(14),
+                            borderRadius: 18,
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor:
+                                      glass.accentMint.withValues(alpha: 0.15),
+                                  child: Icon(Icons.person_rounded,
+                                      color: glass.accentMint),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        contact.name,
+                                        style: TextStyle(
+                                          color: glass.textPrimary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${contact.relation.isNotEmpty ? "${contact.relation} • " : ""}${contact.phone}',
+                                        style: TextStyle(
+                                            color: glass.textSecondary,
+                                            fontSize: 13),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Per-contact Call Button (>= 48x48 tap target)
+                                SizedBox(
+                                  width: 48,
+                                  height: 48,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.call_rounded,
+                                        size: 22),
+                                    color: const Color(0xFF6BAA8E),
+                                    tooltip: 'Call ${contact.name}',
+                                    onPressed: () =>
+                                        _callContact(contact.phone),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                    const SizedBox(height: 20),
+
+                    // Medical Card Summary for First Responders
+                    Text(
+                      'Medical Card (For First Responders)',
+                      style: TextStyle(
+                        color: glass.textPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    GlassCard(
+                      padding: const EdgeInsets.all(18),
+                      borderRadius: 22,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _medicalId.name.isEmpty
+                                      ? 'Name: Not provided'
+                                      : _medicalId.name,
+                                  style: TextStyle(
+                                    color: glass.textPrimary,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              if (_medicalId.bloodGroup.isNotEmpty) ...[
+                                Builder(
+                                  builder: (context) {
+                                    final isDark =
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark;
+                                    final chipTextColor = isDark
+                                        ? const Color(0xFFFFB4AB)
+                                        : const Color(0xFFB3362C);
+                                    final chipBgColor = isDark
+                                        ? const Color(0xFF410E0B)
+                                        : const Color(0xFFFFEBEE);
+                                    final chipBorderColor = isDark
+                                        ? const Color(0xFF93000A)
+                                        : const Color(0xFFF2B8B5);
+
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: chipBgColor,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: chipBorderColor,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Blood: ${_medicalId.bloodGroup}',
+                                        style: TextStyle(
+                                          color: chipTextColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _buildSummaryRow(
+                              'Allergies',
+                              _medicalId.allergies.isEmpty
+                                  ? 'None recorded'
+                                  : _medicalId.allergies,
+                              glass),
+                          _buildSummaryRow(
+                              'Conditions',
+                              _medicalId.conditions.isEmpty
+                                  ? 'None recorded'
+                                  : _medicalId.conditions,
+                              glass),
+                          _buildSummaryRow(
+                              'Medications',
+                              _medicalId.medications.isEmpty
+                                  ? 'None recorded'
+                                  : _medicalId.medications,
+                              glass),
+                          if (_medicalId.notes.isNotEmpty)
+                            _buildSummaryRow('Notes', _medicalId.notes, glass),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
-        ),
-      ),
+              ),
+            ),
     );
   }
 
