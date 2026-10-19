@@ -4,7 +4,7 @@ import 'package:carepulse/main.dart';
 
 void main() {
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'onboarding_v1_seen': true});
   });
 
   testWidgets('CarePulseApp smoke test', (WidgetTester tester) async {

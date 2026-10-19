@@ -62,7 +62,7 @@ class ControllableEngineService extends TriageEngineService {
 
 void main() {
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'onboarding_v1_seen': true});
   });
 
   testWidgets(

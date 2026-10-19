@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/constants/emergency_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/tts_service.dart';
@@ -13,6 +14,9 @@ import '../widgets/emergency_chips.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/streaming_response_card.dart';
 import '../widgets/telemetry_bar.dart';
+import 'main_shell.dart';
+import 'model_setup_screen.dart';
+import 'profile_screen.dart';
 
 class EmergencyHomeScreen extends StatefulWidget {
   const EmergencyHomeScreen({super.key});
@@ -40,6 +44,171 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     super.initState();
     _loadSettings();
     _tts.isSpeakingNotifier.addListener(_onTtsStateChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkFirstLaunchOnboarding();
+    });
+  }
+
+  Future<void> _checkFirstLaunchOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    final seen = prefs.getBool('onboarding_v1_seen') ?? false;
+    if (!seen && mounted) {
+      await prefs.setBool('onboarding_v1_seen', true);
+      if (!mounted) return;
+      _showOnboardingSheet();
+    }
+  }
+
+  void _showOnboardingSheet() {
+    final controller = Provider.of<TriageController>(context, listen: false);
+    final modelSize = controller.totalMB > 0
+        ? '${controller.totalMB.toInt()}MB'
+        : '${AppConstants.estimatedModelSizeMb.toInt()}MB';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final glass = theme.extension<CarePulseGlass>()!;
+        final isDark = theme.brightness == Brightness.dark;
+        final surfaceColor = isDark ? const Color(0xFF1B242D) : Colors.white;
+        final onSurface =
+            isDark ? const Color(0xFFF1F7FA) : const Color(0xFF1F2933);
+        final onSurfaceVariant =
+            isDark ? const Color(0xFFB5C3CA) : const Color(0xFF52606D);
+
+        return Material(
+          color: surfaceColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          clipBehavior: Clip.antiAlias,
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          gradient: glass.iconTintGradient,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.health_and_safety_rounded,
+                            color: glass.accentMint, size: 28),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          'Welcome to CarePulse',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.check_circle_outline_rounded,
+                          size: 20, color: glass.accentMint),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Emergency rules, Guides, CPR and SOS already work offline without internet.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.download_for_offline_outlined,
+                          size: 20, color: glass.accentMint),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'AI answers need a one-time $modelSize download.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.wifi_rounded,
+                          size: 20, color: glass.accentMint),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Wi-Fi recommended for downloading model weights.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    key: const Key('onboarding_download_button'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: glass.accentMint,
+                      foregroundColor: Colors.black87,
+                      minimumSize: const Size(0, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      controller.startModelDownload();
+                    },
+                    child: const Text(
+                      'Download AI model now',
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    key: const Key('onboarding_later_button'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: onSurfaceVariant,
+                      minimumSize: const Size(0, 44),
+                    ),
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Later'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _loadSettings() async {
@@ -208,34 +377,36 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
     return GlassScaffold(
       body: Column(
         children: [
-          // Slim status row under top bar: Offline · AI ready
+          // Status row under top bar: Status pill on the left, Profile button on the right
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                GlassCard(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  borderRadius: 20,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.circle, size: 8, color: glass.successDot),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Offline · AI ready',
-                        style: TextStyle(
-                          color: glass.textPrimary,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                _buildStatusPill(context, controller, glass),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    key: const Key('assistant_profile_button'),
+                    tooltip: 'Medical profile',
+                    icon: Icon(Icons.person_outline_rounded,
+                        color: glass.textPrimary),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileScreen(),
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ],
             ),
           ),
+          // Sticky banner directly under status row whenever model is not ready
+          _buildStickyBanner(context, controller, glass),
           // Scrollable Content Area with soft fade at bottom edge
           Expanded(
             child: ShaderMask(
@@ -433,6 +604,14 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                         wasStopped: controller.wasStopped,
                         clarificationNote: controller.clarificationNote,
                         sourceLabel: controller.answerSource?.label,
+                        isModelReady: controller.isReady,
+                        isDownloading: controller.isDownloading,
+                        downloadProgress: controller.downloadProgress,
+                        onDownload: () => controller.startModelDownload(),
+                        onOpenGuides: () =>
+                            const TabSwitchNotification(1).dispatch(context),
+                        errorMessage: controller.errorMessage,
+                        onRetry: () => controller.retryLastQuery(),
                         onSpeak: () =>
                             _toggleSpeak(controller.streamedResponse),
                         isSpeaking: _isSpeaking,
@@ -754,6 +933,308 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusPill(
+      BuildContext context, TriageController controller, CarePulseGlass glass) {
+    Color dotColor;
+    String label;
+
+    if (controller.isReady) {
+      dotColor = glass.successDot;
+      label = 'Offline · AI ready';
+    } else if (controller.isDownloading) {
+      dotColor = const Color(0xFF009688); // teal
+      label = 'Downloading ${(controller.downloadProgress * 100).toInt()}%';
+    } else if (controller.isVerifying) {
+      dotColor = const Color(0xFF42A5F5); // blue
+      label = 'Verifying...';
+    } else if (controller.hasError) {
+      dotColor = Theme.of(context).colorScheme.error;
+      label = 'Model error';
+    } else {
+      // isDownloadRequired or checking
+      dotColor = const Color(0xFFFFB300); // amber
+      label = 'AI model not downloaded';
+    }
+
+    return Flexible(
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        borderRadius: 20,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.circle, size: 8, color: dotColor),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: glass.textPrimary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStickyBanner(
+      BuildContext context, TriageController controller, CarePulseGlass glass) {
+    if (controller.isReady) {
+      return const SizedBox.shrink();
+    }
+
+    final modelSize = controller.totalMB > 0
+        ? '${controller.totalMB.toInt()}MB'
+        : '${AppConstants.estimatedModelSizeMb.toInt()}MB';
+
+    Widget content;
+
+    if (controller.isDownloading) {
+      final percent = (controller.downloadProgress * 100).toInt();
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Downloading AI model ($percent%)',
+                  style: TextStyle(
+                    color: glass.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ModelSetupScreen(),
+                    ),
+                  );
+                },
+                child: const Text('Details'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: controller.downloadProgress > 0
+                  ? controller.downloadProgress
+                  : null,
+              backgroundColor: glass.glassBorderColor.withValues(alpha: 0.3),
+              valueColor: AlwaysStoppedAnimation<Color>(glass.accentMint),
+              minHeight: 6,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                '${controller.downloadedMB.toStringAsFixed(1)} / ${controller.totalMB.toStringAsFixed(1)} MB',
+                style: TextStyle(
+                  color: glass.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+              const Spacer(),
+              ElevatedButton(
+                key: const Key('sticky_banner_pause_button'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      glass.glassBorderColor.withValues(alpha: 0.25),
+                  foregroundColor: glass.textPrimary,
+                  minimumSize: const Size(0, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () => controller.pauseModelDownload(),
+                child: const Text('Pause', style: TextStyle(fontSize: 12)),
+              ),
+            ],
+          ),
+        ],
+      );
+    } else if (controller.isVerifying) {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(glass.accentMint),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Verifying download...',
+                      style: TextStyle(
+                        color: glass.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ModelSetupScreen(),
+                    ),
+                  );
+                },
+                child: const Text('Details'),
+              ),
+            ],
+          ),
+        ],
+      );
+    } else if (controller.hasError) {
+      final msg = controller.errorMessage ??
+          'Model download failed. Please check connection.';
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.error_outline_rounded,
+                  color: Theme.of(context).colorScheme.error, size: 18),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  msg,
+                  style: TextStyle(
+                    color: glass.textPrimary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ModelSetupScreen(),
+                    ),
+                  );
+                },
+                child: const Text('Details'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            key: const Key('sticky_banner_retry_button'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: glass.accentMint,
+              foregroundColor: Colors.black87,
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () => controller.startModelDownload(),
+            child: const Text('Retry',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      );
+    } else {
+      // Needs download (or checking)
+      final hasPartial = controller.partialBytes > 0;
+      final percent = (controller.downloadProgress * 100).toInt();
+      final buttonLabel =
+          hasPartial ? 'Resume download ($percent%)' : 'Download AI model';
+
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  'AI answers need a one-time $modelSize download. Emergency rules, Guides, CPR and SOS already work offline.',
+                  style: TextStyle(
+                    color: glass.textPrimary,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ModelSetupScreen(),
+                    ),
+                  );
+                },
+                child: const Text('Details'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            key: const Key('sticky_banner_download_button'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: glass.accentMint,
+              foregroundColor: Colors.black87,
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () => controller.startModelDownload(),
+            child: Text(buttonLabel,
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: GlassCard(
+        key: const Key('assistant_sticky_banner'),
+        borderRadius: 16,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        tint: const Color(0xFFFFB300).withValues(alpha: 0.12),
+        child: content,
       ),
     );
   }

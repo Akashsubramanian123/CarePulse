@@ -464,18 +464,29 @@ class TriageController extends ChangeNotifier {
 
   Future<void> _executeNormalTriageFlow(String queryText,
       {String? additionalContext}) async {
-    // If no red flag matched and model is not ready, show friendly message pointing to Guides & download
+    _currentQuery = queryText;
+    _errorMessage = null;
+
+    // If no red flag matched and model is not ready, check retriever for confident protocol match
     if (!isReady) {
-      _currentQuery = queryText;
       _isGenerating = false;
-      _answerSource = null;
-      _streamedResponse =
-          'The offline AI model is not downloaded yet. Please explore the Guides tab for verified first-aid procedures, or download the model below to enable offline AI triage.';
+      await _ensureProtocolsLoaded();
+      final matches = _protocolRetriever.topMatches(queryText, k: 1);
+      if (matches.isNotEmpty) {
+        _selectedProtocol = matches.first;
+        _streamedResponse = matches.first.toFormattedSteps();
+        _answerSource = AnswerSource.verifiedProtocol;
+        await _maybeSaveHistory();
+      } else {
+        _selectedProtocol = null;
+        _streamedResponse =
+            'The offline AI model is not downloaded yet. Please explore the Guides tab for verified first-aid procedures, or download the model below to enable offline AI triage.';
+        _answerSource = null;
+      }
       notifyListeners();
       return;
     }
 
-    _currentQuery = queryText;
     _streamedResponse = '';
     _isGenerating = true;
     _ttftMs = 0;
@@ -555,10 +566,23 @@ class TriageController extends ChangeNotifier {
       _generationSubscription = null;
       _generationCompleter = null;
       _ramUsageMb = _engineService.getEstimatedRamUsageMB();
+      if (_errorMessage == null &&
+          !_wasStopped &&
+          _streamedResponse.trim().isEmpty) {
+        _errorMessage =
+            'The AI did not return an answer. Try again or rephrase.';
+      }
       notifyListeners();
-      if (!_wasStopped || _streamedResponse.trim().isNotEmpty) {
+      if (!_wasStopped && _streamedResponse.trim().isNotEmpty) {
         await _maybeSaveHistory();
       }
+    }
+  }
+
+  /// Retries the most recent emergency query.
+  Future<void> retryLastQuery() async {
+    if (_currentQuery.isNotEmpty) {
+      await submitEmergencyQuery(_currentQuery);
     }
   }
 

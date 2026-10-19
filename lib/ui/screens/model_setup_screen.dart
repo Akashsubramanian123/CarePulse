@@ -27,6 +27,7 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
 
   bool _isListening = false;
   bool _isSpeaking = false;
+  bool _hasAutoPopped = false;
 
   @override
   void initState() {
@@ -153,51 +154,51 @@ class _ModelSetupScreenState extends State<ModelSetupScreen> {
     } catch (_) {}
     final settings = settingsController ?? AppSettingsController();
 
+    final triage = Provider.of<TriageController?>(context);
+    if (triage != null &&
+        triage.isReady &&
+        !_hasAutoPopped &&
+        Navigator.canPop(context)) {
+      _hasAutoPopped = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      });
+    }
+
     return GlassScaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: glass.accentMint),
-        title: Text(
-          AppConstants.appName,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: glass.textPrimary,
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: SizedBox(
-              height: 48,
-              child: TextButton.icon(
-                onPressed: () => _callEmergency(settings.emergencyNumber),
-                style: TextButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFFC7382E).withValues(alpha: 0.18),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: const BorderSide(color: Color(0xFFC7382E), width: 1),
-                  ),
+      title: 'Model Setup',
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 12.0),
+          child: SizedBox(
+            height: 48,
+            child: TextButton.icon(
+              onPressed: () => _callEmergency(settings.emergencyNumber),
+              style: TextButton.styleFrom(
+                backgroundColor:
+                    const Color(0xFFC7382E).withValues(alpha: 0.18),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: const BorderSide(color: Color(0xFFC7382E), width: 1),
                 ),
-                icon:
-                    const Icon(Icons.phone, color: Color(0xFFC7382E), size: 16),
-                label: Text(
-                  'Call ${settings.emergencyNumber}',
-                  style: const TextStyle(
-                    color: Color(0xFFC7382E),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+              ),
+              icon: const Icon(Icons.phone, color: Color(0xFFC7382E), size: 16),
+              label: Text(
+                'Call ${settings.emergencyNumber}',
+                style: const TextStyle(
+                  color: Color(0xFFC7382E),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
       body: ShaderMask(
         shaderCallback: (Rect bounds) {
           return const LinearGradient(

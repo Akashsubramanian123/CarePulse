@@ -155,52 +155,40 @@ class _MedicalIdScreenState extends State<MedicalIdScreen> {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
     return GlassScaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: glass.accentMint),
-        title: Text(
-          'Medical ID',
-          style: TextStyle(
-            color: glass.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        actions: [
-          if (!_isLoading)
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: SizedBox(
-                height: 48,
-                child: TextButton.icon(
-                  onPressed: () {
-                    if (_isEditing) {
-                      _save();
-                    } else {
-                      setState(() {
-                        _populateFields(_currentMedicalId);
-                        _isEditing = true;
-                      });
-                    }
-                  },
-                  icon: Icon(
-                      _isEditing ? Icons.check_rounded : Icons.edit_rounded,
-                      color: glass.accentMint,
-                      size: 20),
-                  label: Text(
-                    _isEditing ? 'Save' : 'Edit',
-                    style: TextStyle(
-                      color: glass.accentMint,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+      title: 'Medical ID',
+      actions: [
+        if (!_isLoading)
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: SizedBox(
+              height: 48,
+              child: TextButton.icon(
+                onPressed: () {
+                  if (_isEditing) {
+                    _save();
+                  } else {
+                    setState(() {
+                      _populateFields(_currentMedicalId);
+                      _isEditing = true;
+                    });
+                  }
+                },
+                icon: Icon(
+                    _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+                    color: glass.accentMint,
+                    size: 20),
+                label: Text(
+                  _isEditing ? 'Save' : 'Edit',
+                  style: TextStyle(
+                    color: glass.accentMint,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
                 ),
               ),
             ),
-        ],
-      ),
+          ),
+      ],
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: glass.accentMint))
           : ShaderMask(

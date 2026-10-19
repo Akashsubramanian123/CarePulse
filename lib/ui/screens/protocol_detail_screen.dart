@@ -84,50 +84,22 @@ class _ProtocolDetailScreenState extends State<ProtocolDetailScreen> {
     final emergencyNum = settings?.emergencyNumber ?? emergencyNumber;
 
     return GlassScaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Center(
-            child: SizedBox(
-              width: 48,
-              height: 48,
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_rounded, color: glass.textPrimary),
-                tooltip: 'Back',
-                onPressed: () => Navigator.pop(context),
-              ),
+      title: p.title,
+      actions: [
+        SizedBox(
+          width: 48,
+          height: 48,
+          child: IconButton(
+            icon: Icon(
+              _isSpeaking ? Icons.stop_circle_rounded : Icons.volume_up_rounded,
+              color: _isSpeaking ? const Color(0xFFC7382E) : glass.accentMint,
             ),
+            tooltip: _isSpeaking ? 'Stop reading' : 'Read aloud',
+            onPressed: _toggleSpeak,
           ),
         ),
-        title: Text(
-          p.title,
-          style: TextStyle(
-            color: glass.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: IconButton(
-              icon: Icon(
-                _isSpeaking
-                    ? Icons.stop_circle_rounded
-                    : Icons.volume_up_rounded,
-                color: _isSpeaking ? const Color(0xFFC7382E) : glass.accentMint,
-              ),
-              tooltip: _isSpeaking ? 'Stop reading' : 'Read aloud',
-              onPressed: _toggleSpeak,
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
+        const SizedBox(width: 8),
+      ],
       body: ShaderMask(
         shaderCallback: (Rect bounds) {
           return const LinearGradient(

@@ -122,37 +122,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     final glass = Theme.of(context).extension<CarePulseGlass>()!;
 
+    final errorColor = Theme.of(context).colorScheme.error;
+
     return GlassScaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: glass.accentMint),
-        title: Text(
-          'Query History',
-          style: TextStyle(
-            color: glass.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        actions: [
-          if (_entries.isNotEmpty)
-            SizedBox(
-              height: 48,
-              child: TextButton.icon(
-                key: const ValueKey('history_clear_all_button'),
-                icon: const Icon(Icons.delete_sweep_rounded, size: 20),
-                label: const Text('Clear all'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFFC7382E),
-                  minimumSize: const Size(48, 48),
-                ),
-                onPressed: () => _confirmClearAll(glass),
+      title: 'Query History',
+      actions: [
+        if (_entries.isNotEmpty)
+          SizedBox(
+            height: 48,
+            child: TextButton.icon(
+              key: const ValueKey('history_clear_all_button'),
+              icon: const Icon(Icons.delete_sweep_rounded, size: 20),
+              label: const Text('Clear all'),
+              style: TextButton.styleFrom(
+                foregroundColor: errorColor,
+                minimumSize: const Size(48, 48),
               ),
+              onPressed: () => _confirmClearAll(glass),
             ),
-          const SizedBox(width: 8),
-        ],
-      ),
+          ),
+        const SizedBox(width: 8),
+      ],
       body: Column(
         children: [
           // Reassurance privacy banner
@@ -264,6 +254,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       itemCount: _entries.length,
       itemBuilder: (context, index) {
         final entry = _entries[index];
+        final errorColor = Theme.of(context).colorScheme.error;
 
         return Dismissible(
           key: ValueKey('history_item_${entry.id}'),
@@ -323,7 +314,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           icon: Icon(
                             Icons.delete_outline_rounded,
                             size: 20,
-                            color: glass.textSecondary,
+                            color: errorColor,
                           ),
                           tooltip: 'Delete query',
                           onPressed: () => _deleteEntry(entry.id),
@@ -371,12 +362,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           color: glass.accentMint,
                         ),
                         const SizedBox(width: 5),
-                        Text(
-                          entry.answerSource.label,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: glass.accentMint,
+                        Flexible(
+                          child: Text(
+                            entry.answerSource.label,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: glass.accentMint,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

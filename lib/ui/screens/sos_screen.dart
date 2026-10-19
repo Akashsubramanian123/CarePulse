@@ -397,6 +397,62 @@ class _SosScreenState extends State<SosScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 18),
+
+                    // Medical ID Quick Entry Card
+                    GlassCard(
+                      key: const Key('sos_medical_id_button'),
+                      borderRadius: 20,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => MedicalIdScreen(store: _store)),
+                        ).then((_) => _loadData());
+                      },
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: glass.accentMint.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(Icons.badge_rounded,
+                                color: glass.accentMint, size: 24),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Medical ID',
+                                  style: TextStyle(
+                                    color: glass.textPrimary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Allergies, blood group, contacts',
+                                  style: TextStyle(
+                                    color: glass.textSecondary,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right_rounded,
+                              color: glass.textSecondary, size: 24),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 20),
 
                     // Emergency Contacts Header

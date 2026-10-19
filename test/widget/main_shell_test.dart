@@ -25,7 +25,7 @@ class FakeModelDownloadService extends ModelDownloadService {
 
 void main() {
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'onboarding_v1_seen': true});
   });
 
   testWidgets('MainShell displays 4 tabs and switches between them',
@@ -75,6 +75,6 @@ void main() {
     // Switch back to Assistant tab
     await tester.tap(find.text('Assistant'));
     await tester.pumpAndSettle();
-    expect(find.text('Instant Red-Flag Emergency Triage'), findsOneWidget);
+    expect(find.text("What's happening?"), findsOneWidget);
   });
 }

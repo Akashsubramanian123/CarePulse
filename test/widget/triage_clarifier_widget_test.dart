@@ -80,7 +80,7 @@ void main() {
   });
 
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'onboarding_v1_seen': true});
   });
 
   Widget createWidget({
@@ -278,9 +278,8 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'Yes'));
     await tester.pumpAndSettle();
 
-    // Friendly message appears pointing to Guides
-    expect(find.textContaining('The offline AI model is not downloaded yet'),
-        findsOneWidget);
-    expect(find.textContaining('explore the Guides tab'), findsOneWidget);
+    // Friendly card appears pointing to Guides
+    expect(find.textContaining('AI model not downloaded yet'), findsOneWidget);
+    expect(find.textContaining('Open Guides'), findsOneWidget);
   });
 }

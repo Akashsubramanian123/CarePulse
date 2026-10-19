@@ -7,6 +7,8 @@ import '../../state/app_settings_controller.dart';
 import '../../state/theme_controller.dart';
 import '../screens/benchmark_screen.dart';
 import '../screens/history_screen.dart';
+import '../screens/medical_id_screen.dart';
+import '../screens/profile_screen.dart';
 
 void showCarePulseSettingsSheet(BuildContext context) {
   showModalBottomSheet(
@@ -142,67 +144,70 @@ class _SettingsSheetContentState extends State<_SettingsSheetContent> {
               const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: SegmentedButton<ThemeMode>(
-                    key: const ValueKey('settings_theme_segmented_button'),
-                    segments: const [
-                      ButtonSegment<ThemeMode>(
-                        value: ThemeMode.system,
-                        icon: Icon(Icons.brightness_auto_rounded, size: 18),
-                        label: Text('System'),
+                child: SegmentedButton<ThemeMode>(
+                  key: const ValueKey('settings_theme_segmented_button'),
+                  segments: const [
+                    ButtonSegment<ThemeMode>(
+                      value: ThemeMode.system,
+                      icon: Icon(Icons.brightness_auto_rounded, size: 18),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text('System'),
                       ),
-                      ButtonSegment<ThemeMode>(
-                        value: ThemeMode.light,
-                        icon: Icon(Icons.light_mode_rounded, size: 18),
-                        label: Text('Light'),
+                    ),
+                    ButtonSegment<ThemeMode>(
+                      value: ThemeMode.light,
+                      icon: Icon(Icons.light_mode_rounded, size: 18),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text('Light'),
                       ),
-                      ButtonSegment<ThemeMode>(
-                        value: ThemeMode.dark,
-                        icon: Icon(Icons.dark_mode_rounded, size: 18),
-                        label: Text('Dark'),
+                    ),
+                    ButtonSegment<ThemeMode>(
+                      value: ThemeMode.dark,
+                      icon: Icon(Icons.dark_mode_rounded, size: 18),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text('Dark'),
                       ),
-                    ],
-                    selected: {currentSettings.themeMode},
-                    onSelectionChanged: (Set<ThemeMode> newSelection) {
-                      if (newSelection.isNotEmpty) {
-                        settingsController?.setThemeMode(newSelection.first);
-                        setState(() {});
+                    ),
+                  ],
+                  selected: {currentSettings.themeMode},
+                  onSelectionChanged: (Set<ThemeMode> newSelection) {
+                    if (newSelection.isNotEmpty) {
+                      settingsController?.setThemeMode(newSelection.first);
+                      setState(() {});
+                    }
+                  },
+                  style: ButtonStyle(
+                    minimumSize: WidgetStateProperty.all(const Size(0, 48)),
+                    visualDensity: VisualDensity.compact,
+                    tapTargetSize: MaterialTapTargetSize.padded,
+                    backgroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return glass.accentMint
+                            .withValues(alpha: isDark ? 0.35 : 0.22);
                       }
-                    },
-                    style: ButtonStyle(
-                      minimumSize: WidgetStateProperty.all(const Size(0, 48)),
-                      visualDensity: VisualDensity.compact,
-                      tapTargetSize: MaterialTapTargetSize.padded,
-                      backgroundColor:
-                          WidgetStateProperty.resolveWith((states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return glass.accentMint
-                              .withValues(alpha: isDark ? 0.35 : 0.22);
-                        }
-                        return Colors.transparent;
-                      }),
-                      foregroundColor:
-                          WidgetStateProperty.resolveWith((states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return isDark
-                              ? const Color(0xFF9FF0E3)
-                              : glass.accentMint;
-                        }
-                        return onSurface;
-                      }),
-                      iconColor: WidgetStateProperty.resolveWith((states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return isDark
-                              ? const Color(0xFF9FF0E3)
-                              : glass.accentMint;
-                        }
-                        return onSurfaceVariant;
-                      }),
-                      side: WidgetStateProperty.all(
-                        BorderSide(color: glass.glassBorderColor, width: 1.0),
-                      ),
+                      return Colors.transparent;
+                    }),
+                    foregroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return isDark
+                            ? const Color(0xFF9FF0E3)
+                            : glass.accentMint;
+                      }
+                      return onSurface;
+                    }),
+                    iconColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return isDark
+                            ? const Color(0xFF9FF0E3)
+                            : glass.accentMint;
+                      }
+                      return onSurfaceVariant;
+                    }),
+                    side: WidgetStateProperty.all(
+                      BorderSide(color: glass.glassBorderColor, width: 1.0),
                     ),
                   ),
                 ),
@@ -383,6 +388,79 @@ class _SettingsSheetContentState extends State<_SettingsSheetContent> {
                 onChanged: (val) {
                   setState(() => _autoReadAloud = val);
                   _saveAutoReadAloud(val);
+                },
+              ),
+              const Divider(height: 24),
+
+              // Profile section
+              Text(
+                'Profile',
+                style: TextStyle(
+                  color: onSurface,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                key: const Key('settings_medical_profile_tile'),
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.account_circle_outlined,
+                    color: glass.accentMint),
+                title: Text(
+                  'Medical profile (used by the AI)',
+                  style: TextStyle(
+                    color: onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Personal conditions, medications, age & allergies',
+                  style: TextStyle(
+                    color: onSurfaceVariant,
+                    fontSize: 12,
+                  ),
+                ),
+                trailing:
+                    Icon(Icons.chevron_right_rounded, color: onSurfaceVariant),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ProfileScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                key: const Key('settings_medical_id_tile'),
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.badge_outlined, color: glass.accentMint),
+                title: Text(
+                  'Medical ID (for first responders and SOS)',
+                  style: TextStyle(
+                    color: onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Emergency card with blood group, allergies, emergency contacts',
+                  style: TextStyle(
+                    color: onSurfaceVariant,
+                    fontSize: 12,
+                  ),
+                ),
+                trailing:
+                    Icon(Icons.chevron_right_rounded, color: onSurfaceVariant),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const MedicalIdScreen(),
+                    ),
+                  );
                 },
               ),
               const Divider(height: 24),

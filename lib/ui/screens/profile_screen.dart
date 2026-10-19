@@ -81,30 +81,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return GlassScaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: glass.accentMint),
-        title: Text(
-          'Medical Profile',
-          style: TextStyle(
-            color: glass.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+      title: 'Medical Profile',
+      actions: [
+        SizedBox(
+          width: 48,
+          height: 48,
+          child: IconButton(
+            icon: Icon(Icons.save_rounded, color: glass.accentMint),
+            tooltip: 'Save Profile',
+            onPressed: _saveProfile,
           ),
         ),
-        actions: [
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: IconButton(
-              icon: Icon(Icons.save_rounded, color: glass.accentMint),
-              tooltip: 'Save Profile',
-              onPressed: _saveProfile,
-            ),
-          ),
-        ],
-      ),
+      ],
       body: ShaderMask(
         shaderCallback: (Rect bounds) {
           return const LinearGradient(

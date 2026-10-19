@@ -226,33 +226,20 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
     final isModelReady = triage?.isReady ?? false;
 
     return GlassScaffold(
-      appBar: AppBar(
-        title: Text(
-          'Benchmark & Evaluation',
-          style: TextStyle(
-            color: glass.textPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: glass.accentMint),
-        actions: [
-          if (_pastRuns.isNotEmpty)
-            IconButton(
-              icon: Icon(
-                _showPastRuns
-                    ? Icons.assessment_rounded
-                    : Icons.history_rounded,
-                color: glass.accentMint,
-              ),
-              tooltip: _showPastRuns ? 'Show Results' : 'Past Runs',
-              onPressed: () {
-                setState(() => _showPastRuns = !_showPastRuns);
-              },
+      title: 'Benchmark',
+      actions: [
+        if (_pastRuns.isNotEmpty)
+          IconButton(
+            icon: Icon(
+              _showPastRuns ? Icons.assessment_rounded : Icons.history_rounded,
+              color: glass.accentMint,
             ),
-        ],
-      ),
+            tooltip: _showPastRuns ? 'Show Results' : 'Past Runs',
+            onPressed: () {
+              setState(() => _showPastRuns = !_showPastRuns);
+            },
+          ),
+      ],
       body: ShaderMask(
         shaderCallback: (Rect bounds) {
           return const LinearGradient(
@@ -273,6 +260,15 @@ class _BenchmarkScreenState extends State<BenchmarkScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text(
+                'Benchmark & Evaluation',
+                style: TextStyle(
+                  color: glass.textPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 14),
               if (_showPastRuns) ...[
                 _buildPastRunsList(glass),
               ] else ...[

@@ -137,8 +137,19 @@ class GradientBackground extends StatelessWidget {
   }
 }
 
+class _GlassScaffoldScope extends InheritedWidget {
+  const _GlassScaffoldScope({required super.child});
+
+  @override
+  bool updateShouldNotify(_GlassScaffoldScope oldWidget) => false;
+}
+
 class GlassScaffold extends StatelessWidget {
   final Widget body;
+  final String? title;
+  final Widget? titleWidget;
+  final Widget? leading;
+  final List<Widget>? actions;
   final PreferredSizeWidget? appBar;
   final Widget? topBar;
   final Widget? bottomNavigationBar;
@@ -154,6 +165,10 @@ class GlassScaffold extends StatelessWidget {
   const GlassScaffold({
     super.key,
     required this.body,
+    this.title,
+    this.titleWidget,
+    this.leading,
+    this.actions,
     this.appBar,
     this.topBar,
     this.bottomNavigationBar,
@@ -169,8 +184,114 @@ class GlassScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasAncestor =
+        context.dependOnInheritedWidgetOfExactType<_GlassScaffoldScope>() !=
+            null;
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final glass = theme.extension<CarePulseGlass>()!;
+    final padding = MediaQuery.paddingOf(context);
+
+    // Resolve 56px top bar if title/topBar/appBar is provided
+    Widget? resolvedTopBar = topBar;
+    if (resolvedTopBar == null &&
+        (title != null || titleWidget != null || appBar != null)) {
+      Widget? resolvedLeading = leading;
+      if (resolvedLeading == null &&
+          appBar is AppBar &&
+          (appBar as AppBar).leading != null) {
+        resolvedLeading = (appBar as AppBar).leading;
+      } else if (resolvedLeading == null && Navigator.canPop(context)) {
+        resolvedLeading = SizedBox(
+          width: 48,
+          height: 48,
+          child: IconButton(
+            icon: Icon(Icons.arrow_back_rounded, color: glass.textPrimary),
+            tooltip: 'Back',
+            onPressed: () => Navigator.maybePop(context),
+          ),
+        );
+      }
+
+      Widget? resolvedTitle = titleWidget;
+      if (resolvedTitle == null) {
+        String titleStr = title ?? '';
+        if (titleStr.isEmpty &&
+            appBar is AppBar &&
+            (appBar as AppBar).title is Text) {
+          titleStr = ((appBar as AppBar).title as Text).data ?? '';
+        }
+        resolvedTitle = Text(
+          titleStr,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: glass.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        );
+      }
+
+      List<Widget> resolvedActions =
+          actions ?? (appBar is AppBar ? (appBar as AppBar).actions ?? [] : []);
+
+      resolvedTopBar = Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            if (resolvedLeading != null) resolvedLeading,
+            if (resolvedLeading != null) const SizedBox(width: 4),
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: resolvedTitle,
+              ),
+            ),
+            if (resolvedActions.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: resolvedActions,
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    Widget content = body;
+    // On tablets constrain page content to a max width of 640 centered
+    content = Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: content,
+      ),
+    );
+
+    // If already inside an ancestor GlassScaffold, do not duplicate background or top safe area
+    if (hasAncestor) {
+      if (resolvedTopBar != null) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: resolvedTopBar,
+              ),
+            ),
+            Expanded(child: content),
+          ],
+        );
+      }
+      return content;
+    }
 
     final overlayStyle = SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -181,41 +302,56 @@ class GlassScaffold extends StatelessWidget {
           isDark ? Brightness.light : Brightness.dark,
     );
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        extendBody: true,
-        extendBodyBehindAppBar: true,
-        resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-        appBar: appBar,
-        bottomNavigationBar: bottomNavigationBar,
-        bottomSheet: bottomSheet,
-        floatingActionButton: floatingActionButton,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-              child: GradientBackground(
-                key: gradientKey,
+    return _GlassScaffoldScope(
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: overlayStyle,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+          bottomNavigationBar: bottomNavigationBar,
+          bottomSheet: bottomSheet,
+          floatingActionButton: floatingActionButton,
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: GradientBackground(
+                  key: gradientKey,
+                ),
               ),
-            ),
-            SafeArea(
-              top: safeAreaTop && (appBar == null),
-              bottom: safeAreaBottom,
-              left: safeAreaLeft,
-              right: safeAreaRight,
-              child: topBar != null
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        topBar!,
-                        Expanded(child: body),
-                      ],
-                    )
-                  : body,
-            ),
-          ],
+              Padding(
+                padding: EdgeInsets.only(
+                  left: safeAreaLeft ? padding.left : 0,
+                  right: safeAreaRight ? padding.right : 0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (safeAreaTop) SizedBox(height: padding.top),
+                    if (resolvedTopBar != null)
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 640),
+                          child: resolvedTopBar,
+                        ),
+                      ),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom:
+                              (safeAreaBottom && bottomNavigationBar == null)
+                                  ? padding.bottom
+                                  : 0,
+                        ),
+                        child: content,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -14,6 +14,13 @@ class StreamingResponseCard extends StatelessWidget {
   final VoidCallback? onStopSpeaking;
   final bool wasStopped;
   final String? clarificationNote;
+  final bool isModelReady;
+  final bool isDownloading;
+  final double downloadProgress;
+  final VoidCallback? onDownload;
+  final VoidCallback? onOpenGuides;
+  final String? errorMessage;
+  final VoidCallback? onRetry;
 
   const StreamingResponseCard({
     super.key,
@@ -27,6 +34,13 @@ class StreamingResponseCard extends StatelessWidget {
     this.onStopSpeaking,
     this.wasStopped = false,
     this.clarificationNote,
+    this.isModelReady = true,
+    this.isDownloading = false,
+    this.downloadProgress = 0.0,
+    this.onDownload,
+    this.onOpenGuides,
+    this.errorMessage,
+    this.onRetry,
   });
 
   List<String>? _parseSteps(String text) {
@@ -353,6 +367,142 @@ class StreamingResponseCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
+          // Model not downloaded / downloading card
+          if (!isModelReady && query.isNotEmpty) ...[
+            GlassCard(
+              key: const Key('model_not_ready_card'),
+              borderRadius: 16,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        isDownloading
+                            ? Icons.downloading_rounded
+                            : Icons.cloud_off_rounded,
+                        color: glass.accentMint,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isDownloading
+                              ? 'AI model is downloading (${(downloadProgress * 100).toInt()}%)'
+                              : 'AI model not downloaded yet',
+                          style: TextStyle(
+                            color: glass.textPrimary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'AI answers need a one-time download. Emergency rules and verified guides already work offline.',
+                    style: TextStyle(
+                      color: glass.textSecondary,
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      if (onDownload != null)
+                        ElevatedButton(
+                          key: const Key('model_not_ready_download_button'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: glass.accentMint,
+                            foregroundColor: Colors.black87,
+                            minimumSize: const Size(0, 40),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: onDownload,
+                          child: Text(
+                            isDownloading ? 'Pause' : 'Download',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      if (onDownload != null && onOpenGuides != null)
+                        const SizedBox(width: 8),
+                      if (onOpenGuides != null)
+                        OutlinedButton(
+                          key: const Key('model_not_ready_guides_button'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: glass.textPrimary,
+                            side: BorderSide(color: glass.glassBorderColor),
+                            minimumSize: const Size(0, 40),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: onOpenGuides,
+                          child: const Text('Open Guides'),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // Error / Retry card
+          if (errorMessage != null) ...[
+            GlassCard(
+              key: const Key('triage_error_card'),
+              borderRadius: 16,
+              padding: const EdgeInsets.all(16),
+              tint: Theme.of(context).colorScheme.error.withValues(alpha: 0.12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.error_outline_rounded,
+                          color: Theme.of(context).colorScheme.error, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          errorMessage!,
+                          style: TextStyle(
+                            color: glass.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (onRetry != null) ...[
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      key: const Key('triage_retry_button'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: glass.accentMint,
+                        foregroundColor: Colors.black87,
+                        minimumSize: const Size(0, 40),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: onRetry,
+                      child: const Text('Retry',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
           // Live Streamed Content
           if (responseText.isEmpty && isGenerating)
             Padding(
@@ -392,9 +542,9 @@ class StreamingResponseCard extends StatelessWidget {
                     context, glass, '3', 'MONITOR & STABILIZE', parsedSteps[2]),
               ],
             )
-          else
+          else if (responseText.isNotEmpty)
             SelectableText(
-              responseText.isEmpty ? 'No response generated.' : responseText,
+              responseText,
               style: TextStyle(
                 color: glass.textPrimary,
                 fontSize: 18,

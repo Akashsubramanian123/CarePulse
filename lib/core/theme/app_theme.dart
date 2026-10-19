@@ -203,7 +203,7 @@ class AppTheme {
         surface: const Color(0xFF1B242D),
         onSurface: _darkGlass.textPrimary,
         onSurfaceVariant: _darkGlass.textSecondary,
-        error: const Color(0xFFC7382E),
+        error: const Color(0xFFFFB4AB),
       ),
       extensions: [_darkGlass],
     );
