@@ -93,3 +93,22 @@ Before any public release, every first-aid protocol bundled in CarePulse must be
 | `scen_44_hypothermia_mild_negative` | Environmental | Shivering from cold rain walking home, alert, indoors | `hypothermia` | No | Dry clothes; Warm blankets; Warm sweet drink | Call 112; Cardiac pacing | Pending | [ ] |
 | `scen_45_bites_stings_wasp` | Allergy | Wasp sting on arm, mild redness, no breathing trouble | `bites_and_stings` | No | Cold pack wrapped in towel; Wash with soap; Scrape stinger | Squeeze venom sac; Cut bite; Call 112 | Pending | [ ] |
 
+## Query Intent Gate Clinical Review (Intent Classification & Safety Rules)
+
+To prevent clinical triage confusion, conversational noise, or non-emergency queries from triggering unresponsive follow-up questions ("Is the person awake and responding?"), incoming messages pass through a deterministic intent gate:
+
+### 1. Order of Evaluation
+1. **Red-Flag Clinical Rules Engine (Unchanged, First & Instant)**: Evaluates critical life-threats (cardiac arrest, unconsciousness, severe hemorrhage, active anaphylaxis, choking, active poisoning, stroke, acute chest pain). When matched, immediately triggers verified emergency protocols and Call 112 banner.
+2. **Intent Classification**: Evaluates normalized query against clinical lexicon, emergency terms, third-person references, and conversational patterns.
+3. **Routing**:
+   - `appHelp` and `outOfScope`: Instantly return a local boundary/help message ($\le 60$ words) with neutral `AnswerSource.appInfo` ("CarePulse" chip), no model/AI execution, no history storage, and no clarifying questions.
+   - `emergencyMedical`: Proceeds to first-aid triage. Follow-up clarifying questions ("Is the person awake and responding?") run **ONLY** for `emergencyMedical` when no red flag matched, and retrieval confidence is below threshold or the query is fewer than 4 words.
+
+### 2. Clinical Lexicon & Categorization Rules
+- **Critical Safety Override**: The tokens `help`, `help me`, `i need help`, `emergency`, `urgent`, `ambulance`, `hospital`, `call 112`, `call 911`, `call 999` are hard-coded to **never** be classified as `appHelp`; they route directly to `emergencyMedical`.
+- **Emergency Medical Lexicon**: Encompasses all 229 verified protocol keywords and synonyms, clinical red-flag terminology, and emergency symptom keywords (`pain`, `hurt`, `injured`, `bleeding`, `blood`, `burn`, `bite`, `sting`, `swollen`, `broken`, `fracture`, `faint`, `dizzy`, `vomit`, `nausea`, `fever`, `seizure`, `unconscious`, `breathing`, `choking`, `poison`, `swallowed`, `allergic`, `rash`, `chest`, `head`, `fell`, `fall`, `accident`, `collapsed`, `drown`, `shock`, `sick`, `unwell`, `ill`, `weak`, `pale`, `confused`, `strange`).
+- **Third-Person Person Reference**: Queries of 3 or more words referencing another individual (`he`, `she`, `someone`, `somebody`, `baby`, `child`, `kid`, `man`, `woman`, `mother`, `father`, `mom`, `dad`, `friend`, `brother`, `sister`, `patient`) are classified as `emergencyMedical` to protect vulnerable bystanders and dependents (safety bias). First-person pronouns alone (`i`, `me`) do not satisfy this criterion without symptom/emergency terminology.
+- **App Help (`appHelp`)**: Greets users, explains offline functionality and identity, or responds to thanks/closing expressions without medical advice.
+- **Out of Scope (`outOfScope`)**: Directs users back to first-aid emergencies and instructs them to call emergency services if urgent assistance is required.
+
+

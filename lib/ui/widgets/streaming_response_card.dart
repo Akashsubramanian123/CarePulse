@@ -235,40 +235,55 @@ class StreamingResponseCard extends StatelessWidget {
           // Source Chip
           if (sourceLabel != null && responseText.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: glass.accentMint.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-                border:
-                    Border.all(color: glass.accentMint.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    sourceLabel!.contains('Verified')
-                        ? Icons.verified_user_rounded
-                        : (sourceLabel!.contains('guided')
-                            ? Icons.auto_awesome_rounded
-                            : Icons.info_outline_rounded),
-                    size: 14,
-                    color: glass.accentMint,
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      sourceLabel!,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: glass.accentMint,
+            Builder(builder: (context) {
+              final isAppInfo = sourceLabel == 'CarePulse';
+              final chipBg = isAppInfo
+                  ? glass.glassBorderColor.withValues(alpha: 0.2)
+                  : glass.accentMint.withValues(alpha: 0.12);
+              final chipBorder = isAppInfo
+                  ? glass.glassBorderColor.withValues(alpha: 0.45)
+                  : glass.accentMint.withValues(alpha: 0.3);
+              final contentColor =
+                  isAppInfo ? glass.textSecondary : glass.accentMint;
+              final icon = isAppInfo
+                  ? Icons.health_and_safety_outlined
+                  : (sourceLabel!.contains('Verified')
+                      ? Icons.verified_user_rounded
+                      : (sourceLabel!.contains('guided')
+                          ? Icons.auto_awesome_rounded
+                          : Icons.info_outline_rounded));
+
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: chipBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: chipBorder),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 14,
+                      color: contentColor,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        sourceLabel!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: contentColor,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              );
+            }),
           ],
 
           // Quiet Stopped Indicator Note

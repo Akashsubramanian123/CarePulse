@@ -183,7 +183,10 @@ void main() {
   });
 
   setUp(() {
-    SharedPreferences.setMockInitialValues({'onboarding_v1_seen': true});
+    SharedPreferences.setMockInitialValues({
+      'onboarding_v2_seen': true,
+      'profile_prompt_dismissed': true,
+    });
   });
 
   Widget buildTestApp({
@@ -553,7 +556,7 @@ void main() {
 
   group('3. Model-not-ready experience & Onboarding', () {
     testWidgets(
-        'Onboarding sheet shows on first launch and does not show after simulated relaunch',
+        'Walkthrough shows on first launch and does not show after simulated relaunch',
         (tester) async {
       SharedPreferences.setMockInitialValues({}); // first launch
 
@@ -568,15 +571,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Welcome bottom sheet appears
-      expect(find.text('Welcome to CarePulse'), findsOneWidget);
-      expect(find.text('Download AI model now'), findsOneWidget);
-      expect(find.text('Later'), findsOneWidget);
+      // Walkthrough full-screen route appears
+      expect(find.text('CarePulse Tour'), findsOneWidget);
+      expect(find.text('First aid that works offline'), findsOneWidget);
+      expect(find.byKey(const Key('walkthrough_skip_button')), findsOneWidget);
 
-      // Tap Later to dismiss
-      await tester.tap(find.text('Later'));
+      // Tap Skip to dismiss
+      await tester.tap(find.byKey(const Key('walkthrough_skip_button')));
       await tester.pumpAndSettle();
-      expect(find.text('Welcome to CarePulse'), findsNothing);
+      expect(find.text('CarePulse Tour'), findsNothing);
 
       // Simulate relaunch: pump again
       await tester.pumpWidget(
@@ -590,8 +593,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Sheet should NOT appear again
-      expect(find.text('Welcome to CarePulse'), findsNothing);
+      // Walkthrough should NOT appear again
+      expect(find.text('CarePulse Tour'), findsNothing);
     });
 
     testWidgets(

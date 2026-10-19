@@ -43,7 +43,10 @@ class FakeTriageEngineService extends TriageEngineService {
 
 void main() {
   setUp(() {
-    SharedPreferences.setMockInitialValues({'onboarding_v1_seen': true});
+    SharedPreferences.setMockInitialValues({
+      'onboarding_v2_seen': true,
+      'profile_prompt_dismissed': true,
+    });
   });
 
   testWidgets('Tapping theme in Settings sheet changes MaterialApp.themeMode',

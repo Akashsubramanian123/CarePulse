@@ -172,7 +172,7 @@ void main() {
         'Stop mid-stream keeps partial text, sets isGenerating=false, next query succeeds, stop when idle is a no-op',
         () async {
       final fakeEngine = FakeTriageEngineService();
-      fakeEngine.delayBetweenTokens = const Duration(milliseconds: 200);
+      fakeEngine.delayBetweenTokens = const Duration(milliseconds: 500);
       final fakeDownload = FakeModelDownloadService(ready: true);
 
       final controller = TriageController(
@@ -198,7 +198,7 @@ void main() {
           controller.submitEmergencyQuery('boiling water spilled on my arm');
 
       // Wait until first token arrives
-      await Future<void>.delayed(const Duration(milliseconds: 25));
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(controller.isGenerating, isTrue);
       expect(controller.streamedResponse, equals('1. IMMEDIATE ACTION: '));
 

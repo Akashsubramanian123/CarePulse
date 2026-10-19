@@ -11,6 +11,7 @@ import '../services/model_download_service.dart';
 import '../services/profile_service.dart';
 import '../services/protocol_repository.dart';
 import '../services/protocol_retriever.dart';
+import '../services/query_intent_classifier.dart';
 import '../services/red_flag_engine.dart';
 import '../services/triage_clarifier.dart';
 import '../services/triage_engine_service.dart';
@@ -31,6 +32,7 @@ enum AnswerSource {
   verifiedProtocol,
   aiGuidedByProtocol,
   aiGenerated,
+  appInfo,
 }
 
 extension AnswerSourceExtension on AnswerSource {
@@ -42,6 +44,8 @@ extension AnswerSourceExtension on AnswerSource {
         return 'AI, guided by verified protocol';
       case AnswerSource.aiGenerated:
         return 'AI-generated. Use judgment, call help if serious.';
+      case AnswerSource.appInfo:
+        return 'CarePulse';
     }
   }
 }
@@ -369,6 +373,23 @@ class TriageController extends ChangeNotifier {
       }
       notifyListeners();
       await _maybeSaveHistory();
+      return;
+    }
+
+    // Step 2 & 3: Intent classification & routing for non-emergency queries
+    final intent = classify(trimmed);
+    if (intent == QueryIntent.appHelp || intent == QueryIntent.outOfScope) {
+      _currentQuery = trimmed;
+      _isGenerating = false;
+      _callEmergencyNow = false;
+      _answerSource = AnswerSource.appInfo;
+      _selectedProtocol = null;
+      _streamedResponse = QueryIntentClassifier.getLocalReply(
+        trimmed,
+        intent,
+        emergencyNumber: _settingsController?.emergencyNumber ?? '112',
+      );
+      notifyListeners();
       return;
     }
 

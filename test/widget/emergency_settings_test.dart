@@ -33,7 +33,10 @@ class FakeModelDownloadService extends ModelDownloadService {
 
 void main() {
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      'onboarding_v2_seen': true,
+      'profile_prompt_dismissed': true,
+    });
   });
 
   testWidgets(

@@ -9,6 +9,7 @@ import '../screens/benchmark_screen.dart';
 import '../screens/history_screen.dart';
 import '../screens/medical_id_screen.dart';
 import '../screens/profile_screen.dart';
+import '../screens/walkthrough_screen.dart';
 
 void showCarePulseSettingsSheet(BuildContext context) {
   showModalBottomSheet(
@@ -521,6 +522,36 @@ class _SettingsSheetContentState extends State<_SettingsSheetContent> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => const BenchmarkScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                key: const Key('settings_replay_walkthrough_tile'),
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.tour_outlined, color: glass.accentMint),
+                title: Text(
+                  'Replay walkthrough',
+                  style: TextStyle(
+                    color: onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Review features and setup tour',
+                  style: TextStyle(
+                    color: onSurfaceVariant,
+                    fontSize: 12,
+                  ),
+                ),
+                trailing:
+                    Icon(Icons.chevron_right_rounded, color: onSurfaceVariant),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WalkthroughScreen(),
                     ),
                   );
                 },

@@ -14,12 +14,18 @@ import '../widgets/emergency_chips.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/streaming_response_card.dart';
 import '../widgets/telemetry_bar.dart';
+import '../../models/medical_id.dart';
+import '../../services/medical_id_store.dart';
 import 'main_shell.dart';
 import 'model_setup_screen.dart';
 import 'profile_screen.dart';
+import 'quick_profile_screen.dart';
+import 'walkthrough_screen.dart';
 
 class EmergencyHomeScreen extends StatefulWidget {
-  const EmergencyHomeScreen({super.key});
+  final MedicalIdStore? medicalIdStore;
+
+  const EmergencyHomeScreen({super.key, this.medicalIdStore});
 
   @override
   State<EmergencyHomeScreen> createState() => _EmergencyHomeScreenState();
@@ -32,6 +38,10 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
   final VoiceInputService _voiceService = VoiceInputService();
   final TtsService _tts = TtsService();
 
+  late final MedicalIdStore _medicalIdStore;
+  bool _profilePromptDismissed = false;
+  bool _hasMedicalIdContent = true;
+
   bool _isListening = false;
   bool _isSpeaking = false;
   bool _telemetryExpanded = false;
@@ -42,7 +52,9 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
   @override
   void initState() {
     super.initState();
+    _medicalIdStore = widget.medicalIdStore ?? MedicalIdStore();
     _loadSettings();
+    _refreshMedicalIdStatus();
     _tts.isSpeakingNotifier.addListener(_onTtsStateChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkFirstLaunchOnboarding();
@@ -51,164 +63,46 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
 
   Future<void> _checkFirstLaunchOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
-    final seen = prefs.getBool('onboarding_v1_seen') ?? false;
+    final seen = prefs.getBool('onboarding_v2_seen') ?? false;
     if (!seen && mounted) {
-      await prefs.setBool('onboarding_v1_seen', true);
-      if (!mounted) return;
-      _showOnboardingSheet();
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => WalkthroughScreen(
+            medicalIdStore: _medicalIdStore,
+          ),
+        ),
+      );
+      if (mounted) {
+        _refreshMedicalIdStatus();
+      }
     }
   }
 
-  void _showOnboardingSheet() {
-    final controller = Provider.of<TriageController>(context, listen: false);
-    final modelSize = controller.totalMB > 0
-        ? '${controller.totalMB.toInt()}MB'
-        : '${AppConstants.estimatedModelSizeMb.toInt()}MB';
+  Future<void> _refreshMedicalIdStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dismissed = prefs.getBool('profile_prompt_dismissed') ?? false;
+      final medId = await _medicalIdStore.loadMedicalId();
+      final hasContent = _hasAnyMedicalIdContent(medId);
+      if (mounted) {
+        setState(() {
+          _profilePromptDismissed = dismissed;
+          _hasMedicalIdContent = hasContent;
+        });
+      }
+    } catch (_) {}
+  }
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        final glass = theme.extension<CarePulseGlass>()!;
-        final isDark = theme.brightness == Brightness.dark;
-        final surfaceColor = isDark ? const Color(0xFF1B242D) : Colors.white;
-        final onSurface =
-            isDark ? const Color(0xFFF1F7FA) : const Color(0xFF1F2933);
-        final onSurfaceVariant =
-            isDark ? const Color(0xFFB5C3CA) : const Color(0xFF52606D);
-
-        return Material(
-          color: surfaceColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          clipBehavior: Clip.antiAlias,
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          gradient: glass.iconTintGradient,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.health_and_safety_rounded,
-                            color: glass.accentMint, size: 28),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          'Welcome to CarePulse',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: onSurface,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.check_circle_outline_rounded,
-                          size: 20, color: glass.accentMint),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Emergency rules, Guides, CPR and SOS already work offline without internet.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.download_for_offline_outlined,
-                          size: 20, color: glass.accentMint),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'AI answers need a one-time $modelSize download.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.wifi_rounded,
-                          size: 20, color: glass.accentMint),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Wi-Fi recommended for downloading model weights.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    key: const Key('onboarding_download_button'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: glass.accentMint,
-                      foregroundColor: Colors.black87,
-                      minimumSize: const Size(0, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      controller.startModelDownload();
-                    },
-                    child: const Text(
-                      'Download AI model now',
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    key: const Key('onboarding_later_button'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: onSurfaceVariant,
-                      minimumSize: const Size(0, 44),
-                    ),
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Later'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
+  bool _hasAnyMedicalIdContent(MedicalId id) {
+    return id.name.trim().isNotEmpty ||
+        id.ageOrDob.trim().isNotEmpty ||
+        id.bloodGroup.trim().isNotEmpty ||
+        id.allergies.trim().isNotEmpty ||
+        id.conditions.trim().isNotEmpty ||
+        id.medications.trim().isNotEmpty ||
+        id.notes.trim().isNotEmpty ||
+        id.contacts.isNotEmpty;
   }
 
   Future<void> _loadSettings() async {
@@ -392,13 +286,16 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                     tooltip: 'Medical profile',
                     icon: Icon(Icons.person_outline_rounded,
                         color: glass.textPrimary),
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => const ProfileScreen(),
                         ),
                       );
+                      if (mounted) {
+                        _refreshMedicalIdStatus();
+                      }
                     },
                   ),
                 ),
@@ -575,6 +472,11 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                         ],
                       ),
                     ),
+
+                    if (!_profilePromptDismissed && !_hasMedicalIdContent) ...[
+                      const SizedBox(height: 16),
+                      _buildCompleteProfileCard(context, glass),
+                    ],
 
                     const SizedBox(height: 24),
                     Text("What's happening?",
@@ -931,6 +833,104 @@ class _EmergencyHomeScreenState extends State<EmergencyHomeScreen> {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompleteProfileCard(BuildContext context, CarePulseGlass glass) {
+    return GlassCard(
+      key: const Key('complete_profile_card'),
+      borderRadius: 20,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: glass.iconTintGradient,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.badge_outlined,
+                    color: glass.accentMint, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Add your Medical ID so SOS can include allergies and blood group',
+                  style: TextStyle(
+                    color: glass.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              ElevatedButton(
+                key: const Key('complete_profile_add_now_button'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: glass.accentMint,
+                  foregroundColor: Colors.black87,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => QuickProfileScreen(
+                        medicalIdStore: _medicalIdStore,
+                      ),
+                    ),
+                  );
+                  if (mounted) {
+                    _refreshMedicalIdStatus();
+                  }
+                },
+                child: const Text('Add now'),
+              ),
+              TextButton(
+                key: const Key('complete_profile_dismiss_button'),
+                style: TextButton.styleFrom(
+                  foregroundColor: glass.textSecondary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('profile_prompt_dismissed', true);
+                  if (mounted) {
+                    setState(() {
+                      _profilePromptDismissed = true;
+                    });
+                  }
+                },
+                child: const Text('Dismiss'),
+              ),
+            ],
           ),
         ],
       ),
